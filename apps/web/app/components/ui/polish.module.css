@@ -1,0 +1,166 @@
+.stateGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.stateCard,
+.sharePanel,
+.successCard,
+.rewardCard {
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 18px 48px rgba(17, 24, 32, 0.08);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.stateCard:hover,
+.sharePanel:hover,
+.successCard:hover,
+.rewardCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 60px rgba(17, 24, 32, 0.12);
+}
+
+.stateCard {
+  display: grid;
+  gap: 10px;
+  min-height: 148px;
+  padding: 14px;
+}
+
+.retryButton {
+  width: fit-content;
+  border: 0;
+  border-radius: 8px;
+  background: #b10f1f;
+  color: white;
+  cursor: pointer;
+  font-weight: 900;
+  padding: 10px 14px;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.retryButton:hover {
+  background: #7d0713;
+  transform: translateY(-1px);
+}
+
+.offlineBanner {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  border-bottom: 1px solid #f1cfd3;
+  background: #fff0f1;
+  color: #8f0d1a;
+  font-size: 14px;
+  font-weight: 850;
+  padding: 10px 18px;
+  text-align: center;
+}
+
+.skeleton {
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #edf0f4, #f9fafb, #edf0f4);
+  background-size: 240% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.wide {
+  width: 88%;
+}
+
+.short {
+  width: 52%;
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #fff0f1;
+  color: #d01424;
+  font-weight: 950;
+}
+
+.successCard,
+.rewardCard,
+.sharePanel {
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.successPulse {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #edfdf3;
+  color: #087443;
+  font-size: 28px;
+  animation: pop 900ms ease both;
+}
+
+.rewardCard {
+  background: linear-gradient(135deg, #fff7e1, #ffffff);
+  animation: glow 1.6s ease-in-out infinite alternate;
+}
+
+.shareGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.shareButton {
+  display: grid;
+  place-items: center;
+  min-height: 58px;
+  border: 1px solid #edf0f4;
+  border-radius: 12px;
+  background: #fbfcfe;
+  color: #111820;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
+  text-decoration: none;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.shareButton:hover {
+  box-shadow: 0 14px 32px rgba(17, 24, 32, 0.1);
+  transform: translateY(-2px);
+}
+
+.whatsapp { color: #087443; }
+.x { color: #111820; }
+.facebook { color: #155eef; }
+.instagram { color: #d01424; opacity: 0.7; }
+
+@keyframes shimmer {
+  to { background-position: -240% 0; }
+}
+
+@keyframes pop {
+  0% { transform: scale(0.72); opacity: 0; }
+  70% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  from { box-shadow: 0 12px 30px rgba(215, 170, 63, 0.14); }
+  to { box-shadow: 0 20px 52px rgba(215, 170, 63, 0.32); }
+}
+
+@media (max-width: 900px) {
+  .stateGrid,
+  .shareGrid {
+    grid-template-columns: 1fr;
+  }
+}

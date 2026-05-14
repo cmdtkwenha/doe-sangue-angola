@@ -1,0 +1,25 @@
+{
+  "name": "doe-sangue-angola",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace apps/web run dev",
+    "dev:mobile": "npm --workspace apps/mobile run start",
+    "build": "npm run build:web && npm --workspace apps/mobile exec -- tsc --noEmit",
+    "build:web": "npm --workspace apps/web run build",
+    "audit": "node scripts/project-audit.cjs",
+    "check:lines": "bash scripts/check-lines.sh",
+    "lint": "node scripts/project-audit.cjs --lint",
+    "smoke": "node scripts/smoke-routes.cjs",
+    "test": "node scripts/run-tests.cjs",
+    "typecheck": "npm --workspace apps/web run build && npm --workspace apps/mobile exec -- tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.105.4"
+  }
+}

@@ -1,0 +1,222 @@
+.adminPage {
+  background: #f3f5f7;
+}
+
+.console {
+  display: grid;
+  gap: 14px;
+}
+
+.commandBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #ffffff;
+  border: 1px solid #dfe4ea;
+  border-radius: 8px;
+  padding: 14px 16px;
+  box-shadow: 0 10px 28px rgba(20, 20, 20, 0.06);
+}
+
+.commandTitle {
+  margin: 2px 0 0;
+  font-size: 24px;
+  color: #141414;
+}
+
+.search {
+  min-width: 280px;
+  border: 1px solid #d8dee6;
+  border-radius: 8px;
+  padding: 11px 12px;
+  color: #252525;
+  background: #f8fafb;
+}
+
+.statusStrip {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr 0.8fr;
+  gap: 12px;
+}
+
+.stripItem,
+.card,
+.mapPanel,
+.queuePanel,
+.tablePanel {
+  background: #ffffff;
+  border: 1px solid #dfe4ea;
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(20, 20, 20, 0.05);
+}
+
+.stripItem {
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ticker {
+  display: flex;
+  gap: 10px;
+  overflow: hidden;
+  background: #171717;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 10px;
+  border: 1px solid #2a2a2a;
+}
+
+.tickerItem {
+  white-space: nowrap;
+  background: #262626;
+  border-left: 3px solid #d7aa3f;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.card {
+  padding: 16px;
+  min-height: 130px;
+}
+
+.kpiValue {
+  margin: 18px 0 4px;
+  color: #141414;
+  font-size: 32px;
+  line-height: 1;
+}
+
+.kpiFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1.35fr 0.65fr;
+  gap: 12px;
+}
+
+.mapPanel,
+.queuePanel,
+.tablePanel {
+  padding: 16px;
+}
+
+.queueGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.queuePanel {
+  min-height: 245px;
+}
+
+.queueItem {
+  display: grid;
+  gap: 5px;
+  padding: 11px 0;
+  border-top: 1px solid #edf0f2;
+}
+
+.queueTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.inventoryRows,
+.inventoryTable {
+  display: grid;
+  gap: 10px;
+}
+
+.inventoryHead,
+.inventoryRow {
+  display: grid;
+  grid-template-columns: 0.6fr 0.8fr 0.7fr 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.inventoryHead {
+  color: #6f737b;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.inventoryRow {
+  padding: 10px 0;
+  border-top: 1px solid #edf0f2;
+}
+
+.bar {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: #edf0f2;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #b10f1f, #d7aa3f);
+}
+
+.bottomGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.auditRow,
+.perfRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid #edf0f2;
+}
+
+@media (max-width: 1100px) {
+  .statusStrip,
+  .mainGrid,
+  .bottomGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .kpiGrid,
+  .queueGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .commandBar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .search,
+  .kpiGrid,
+  .queueGrid,
+  .inventoryHead,
+  .inventoryRow {
+    grid-template-columns: 1fr;
+    min-width: 0;
+  }
+}

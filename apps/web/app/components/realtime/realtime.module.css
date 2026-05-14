@@ -1,0 +1,33 @@
+.strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  background: #111820;
+  color: white;
+  padding: 14px 16px;
+  box-shadow: 0 18px 48px rgba(17, 24, 32, 0.12);
+}
+
+.pulse {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #2de38f;
+  box-shadow: 0 0 0 8px rgba(45, 227, 143, 0.12);
+}
+
+.event {
+  color: #ffd66b;
+  font-weight: 900;
+}
+
+@media (max-width: 760px) {
+  .strip {
+    align-items: start;
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,11 @@
+-- Future Supabase tables:
+-- users
+-- donors
+-- hospitals
+-- blood_requests
+-- appointments
+-- notifications
+-- rewards
+-- audit_logs
+-- fraud_reviews
+-- family_emergency_requests

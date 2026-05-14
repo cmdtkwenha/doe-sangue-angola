@@ -1,0 +1,232 @@
+.panel {
+  display: grid;
+  gap: 16px;
+  border: 1px solid #e3e7ee;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ffffff, #fff8f8);
+  box-shadow: 0 18px 48px rgba(17, 24, 32, 0.08);
+  padding: 18px;
+}
+
+.launcher {
+  display: grid;
+  gap: 14px;
+  border: 1px solid #e3e7ee;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #101317, #1c2430);
+  color: white;
+  padding: 18px;
+}
+
+.launchHead,
+.generator,
+.accounts,
+.tour {
+  display: grid;
+  gap: 12px;
+}
+
+.launchHead {
+  grid-template-columns: 1fr auto;
+  align-items: start;
+}
+
+.launcher p,
+.tour p,
+.generator p {
+  color: #d8dee8;
+  margin: 0;
+}
+
+.accountGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.account,
+.generator,
+.tour {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 14px;
+}
+
+.account {
+  display: grid;
+  gap: 5px;
+}
+
+.account span {
+  color: white;
+  font-weight: 900;
+}
+
+.generator {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.tourDots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tourDot {
+  width: 26px;
+  height: 8px;
+  min-height: 8px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.tourDotActive {
+  background: #ff4a57;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.toggle,
+.reset {
+  border: 0;
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-weight: 900;
+}
+
+.toggle {
+  background: #111820;
+  color: white;
+}
+
+.toggleOn {
+  background: linear-gradient(135deg, #d01424, #a40d1a);
+}
+
+.reset {
+  border: 1px solid #e3e7ee;
+  background: white;
+  color: #111820;
+}
+
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+}
+
+.walkthrough {
+  align-items: center;
+  background: #101317;
+  border-radius: 14px;
+  color: white;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 16px;
+}
+
+.walkthrough h3 {
+  margin: 4px 0;
+}
+
+.walkthrough p {
+  color: #d8dee8;
+  margin: 0;
+}
+
+.walkActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.focus {
+  border-radius: 14px;
+  box-shadow: 0 0 0 3px rgba(208, 20, 36, 0.18);
+}
+
+.step {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #edf0f4;
+  border-radius: 12px;
+  background: white;
+  padding: 14px;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.step:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 38px rgba(17, 24, 32, 0.1);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.number {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff0f1;
+  color: #d01424;
+  font-weight: 950;
+}
+
+.actor {
+  color: #697386;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.live {
+  background: #fff6dc;
+  color: #8a6500;
+}
+
+.done {
+  background: #edfdf3;
+  color: #087443;
+}
+
+.ready {
+  background: #eef5ff;
+  color: #155eef;
+}
+
+.badge {
+  border-radius: 999px;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+@media (max-width: 760px) {
+  .head,
+  .walkthrough,
+  .launchHead,
+  .generator {
+    align-items: start;
+    flex-direction: column;
+    grid-template-columns: 1fr;
+  }
+
+  .accountGrid {
+    grid-template-columns: 1fr;
+  }
+}

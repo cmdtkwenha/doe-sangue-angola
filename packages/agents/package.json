@@ -1,0 +1,9 @@
+{
+  "name": "@doe-sangue-angola/agents",
+  "version": "0.1.0",
+  "main": "src/index.ts",
+  "private": true,
+  "dependencies": {
+    "@doe-sangue-angola/shared-types": "0.1.0"
+  }
+}

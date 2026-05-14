@@ -1,0 +1,31 @@
+name: Doe Sangue Angola CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Check file length
+        run: npm run check:lines
+
+      - name: Test
+        run: npm run test
+
+      - name: Typecheck and build
+        run: npm run typecheck

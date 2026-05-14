@@ -1,0 +1,40 @@
+.pinCard {
+  background: linear-gradient(135deg, #ffffff, #f5fffb);
+  border: 1px solid #d8eee5;
+  border-radius: 12px;
+  box-shadow: 0 12px 35px rgba(25, 35, 45, 0.04);
+  padding: 18px;
+}
+
+.pinGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 54px);
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.digit {
+  display: grid;
+  place-items: center;
+  height: 54px;
+  border-radius: 12px;
+  color: #0b7a43;
+  background: #eafff3;
+  border: 1px solid #bfe9cf;
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.validationRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid #edf0f4;
+}
+
+@media (max-width: 760px) {
+  .pinGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build:web",
+  "installCommand": "npm install",
+  "outputDirectory": "apps/web/.next",
+  "regions": ["fra1"],
+  "github": {
+    "silent": false
+  }
+}

@@ -1,0 +1,144 @@
+.panel {
+  background: #fff;
+  border: 1px solid #e6e9ef;
+  border-radius: 18px;
+  box-shadow: 0 18px 42px rgba(16, 19, 23, 0.06);
+  padding: 18px;
+}
+
+.head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.title {
+  color: #111827;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.timeline {
+  display: grid;
+  gap: 10px;
+}
+
+.step {
+  align-items: center;
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 10px;
+}
+
+.dot {
+  align-items: center;
+  background: #f1f5f9;
+  border-radius: 999px;
+  color: #64748b;
+  display: flex;
+  font-size: 12px;
+  font-weight: 800;
+  height: 28px;
+  justify-content: center;
+}
+
+.done .dot {
+  background: #d71920;
+  color: #fff;
+}
+
+.active .dot {
+  background: #f4b740;
+  color: #111827;
+}
+
+.line {
+  background: #edf0f4;
+  border-radius: 999px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.bar {
+  background: linear-gradient(90deg, #d71920, #f4b740);
+  height: 100%;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.button {
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 800;
+  min-height: 44px;
+  padding: 0 14px;
+}
+
+.primary {
+  background: #d71920;
+  color: #fff;
+}
+
+.soft {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #111827;
+}
+
+.list {
+  display: grid;
+  gap: 10px;
+}
+
+.row {
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+  border-radius: 14px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  padding: 12px;
+}
+
+.pinBox {
+  background: #101317;
+  border-radius: 14px;
+  color: #fff;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 6px;
+  padding: 14px;
+  text-align: center;
+}
+
+.input {
+  border: 1px solid #d8dee8;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 800;
+  min-height: 44px;
+  padding: 0 12px;
+  width: 130px;
+}
+
+@media (max-width: 720px) {
+  .head,
+  .row {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .button,
+  .input {
+    width: 100%;
+  }
+}

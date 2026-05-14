@@ -1,0 +1,53 @@
+"use client";
+
+import { isAuthorized } from "@doe-sangue-angola/shared-services";
+import type { UserRole } from "@doe-sangue-angola/shared-types";
+import { usePathname, useRouter } from "next/navigation";
+import type { ReactNode } from "react";
+import { useEffect, useMemo } from "react";
+import styles from "../auth/auth.module.css";
+import { LogoutButton } from "../auth/LogoutButton";
+import { useAuth } from "../auth/useAuth";
+
+export function SecureRouteWrapper({
+  allowed,
+  children,
+  showLogout = true
+}: {
+  allowed: UserRole[];
+  children: ReactNode;
+  showLogout?: boolean;
+}) {
+  const { loading, session } = useAuth();
+  const pathname = usePathname();
+  const router = useRouter();
+  const allowedKey = allowed.join(":");
+  const allowedRoles = useMemo(() => allowed, [allowedKey]);
+
+  useEffect(() => {
+    if (loading) return;
+    if (!session) router.replace(`/auth?next=${pathname}`);
+    else if (!isAuthorized(session.user.role, allowedRoles)) router.replace("/unauthorized");
+  }, [allowedRoles, loading, pathname, router, session]);
+
+  if (loading || !session) return <SecureLoadingState />;
+  if (!isAuthorized(session.user.role, allowedRoles)) return <SecureLoadingState />;
+
+  return (
+    <>
+      {showLogout ? <div className={styles.topRight}><LogoutButton /></div> : null}
+      {children}
+    </>
+  );
+}
+
+function SecureLoadingState() {
+  return (
+    <main className={styles.loading}>
+      <div className="panel">
+        <div className="eyebrow">Sessão segura</div>
+        <h1 className="title">A validar permissões...</h1>
+      </div>
+    </main>
+  );
+}

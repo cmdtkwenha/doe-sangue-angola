@@ -1,0 +1,122 @@
+.profileHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fff0f1, #f8d9dd);
+  color: #d01424;
+  font-weight: 950;
+}
+
+.digitalCard {
+  position: relative;
+  overflow: hidden;
+  padding: 18px;
+  border-radius: 16px;
+  color: white;
+  background: linear-gradient(135deg, #c8102e, #790711);
+  box-shadow: 0 18px 40px rgba(177, 15, 31, 0.24);
+}
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.bloodType {
+  margin: 12px 0;
+  font-size: 42px;
+  font-weight: 950;
+}
+
+.qr {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  width: 76px;
+  height: 76px;
+  padding: 8px;
+  border-radius: 10px;
+  background: white;
+}
+
+.qr span {
+  background: #111820;
+}
+
+.panel {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 12px 32px rgba(25, 35, 45, 0.06);
+}
+
+.progressTrack {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf0f4;
+}
+
+.progressFill {
+  width: 82%;
+  height: 100%;
+  background: linear-gradient(90deg, #d01424, #d7aa3f);
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.summaryTile,
+.historyRow {
+  border-radius: 10px;
+  background: #fbfcfe;
+  padding: 10px;
+}
+
+.summaryValue {
+  display: block;
+  margin-top: 4px;
+  font-size: 22px;
+  font-weight: 950;
+}
+
+.historyRow {
+  display: grid;
+  grid-template-columns: 0.8fr 1.4fr auto;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.contact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.status {
+  display: inline-flex;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: #edfdf3;
+  color: #087443;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 900;
+}

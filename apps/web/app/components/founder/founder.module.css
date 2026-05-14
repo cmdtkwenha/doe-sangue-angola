@@ -1,0 +1,137 @@
+.dashboard {
+  display: grid;
+  gap: 16px;
+}
+
+.hero,
+.panel,
+.action {
+  background: white;
+  border: 1px solid #e3e7ee;
+  border-radius: 14px;
+  box-shadow: 0 14px 36px rgba(25, 35, 45, 0.06);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #fff6f7, #ffffff);
+  border-color: #f3c9cd;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.panel {
+  padding: 18px;
+}
+
+.metricGrid,
+.envGrid,
+.actions {
+  display: grid;
+  gap: 10px;
+}
+
+.metricGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.metric,
+.env,
+.approval {
+  border: 1px solid #edf0f4;
+  border-radius: 12px;
+  background: #fbfcfe;
+  padding: 12px;
+}
+
+.metric strong {
+  display: block;
+  font-size: 26px;
+  margin-top: 4px;
+}
+
+.envGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.statusCard {
+  display: grid;
+  gap: 14px;
+}
+
+.checkList {
+  display: grid;
+  gap: 8px;
+}
+
+.checkRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 10px;
+  padding: 10px;
+  border: 1px solid #e5e9ef;
+  border-radius: 10px;
+  background: #fbfcfe;
+}
+
+.checkRow span {
+  color: #0f8a4b;
+  font-weight: 800;
+}
+
+.checkRow small {
+  grid-column: 1 / -1;
+  color: #667085;
+}
+
+.checkRow[data-level="aviso"] span {
+  color: #b7791f;
+}
+
+.checkRow[data-level="erro"] span {
+  color: #c91f2e;
+}
+
+.action,
+.approval {
+  display: grid;
+  gap: 8px;
+}
+
+.approval {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 88px;
+  resize: vertical;
+  border: 1px solid #d8dee7;
+  border-radius: 12px;
+  padding: 12px;
+  font: inherit;
+}
+
+.danger {
+  border-color: #f3c9cd;
+  background: #fff6f7;
+}
+
+@media (max-width: 1000px) {
+  .hero,
+  .grid,
+  .metricGrid,
+  .envGrid,
+  .approval {
+    grid-template-columns: 1fr;
+  }
+}

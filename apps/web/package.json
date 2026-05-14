@@ -1,0 +1,27 @@
+{
+  "name": "@doe-sangue-angola/web",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@doe-sangue-angola/agents": "0.1.0",
+    "@doe-sangue-angola/shared-services": "0.1.0",
+    "@doe-sangue-angola/shared-types": "0.1.0",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.105.4",
+    "next": "16.2.6",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/react": "latest",
+    "@types/node": "latest",
+    "tailwindcss": "4.3.0",
+    "postcss": "latest",
+    "autoprefixer": "latest"
+  }
+}

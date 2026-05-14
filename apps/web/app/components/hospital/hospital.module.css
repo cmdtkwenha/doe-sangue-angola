@@ -1,0 +1,215 @@
+.hospitalPage {
+  background: #f4f8f8;
+}
+
+.dashboard {
+  display: grid;
+  gap: 14px;
+}
+
+.command {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #dce8e7;
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(16, 32, 30, 0.06);
+}
+
+.title {
+  margin: 4px 0 0;
+  color: #10201e;
+  font-size: 25px;
+}
+
+.commandActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.clinicalButton {
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 14px;
+  color: white;
+  background: #0f6657;
+  font-weight: 900;
+}
+
+.urgentButton {
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 14px;
+  color: white;
+  background: #b10f1f;
+  font-weight: 900;
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.card,
+.urgentCard,
+.panel {
+  background: #ffffff;
+  border: 1px solid #dce8e7;
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(16, 32, 30, 0.05);
+}
+
+.card {
+  padding: 15px;
+}
+
+.kpiValue {
+  margin: 14px 0 4px;
+  color: #10201e;
+  font-size: 28px;
+}
+
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1.45fr 0.8fr;
+  gap: 12px;
+}
+
+.tripleGrid {
+  display: grid;
+  grid-template-columns: 0.9fr 1fr 0.9fr;
+  gap: 12px;
+}
+
+.bottomGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.urgentCard,
+.panel {
+  padding: 16px;
+}
+
+.urgentCard {
+  display: grid;
+  gap: 12px;
+  background: linear-gradient(135deg, #fff, #fff5f3);
+  border-color: #f0c7c3;
+}
+
+.row {
+  display: grid;
+  gap: 5px;
+  padding: 11px 0;
+  border-top: 1px solid #edf3f3;
+}
+
+.rowTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.requestTable {
+  display: grid;
+  gap: 8px;
+}
+
+.tableHead,
+.tableRow {
+  display: grid;
+  grid-template-columns: 1fr 0.7fr 0.7fr 0.8fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.tableHead {
+  color: #6f737b;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.tableRow {
+  padding: 12px;
+  border: 1px solid #edf3f3;
+  border-radius: 8px;
+  background: #fbfdfd;
+}
+
+.pinGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 42px);
+  gap: 8px;
+}
+
+.pinDigit {
+  display: grid;
+  place-items: center;
+  height: 44px;
+  border-radius: 8px;
+  color: #10201e;
+  background: #eef7f5;
+  border: 1px solid #d6e7e4;
+  font-size: 19px;
+  font-weight: 900;
+}
+
+.inventoryRows,
+.metricRows {
+  display: grid;
+  gap: 12px;
+}
+
+.bar {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: #e7eeee;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #0f6657, #d7aa3f);
+}
+
+.auditRow,
+.metricRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid #edf3f3;
+}
+
+@media (max-width: 1100px) {
+  .kpiGrid,
+  .mainGrid,
+  .tripleGrid,
+  .bottomGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .command,
+  .commandActions,
+  .rowTop {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .tableHead,
+  .tableRow {
+    grid-template-columns: 1fr;
+  }
+}

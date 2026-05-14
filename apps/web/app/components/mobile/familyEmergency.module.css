@@ -1,0 +1,101 @@
+.panel,
+.card,
+.field,
+.response {
+  border: 1px solid #e7eaf0;
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 12px 32px rgba(25, 35, 45, 0.06);
+}
+
+.panel {
+  margin-top: 12px;
+  padding: 14px;
+}
+
+.form {
+  display: grid;
+  gap: 10px;
+}
+
+.field {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+}
+
+.field span {
+  color: #697386;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.field strong {
+  color: #111820;
+}
+
+.card {
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.hero {
+  padding: 16px;
+  color: white;
+  background: linear-gradient(135deg, #df1d2d, #8f0a14);
+}
+
+.blood {
+  display: block;
+  margin-top: 8px;
+  font-size: 44px;
+  font-weight: 950;
+}
+
+.body {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.badge {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.pending { background: #fff6dc; color: #8a6500; }
+.verified { background: #edfdf3; color: #087443; }
+.expired { background: #f1f3f6; color: #697386; }
+.resolved { background: #eef5ff; color: #155eef; }
+
+.shareBox {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  border-radius: 12px;
+  background: #fff7ed;
+  padding: 12px;
+}
+
+.link {
+  overflow-wrap: anywhere;
+  color: #d01424;
+  font-weight: 900;
+}
+
+.response {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 12px;
+}
+
+.response small {
+  color: #697386;
+}

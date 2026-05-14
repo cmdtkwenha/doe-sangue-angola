@@ -1,0 +1,24 @@
+{
+  "name": "@doe-sangue-angola/mobile",
+  "private": true,
+  "scripts": {
+    "start": "expo start"
+  },
+  "dependencies": {
+    "@doe-sangue-angola/agents": "0.1.0",
+    "@doe-sangue-angola/shared-services": "0.1.0",
+    "@doe-sangue-angola/shared-types": "0.1.0",
+    "@supabase/supabase-js": "^2.105.4",
+    "expo": "55.0.23",
+    "expo-constants": "^55.0.16",
+    "expo-dev-client": "^55.0.33",
+    "expo-device": "^55.0.16",
+    "expo-notifications": "^55.0.22",
+    "expo-task-manager": "^55.0.16",
+    "react": "19.2.0",
+    "react-native": "0.83.6"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

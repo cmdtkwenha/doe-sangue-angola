@@ -1,0 +1,149 @@
+.panel {
+  background: #fff;
+  border: 1px solid #e3e7ee;
+  border-radius: 16px;
+  box-shadow: 0 18px 48px rgba(17, 24, 32, 0.06);
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.header,
+.event,
+.summary {
+  display: grid;
+  gap: 14px;
+}
+
+.header {
+  align-items: start;
+  grid-template-columns: 1fr auto;
+}
+
+.export {
+  background: #d71920;
+  border: 0;
+  border-radius: 11px;
+  color: white;
+  cursor: pointer;
+  font-weight: 900;
+  min-height: 42px;
+  padding: 0 16px;
+}
+
+.filters {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.filter {
+  display: grid;
+  gap: 6px;
+}
+
+.filter span,
+.metric span {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.filter select {
+  background: #f8fafc;
+  border: 1px solid #dfe5ee;
+  border-radius: 10px;
+  min-height: 42px;
+  padding: 0 12px;
+}
+
+.summary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.metric {
+  background: #fbfcfe;
+  border: 1px solid #edf0f4;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.metric strong {
+  display: block;
+  font-size: 28px;
+  margin-top: 4px;
+}
+
+.timeline {
+  display: grid;
+}
+
+.event {
+  border-top: 1px solid #edf0f4;
+  grid-template-columns: 14px 1fr auto;
+  padding: 14px 0;
+}
+
+.event:first-child {
+  border-top: 0;
+}
+
+.eventHead {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.event p {
+  margin: 6px 0;
+}
+
+.event small,
+.eventHead span {
+  color: #667085;
+}
+
+.dot {
+  border-radius: 999px;
+  height: 12px;
+  margin-top: 4px;
+  width: 12px;
+}
+
+.risk {
+  align-self: start;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 10px;
+}
+
+.dot[data-risk="low"],
+.risk[data-risk="low"] {
+  background: #e9fff3;
+  color: #087443;
+}
+
+.dot[data-risk="medium"],
+.risk[data-risk="medium"] {
+  background: #fff6dc;
+  color: #946200;
+}
+
+.dot[data-risk="high"],
+.risk[data-risk="high"] {
+  background: #fff0f1;
+  color: #b10f1f;
+}
+
+@media (max-width: 960px) {
+  .header,
+  .filters,
+  .summary,
+  .event {
+    grid-template-columns: 1fr;
+  }
+}

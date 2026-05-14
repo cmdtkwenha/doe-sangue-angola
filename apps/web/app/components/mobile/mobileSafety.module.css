@@ -1,0 +1,90 @@
+.section {
+  background: #fff;
+  border: 1px solid #eceff4;
+  border-radius: 16px;
+  box-shadow: 0 14px 36px rgba(17, 24, 32, 0.06);
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 14px;
+}
+
+.badge {
+  align-items: center;
+  background: #edfdf3;
+  border: 1px solid #b7efce;
+  border-radius: 999px;
+  color: #087443;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  gap: 6px;
+  padding: 7px 10px;
+}
+
+.notice {
+  background: linear-gradient(135deg, #fff7ed, #ffffff);
+  border: 1px solid #f4d8a8;
+  border-radius: 14px;
+  color: #654300;
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+}
+
+.row {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.toggle,
+.checkbox {
+  accent-color: #d01424;
+}
+
+.card {
+  background: #f8fafc;
+  border: 1px solid #edf0f4;
+  border-radius: 14px;
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+}
+
+.input,
+.textarea {
+  background: #fbfcfe;
+  border: 1px solid #dfe5ee;
+  border-radius: 12px;
+  font: inherit;
+  padding: 11px 12px;
+  width: 100%;
+}
+
+.textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+
+.button {
+  background: #d01424;
+  border: 0;
+  border-radius: 12px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 900;
+  min-height: 44px;
+  padding: 0 14px;
+}
+
+.softButton {
+  background: #101317;
+}
+
+.finePrint {
+  color: #667085;
+  font-size: 12px;
+  line-height: 1.45;
+}

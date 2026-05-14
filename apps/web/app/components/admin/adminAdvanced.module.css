@@ -1,0 +1,163 @@
+.advancedGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.wideGrid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 16px;
+}
+
+.panel {
+  background: white;
+  border: 1px solid #e3e7ee;
+  border-radius: 12px;
+  box-shadow: 0 12px 35px rgba(25, 35, 45, 0.04);
+  padding: 18px;
+}
+
+.panelHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.row {
+  display: grid;
+  gap: 4px;
+  padding: 11px 0;
+  border-top: 1px solid #edf0f4;
+}
+
+.rowTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ticker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  overflow: hidden;
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: white;
+  background: #10161d;
+  border: 1px solid #27313b;
+}
+
+.tickerItem {
+  white-space: nowrap;
+  border-left: 3px solid #d01424;
+  border-radius: 8px;
+  padding: 9px 12px;
+  background: #1d2530;
+}
+
+.critical {
+  color: #b10f1f;
+  background: #fff0f1;
+}
+
+.warning {
+  color: #946200;
+  background: #fff6dc;
+}
+
+.stable {
+  color: #087443;
+  background: #e9fff3;
+}
+
+.statusDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 7px;
+  background: #087443;
+}
+
+.chart {
+  width: 100%;
+  height: 170px;
+  margin-top: 12px;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: 1fr 3fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid #edf0f4;
+}
+
+.bar {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf0f4;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #d01424, #f6a623);
+}
+
+.riskScore {
+  border-radius: 16px;
+  font-size: 46px;
+  font-weight: 950;
+  margin: 12px 0;
+  padding: 18px;
+  text-align: center;
+}
+
+.riskHigh {
+  background: #fff0f1;
+  color: #b10f1f;
+}
+
+.riskMedium {
+  background: #fff6dc;
+  color: #946200;
+}
+
+.riskLow {
+  background: #e9fff3;
+  color: #087443;
+}
+
+.riskMeta {
+  color: #667085;
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.riskLine {
+  background: #edf0f4;
+  border-radius: 999px;
+  height: 7px;
+  overflow: hidden;
+}
+
+.riskLine span {
+  background: linear-gradient(90deg, #f6a623, #d01424);
+  display: block;
+  height: 100%;
+}
+
+@media (max-width: 1200px) {
+  .advancedGrid,
+  .wideGrid {
+    grid-template-columns: 1fr;
+  }
+}

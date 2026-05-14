@@ -1,0 +1,68 @@
+.banner,
+.panel {
+  border: 1px solid #e3e7ee;
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 14px 36px rgba(25, 35, 45, 0.06);
+}
+
+.banner {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 16px 18px;
+  border-color: #f1d28f;
+  background: linear-gradient(135deg, #fffaf0, #ffffff);
+}
+
+.panel {
+  padding: 18px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 16px;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.metric,
+.account {
+  border: 1px solid #edf0f4;
+  border-radius: 12px;
+  background: #fbfcfe;
+  padding: 12px;
+}
+
+.metric strong {
+  display: block;
+  font-size: 24px;
+  margin-top: 4px;
+}
+
+.accounts {
+  display: grid;
+  gap: 10px;
+}
+
+.account {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .banner,
+  .grid,
+  .metrics,
+  .account {
+    grid-template-columns: 1fr;
+  }
+}

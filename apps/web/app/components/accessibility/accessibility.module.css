@@ -1,0 +1,58 @@
+.skipLink {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1000;
+  border-radius: 10px;
+  background: #111820;
+  color: white;
+  font-weight: 900;
+  padding: 10px 14px;
+  transform: translateY(-140%);
+  transition: transform 160ms ease;
+}
+
+.skipLink:focus {
+  transform: translateY(0);
+}
+
+.focusRing:focus-visible,
+.focusRing :where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid #d7aa3f;
+  outline-offset: 3px;
+}
+
+.form {
+  display: grid;
+  gap: 6px;
+}
+
+.helper {
+  color: #6f737b;
+  font-size: 12px;
+  line-height: 1.4;
+  margin-top: -8px;
+}
+
+.error {
+  border-radius: 10px;
+  background: #fff0f1;
+  color: #8f0d1a;
+  font-size: 13px;
+  font-weight: 850;
+  padding: 10px 12px;
+}
+
+.modalShade {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-items: end;
+  padding: 16px;
+  background: rgba(10, 13, 18, 0.68);
+}
+
+.modalCard {
+  max-height: 90%;
+  overflow: auto;
+}

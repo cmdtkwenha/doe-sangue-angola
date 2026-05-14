@@ -1,0 +1,31 @@
+import { inventory } from "@doe-sangue-angola/shared-services";
+import styles from "./hospitalPortal.module.css";
+
+export function InventoryPanel() {
+  return (
+    <section className={styles.panel}>
+      <div className={styles.panelHead}>
+        <strong>Inventário de Sangue</strong>
+        <a className="muted" href="#">Ver detalhes</a>
+      </div>
+      <div className={styles.table}>
+        {inventory.map((item) => {
+          const reserve = Math.max(item.safeMinimum - item.units, 0);
+          const critical = item.units < item.safeMinimum;
+          return (
+          <article className={styles.inventoryRow} key={item.bloodType}>
+            <strong>{item.bloodType}</strong>
+            <span>{item.units} disponível</span>
+            <span>{reserve} reserva</span>
+            <span>{item.units + reserve} total</span>
+            <span className={critical ? "pill red" : "pill gold"}>
+              {critical ? "Crítico" : "Adequado"}
+            </span>
+          </article>
+          );
+        })}
+      </div>
+      <a className={styles.footerLink} href="#">Ver inventário completo</a>
+    </section>
+  );
+}
