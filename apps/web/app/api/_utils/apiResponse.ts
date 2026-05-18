@@ -14,7 +14,7 @@ export async function apiResponse<T>(handler: Handler<T>) {
     return Response.json(
       {
         ok: false,
-        message: "Não foi possível concluir o pedido. Tente novamente."
+        message: "Supabase indisponível. Tente novamente ou use modo mock."
       },
       { status: 500 }
     );

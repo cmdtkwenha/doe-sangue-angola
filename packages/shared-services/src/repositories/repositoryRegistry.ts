@@ -8,7 +8,7 @@ import { mockRepositories } from "./mockRepositories";
 import type { AppRepositories } from "../interfaces";
 import { isDatabaseConfigured } from "../databaseService";
 
-const supabaseRepositories: AppRepositories = {
+export const supabaseRepositories: AppRepositories = {
   audit: auditRepository,
   donor: donorRepository,
   hospital: hospitalRepository,

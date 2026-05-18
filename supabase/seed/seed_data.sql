@@ -3,7 +3,7 @@
 insert into public.users (id, role, name, email, phone) values
   ('00000000-0000-0000-0000-000000000001', 'admin', 'Admin Nacional', 'admin@sangueangola.ao', '+244 923 000 001'),
   ('00000000-0000-0000-0000-000000000002', 'hospital', 'Dr. João Mendes', 'hospital@sangueangola.ao', '+244 923 000 118'),
-  ('00000000-0000-0000-0000-000000000003', 'donor', 'Maria João Santos', 'dador@sangueangola.ao', '+244 923 456 789');
+  ('00000000-0000-0000-0000-000000000003', 'donor', 'Maria João Santos', 'donor@sangueangola.ao', '+244 923 456 789');
 
 insert into public.hospitals (
   id, user_id, name, province, municipality, verified, capacity, contact

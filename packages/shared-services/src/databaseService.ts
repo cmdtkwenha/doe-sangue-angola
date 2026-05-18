@@ -49,3 +49,34 @@ export async function safeQuery<T>(fn: (db: SupabaseClient) => Promise<T>) {
     };
   }
 }
+
+export async function checkDatabaseHealth() {
+  if (!isDatabaseConfigured()) {
+    return {
+      ok: false as const,
+      mode: "mock-fallback" as const,
+      message: "Supabase não configurado. Modo mock continua disponível."
+    };
+  }
+
+  try {
+    const { error } = await getDatabaseClient()
+      .from("users")
+      .select("id", { count: "exact", head: true });
+
+    if (error) throw error;
+    return {
+      ok: true as const,
+      mode: "supabase" as const,
+      message: "Ligação Supabase ativa."
+    };
+  } catch (error) {
+    return {
+      ok: false as const,
+      mode: "supabase-error" as const,
+      message: error instanceof Error
+        ? error.message
+        : "Falha ao verificar Supabase."
+    };
+  }
+}

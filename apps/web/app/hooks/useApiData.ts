@@ -26,9 +26,11 @@ export function useApiData<T>(path: string, fallback: T, version = 0) {
       .then((payload) => {
         if (!active) return;
         if (payload.ok && payload.data) setData(payload.data);
-        else setError(payload.message ?? "Não foi possível carregar dados.");
+        else setError(payload.message ?? "Supabase indisponível. Dados mock continuam seguros.");
       })
-      .catch(() => active && setError("Falha ao sincronizar dados reais."))
+      .catch(() =>
+        active && setError("Falha ao sincronizar Supabase. Use mock até a ligação voltar.")
+      )
       .finally(() => active && setLoading(false));
 
     return () => {
