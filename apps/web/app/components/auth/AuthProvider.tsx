@@ -6,6 +6,7 @@ import {
   getRedirectForRole,
   getAuthMode,
   isDemoAuthAllowed,
+  authRepository,
   trackFailedAction,
   trackLoginEvent,
   type AuthUser
@@ -116,7 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (demoMode) {
         trackFailedAction("Login demo falhou", { email });
         debugAuth("Login demo falhou", email);
-        setError("Conta demo inválida. Use os botões demo ou a senha demo@2026.");
+        setError("Conta demo inválida. Confirme email e palavra-passe.");
         return;
       }
       if (!supabase) {
@@ -163,15 +164,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (data.user) {
-        const { error: profileError } = await supabase.from("users").upsert({
-          auth_user_id: data.user.id,
-          email: input.email,
-          name: input.name,
-          role: input.role
-        }, {
-          onConflict: "email"
-        });
-        if (profileError) setError("Conta criada, mas o perfil ainda não foi guardado.");
+        try {
+          await authRepository.upsertProfile({
+            authUserId: data.user.id,
+            email: input.email,
+            name: input.name,
+            role: input.role
+          });
+        } catch {
+          setError("Conta criada, mas o perfil ainda não foi guardado.");
+        }
       }
       const next = await resolveSupabaseSession(supabase, data.session);
       setSession(next);

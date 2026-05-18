@@ -1,5 +1,6 @@
 export * from "./auditRepository";
 export * from "./appointmentRepository";
+export * from "./authRepository";
 export * from "./databaseTypes";
 export * from "./donorRepository";
 export * from "./hospitalRepository";
