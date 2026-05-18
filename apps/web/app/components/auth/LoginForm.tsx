@@ -1,10 +1,5 @@
 "use client";
 
-import {
-  demoAccounts,
-  demoPasswords,
-  getAuthMode
-} from "@doe-sangue-angola/shared-services";
 import Link from "next/link";
 import { useState } from "react";
 import { AccessibleForm, FieldHint } from "../accessibility";
@@ -12,15 +7,9 @@ import styles from "./auth.module.css";
 import { useAuth } from "./useAuth";
 
 export function LoginForm() {
-  const { error, login, loginDemo, loading } = useAuth();
-  const [email, setEmail] = useState("admin@sangueangola.ao");
-  const [password, setPassword] = useState("demo@2026");
-  const authMode = getAuthMode() === "supabase" ? "supabase" : "mock";
-  const loginAs = (account: typeof demoAccounts[number]) => {
-    setEmail(account.email);
-    setPassword(demoPasswords[0]);
-    loginDemo(account.role);
-  };
+  const { error, login, loading } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   return (
     <AccessibleForm
@@ -32,7 +21,6 @@ export function LoginForm() {
         void login(email, password);
       }}
     >
-      <div className={styles.modeBadge}>Modo ativo: {authMode}</div>
       <label className="eyebrow" htmlFor="email">Email</label>
       <input
         className={styles.input}
@@ -57,21 +45,6 @@ export function LoginForm() {
         value={password}
       />
       <FieldHint id="password-hint">A palavra-passe tem validação segura.</FieldHint>
-      <section className={styles.demoBox} aria-label="Credenciais demo">
-        <strong>Entrar sem configurar Supabase</strong>
-        <p>Credenciais: email abaixo com <b>{demoPasswords[0]}</b>. Também aceita <b>{demoPasswords[1]}</b>.</p>
-        {demoAccounts.map((account) => (
-          <button
-            className={styles.demoButton}
-            key={account.email}
-            onClick={() => loginAs(account)}
-            type="button"
-          >
-            <span>Entrar como {account.label}</span>
-            <small>{account.email} → {account.route}</small>
-          </button>
-        ))}
-      </section>
       <button className="button" disabled={loading} type="submit">
         {loading ? "A validar sessão..." : "Entrar"}
       </button>
