@@ -1,5 +1,6 @@
 import {
   demoAccounts,
+  demoPasswords,
   getRoleFromMetadata,
   type AuthUser
 } from "@doe-sangue-angola/shared-services";
@@ -10,7 +11,8 @@ export type DemoAccount = typeof demoAccounts[number];
 
 export function findDemoAccount(email: string, password: string) {
   return demoAccounts.find((account) =>
-    account.email === email && account.password === password
+    account.email === email &&
+    (account.password === password || demoPasswords.some((item) => item === password))
   );
 }
 

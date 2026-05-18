@@ -84,6 +84,41 @@
   font-weight: 900;
 }
 
+.demoBox {
+  display: grid;
+  gap: 8px;
+  margin: 4px 0 12px;
+  padding: 12px;
+  border: 1px solid #f1cfd3;
+  border-radius: 12px;
+  background: #fff8f5;
+}
+
+.demoBox p {
+  margin: 0;
+  color: #5f6672;
+  font-size: 13px;
+}
+
+.demoAccount {
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+  border: 1px solid #ead6d8;
+  border-radius: 10px;
+  background: white;
+  color: #111820;
+  text-align: left;
+}
+
+.demoAccount span {
+  font-weight: 900;
+}
+
+.demoAccount small {
+  color: #7a808a;
+}
+
 .error,
 .success {
   border-radius: 10px;

@@ -16,6 +16,8 @@ export type DemoStep = {
   status: "Pronto" | "Ao vivo" | "Concluído";
 };
 
+export const demoPasswords = ["Demo@2026", "demo@2026"] as const;
+
 export const demoAccounts = [
   {
     label: "Admin",

@@ -47,5 +47,5 @@ export function getRoleFromMetadata(metadata?: Record<string, unknown>) {
 
 export function isDemoAuthAllowed() {
   const env = loadEnvironment();
-  return env.mode === "development" && env.authMode === "demo";
+  return env.authMode === "demo";
 }

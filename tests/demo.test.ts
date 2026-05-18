@@ -1,4 +1,10 @@
-import { demoAccounts, getRedirectForRole } from "@doe-sangue-angola/shared-services";
+import {
+  demoAccounts,
+  demoPasswords,
+  getAuthMode,
+  getRedirectForRole,
+  isDemoAuthAllowed
+} from "@doe-sangue-angola/shared-services";
 
 declare const assert: typeof import("node:assert/strict");
 declare function test(name: string, fn: () => void): void;
@@ -19,10 +25,27 @@ test("contas demo usam senha simples de apresentação", () => {
   demoAccounts.forEach((account) => {
     assert.equal(account.password, "Demo@2026");
   });
+  assert.deepEqual([...demoPasswords], ["Demo@2026", "demo@2026"]);
 });
 
 test("contas demo redirecionam para o portal correto", () => {
   demoAccounts.forEach((account) => {
     assert.equal(account.route, getRedirectForRole(account.role));
   });
+});
+
+test("AUTH_MODE=mock ativa login demo em produção", () => {
+  const previousAuth = process.env.NEXT_PUBLIC_AUTH_MODE;
+  const previousEnv = process.env.NEXT_PUBLIC_APP_ENV;
+
+  process.env.NEXT_PUBLIC_AUTH_MODE = "mock";
+  process.env.NEXT_PUBLIC_APP_ENV = "production";
+
+  assert.equal(getAuthMode(), "demo");
+  assert.equal(isDemoAuthAllowed(), true);
+
+  if (previousAuth) process.env.NEXT_PUBLIC_AUTH_MODE = previousAuth;
+  else delete process.env.NEXT_PUBLIC_AUTH_MODE;
+  if (previousEnv) process.env.NEXT_PUBLIC_APP_ENV = previousEnv;
+  else delete process.env.NEXT_PUBLIC_APP_ENV;
 });

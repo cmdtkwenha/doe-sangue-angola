@@ -103,6 +103,10 @@ Use these mock accounts for stakeholder presentations:
 | Hospital Verificado | `hospital@sangueangola.ao` | `Demo@2026` |
 | Dador Mobile | `donor@sangueangola.ao` | `Demo@2026` |
 
+Também pode usar a senha fallback `demo@2026`. Para Vercel em modo demo,
+configure `NEXT_PUBLIC_AUTH_MODE=mock`. Guia rápido:
+[docs/demo-login.md](./docs/demo-login.md).
+
 Open `/admin` after login and use Presentation Mode to launch a guided flow: hospital request, admin live update, donor acceptance, PIN validation, completion, rewards and audit logs.
 
 ## Quality Checks

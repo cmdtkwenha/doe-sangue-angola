@@ -1,5 +1,6 @@
 "use client";
 
+import { demoAccounts, demoPasswords } from "@doe-sangue-angola/shared-services";
 import Link from "next/link";
 import { useState } from "react";
 import { AccessibleForm, FieldHint } from "../accessibility";
@@ -45,6 +46,24 @@ export function LoginForm() {
         value={password}
       />
       <FieldHint id="password-hint">A palavra-passe tem validação segura.</FieldHint>
+      <section className={styles.demoBox} aria-label="Credenciais demo">
+        <strong>Contas demo</strong>
+        <p>Palavra-passe: <b>{demoPasswords[0]}</b> ou <b>{demoPasswords[1]}</b></p>
+        {demoAccounts.map((account) => (
+          <button
+            className={styles.demoAccount}
+            key={account.email}
+            onClick={() => {
+              setEmail(account.email);
+              setPassword(demoPasswords[1]);
+            }}
+            type="button"
+          >
+            <span>{account.label}</span>
+            <small>{account.email} → {account.route}</small>
+          </button>
+        ))}
+      </section>
       <button className="button" disabled={loading} type="submit">
         {loading ? "A validar sessão..." : "Entrar"}
       </button>

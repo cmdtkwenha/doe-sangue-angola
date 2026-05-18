@@ -22,6 +22,7 @@ export function isSupabaseMode() {
 export function getAuthMode(): AuthMode {
   const value = env.NEXT_PUBLIC_AUTH_MODE ?? env.EXPO_PUBLIC_AUTH_MODE;
 
+  if (value === "mock") return "demo";
   return value === "supabase" ? "supabase" : "demo";
 }
 

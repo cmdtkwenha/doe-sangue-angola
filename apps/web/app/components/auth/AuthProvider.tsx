@@ -44,8 +44,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const demoMode = getAuthMode() !== "supabase";
 
   useEffect(() => {
+    if (demoMode) {
+      setLoading(false);
+      return;
+    }
     if (!supabase && getAuthMode() === "supabase") {
       setError("Supabase Auth não configurado. Crie .env.local com as chaves públicas.");
       setLoading(false);
@@ -66,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => data.subscription.unsubscribe();
-  }, []);
+  }, [demoMode]);
 
   const value = useMemo<AuthContextValue>(() => ({
     error,
@@ -83,13 +88,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
       }
-      if (!supabase) {
-        if (!isDemoAuthAllowed()) {
-          setError("Supabase Auth não configurado. Verifique .env.local.");
-          return;
-        }
+      if (demoMode) {
         trackFailedAction("Login demo falhou", { email });
-        setError("Use uma conta demo válida ou configure Supabase Auth.");
+        setError("Use uma conta demo válida. Palavra-passe: Demo@2026 ou demo@2026.");
+        return;
+      }
+      if (!supabase) {
+        setError("Supabase Auth não configurado. Verifique .env.local.");
         return;
       }
       setLoading(true);
@@ -156,7 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .resetPasswordForEmail(email, { redirectTo: `${origin}/auth` });
       if (authError) setError("Não foi possível enviar o email de recuperação.");
     }
-  }), [error, loading, router, session]);
+  }), [demoMode, error, loading, router, session]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

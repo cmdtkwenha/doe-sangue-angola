@@ -3,7 +3,6 @@ import { NextResponse, type NextRequest } from "next/server";
 import {
   getAllowedRolesForPath,
   getAuthMode,
-  isDemoAuthAllowed,
   isKnownRole,
   normalizeRole
 } from "@doe-sangue-angola/shared-services";
@@ -14,7 +13,7 @@ export async function proxy(request: NextRequest) {
 
   if (!allowedRoles) return NextResponse.next();
   if (getAuthMode() !== "supabase") {
-    return isDemoAuthAllowed() ? NextResponse.next() : redirectToAuth(request);
+    return NextResponse.next();
   }
   if (!hasSupabaseEnv()) return redirectToAuth(request);
 
