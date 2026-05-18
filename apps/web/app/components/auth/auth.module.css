@@ -69,6 +69,18 @@
   gap: 6px;
 }
 
+.modeBadge {
+  justify-self: start;
+  padding: 7px 10px;
+  border: 1px solid #f1cfd3;
+  border-radius: 999px;
+  background: #fff0f1;
+  color: #b10f1f;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .links {
   display: flex;
   flex-wrap: wrap;
@@ -117,6 +129,29 @@
 
 .demoAccount small {
   color: #7a808a;
+}
+
+.demoButton {
+  display: grid;
+  gap: 4px;
+  min-height: 58px;
+  padding: 14px 16px;
+  border: 1px solid #d01424;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #d01424, #a90f18);
+  color: white;
+  text-align: left;
+  box-shadow: 0 12px 22px rgba(208, 20, 36, 0.18);
+}
+
+.demoButton span {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.demoButton small {
+  color: #ffe6e8;
+  font-weight: 700;
 }
 
 .error,

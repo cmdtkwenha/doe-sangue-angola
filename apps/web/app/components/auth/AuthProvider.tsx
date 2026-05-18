@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  demoAccounts,
   getOnboardingRedirectForRole,
   getRedirectForRole,
   getAuthMode,
@@ -23,6 +24,7 @@ import {
 
 type AuthContextValue = {
   error: string | null;
+  loginDemo: (role: UserRole) => void;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -78,6 +80,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AuthContextValue>(() => ({
     error,
+    loginDemo(role) {
+      if (!demoMode) {
+        setError("Acesso demo disponível apenas quando NEXT_PUBLIC_AUTH_MODE=mock.");
+        return;
+      }
+      const demo = findDemoAccountByRole(role);
+      if (!demo) {
+        setError("Conta demo não encontrada para este perfil.");
+        return;
+      }
+      const next = mapDemoSession(demo);
+      writeDemoSession(next);
+      setError(null);
+      setSession(next);
+      trackLoginEvent(next.user.email, next.user.role);
+      debugAuth("Login demo direto", next.user.email);
+      router.push(getRedirectForRole(next.user.role));
+    },
     loading,
     session,
     async login(email, password) {
@@ -96,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (demoMode) {
         trackFailedAction("Login demo falhou", { email });
         debugAuth("Login demo falhou", email);
-        setError("Use uma conta demo válida. Palavra-passe: Demo@2026 ou demo@2026.");
+        setError("Conta demo inválida. Use os botões demo ou a senha demo@2026.");
         return;
       }
       if (!supabase) {
@@ -201,3 +221,6 @@ function debugAuth(message: string, email: string) {
     console.info(`[auth-demo] ${message}`, { email });
   }
 }
+
+const findDemoAccountByRole = (role: UserRole) =>
+  demoAccounts.find((account) => account.role === role);

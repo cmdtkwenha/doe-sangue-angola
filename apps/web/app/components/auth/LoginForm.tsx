@@ -1,6 +1,10 @@
 "use client";
 
-import { demoAccounts, demoPasswords } from "@doe-sangue-angola/shared-services";
+import {
+  demoAccounts,
+  demoPasswords,
+  getAuthMode
+} from "@doe-sangue-angola/shared-services";
 import Link from "next/link";
 import { useState } from "react";
 import { AccessibleForm, FieldHint } from "../accessibility";
@@ -8,13 +12,14 @@ import styles from "./auth.module.css";
 import { useAuth } from "./useAuth";
 
 export function LoginForm() {
-  const { error, login, loading } = useAuth();
+  const { error, login, loginDemo, loading } = useAuth();
   const [email, setEmail] = useState("admin@sangueangola.ao");
   const [password, setPassword] = useState("demo@2026");
+  const authMode = getAuthMode() === "supabase" ? "supabase" : "mock";
   const loginAs = (account: typeof demoAccounts[number]) => {
     setEmail(account.email);
-    setPassword(demoPasswords[1]);
-    void login(account.email, demoPasswords[1]);
+    setPassword(demoPasswords[0]);
+    loginDemo(account.role);
   };
 
   return (
@@ -27,6 +32,7 @@ export function LoginForm() {
         void login(email, password);
       }}
     >
+      <div className={styles.modeBadge}>Modo ativo: {authMode}</div>
       <label className="eyebrow" htmlFor="email">Email</label>
       <input
         className={styles.input}
@@ -56,7 +62,7 @@ export function LoginForm() {
         <p>Credenciais: email abaixo com <b>{demoPasswords[0]}</b>. Também aceita <b>{demoPasswords[1]}</b>.</p>
         {demoAccounts.map((account) => (
           <button
-            className={styles.demoAccount}
+            className={styles.demoButton}
             key={account.email}
             onClick={() => loginAs(account)}
             type="button"
