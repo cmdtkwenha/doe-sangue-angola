@@ -17,18 +17,19 @@ locais e redireciona cada perfil para o portal correto.
 
 ## Contas Demo
 
-| Perfil | Email | Destino |
-| --- | --- | --- |
-| Admin | `admin@sangueangola.ao` | `/admin` |
-| Hospital | `hospital@sangueangola.ao` | `/hospital` |
-| Dador | `donor@sangueangola.ao` | `/mobile` |
+| Perfil | Email | Palavra-passe | Destino |
+| --- | --- | --- | --- |
+| Admin | `admin@sangueangola.ao` | `demo@2026` | `/admin` |
+| Hospital | `hospital@sangueangola.ao` | `demo@2026` | `/hospital` |
+| Dador | `donor@sangueangola.ao` | `demo@2026` | `/mobile` |
 
 ## Palavra-passe
 
-Use uma destas palavras-passe:
+Use `demo@2026`. A palavra-passe antiga `Demo@2026` continua aceite como
+fallback para apresentações antigas.
 
-- `Demo@2026`
 - `demo@2026`
+- `Demo@2026`
 
 ## Teste Rápido
 

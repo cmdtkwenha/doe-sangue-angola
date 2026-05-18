@@ -23,9 +23,9 @@ test("contas demo oficiais existem para apresentações", () => {
 
 test("contas demo usam senha simples de apresentação", () => {
   demoAccounts.forEach((account) => {
-    assert.equal(account.password, "Demo@2026");
+    assert.equal(account.password, "demo@2026");
   });
-  assert.deepEqual([...demoPasswords], ["Demo@2026", "demo@2026"]);
+  assert.deepEqual([...demoPasswords], ["demo@2026", "Demo@2026"]);
 });
 
 test("contas demo redirecionam para o portal correto", () => {

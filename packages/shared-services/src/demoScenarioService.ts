@@ -16,28 +16,28 @@ export type DemoStep = {
   status: "Pronto" | "Ao vivo" | "Concluído";
 };
 
-export const demoPasswords = ["Demo@2026", "demo@2026"] as const;
+export const demoPasswords = ["demo@2026", "Demo@2026"] as const;
 
 export const demoAccounts = [
   {
     label: "Admin",
     role: "admin",
     email: "admin@sangueangola.ao",
-    password: "Demo@2026",
+    password: "demo@2026",
     route: "/admin"
   },
   {
     label: "Hospital",
     role: "hospital",
     email: "hospital@sangueangola.ao",
-    password: "Demo@2026",
+    password: "demo@2026",
     route: "/hospital"
   },
   {
     label: "Dador",
     role: "donor",
     email: "donor@sangueangola.ao",
-    password: "Demo@2026",
+    password: "demo@2026",
     route: "/mobile"
   }
 ] as const;

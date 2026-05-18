@@ -16,6 +16,7 @@ import { createContext, useEffect, useMemo, useState } from "react";
 import { supabase } from "../../../lib/supabaseClient";
 import {
   findDemoAccount,
+  type AppSession,
   mapDemoSession,
   resolveSupabaseSession
 } from "./authSession";
@@ -38,6 +39,7 @@ type RegisterInput = {
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
+const demoSessionKey = "doe-sangue-angola-demo-session";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<AuthContextValue["session"]>(null);
@@ -48,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (demoMode) {
+      setSession(readDemoSession());
       setLoading(false);
       return;
     }
@@ -82,14 +85,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const demo = findDemoAccount(email, password);
         if (demo) {
           const next = mapDemoSession(demo);
+          writeDemoSession(next);
           setSession(next);
           trackLoginEvent(next.user.email, next.user.role);
+          debugAuth("Login demo efetuado", next.user.email);
           router.push(getRedirectForRole(next.user.role));
           return;
         }
       }
       if (demoMode) {
         trackFailedAction("Login demo falhou", { email });
+        debugAuth("Login demo falhou", email);
         setError("Use uma conta demo válida. Palavra-passe: Demo@2026 ou demo@2026.");
         return;
       }
@@ -115,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     async logout() {
       if (supabase) await supabase.auth.signOut();
+      clearDemoSession();
       setSession(null);
       router.push("/auth");
     },
@@ -164,4 +171,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }), [demoMode, error, loading, router, session]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+function readDemoSession(): AppSession | null {
+  if (typeof window === "undefined") return null;
+  const raw = window.localStorage.getItem(demoSessionKey);
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as AppSession;
+  } catch {
+    clearDemoSession();
+    return null;
+  }
+}
+
+function writeDemoSession(session: AppSession) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(demoSessionKey, JSON.stringify(session));
+}
+
+function clearDemoSession() {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(demoSessionKey);
+}
+
+function debugAuth(message: string, email: string) {
+  if (process.env.NODE_ENV === "development") {
+    console.info(`[auth-demo] ${message}`, { email });
+  }
 }

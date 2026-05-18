@@ -10,7 +10,12 @@ import { useAuth } from "./useAuth";
 export function LoginForm() {
   const { error, login, loading } = useAuth();
   const [email, setEmail] = useState("admin@sangueangola.ao");
-  const [password, setPassword] = useState("Demo@2026");
+  const [password, setPassword] = useState("demo@2026");
+  const loginAs = (account: typeof demoAccounts[number]) => {
+    setEmail(account.email);
+    setPassword(demoPasswords[1]);
+    void login(account.email, demoPasswords[1]);
+  };
 
   return (
     <AccessibleForm
@@ -47,19 +52,16 @@ export function LoginForm() {
       />
       <FieldHint id="password-hint">A palavra-passe tem validação segura.</FieldHint>
       <section className={styles.demoBox} aria-label="Credenciais demo">
-        <strong>Contas demo</strong>
-        <p>Palavra-passe: <b>{demoPasswords[0]}</b> ou <b>{demoPasswords[1]}</b></p>
+        <strong>Entrar sem configurar Supabase</strong>
+        <p>Credenciais: email abaixo com <b>{demoPasswords[0]}</b>. Também aceita <b>{demoPasswords[1]}</b>.</p>
         {demoAccounts.map((account) => (
           <button
             className={styles.demoAccount}
             key={account.email}
-            onClick={() => {
-              setEmail(account.email);
-              setPassword(demoPasswords[1]);
-            }}
+            onClick={() => loginAs(account)}
             type="button"
           >
-            <span>{account.label}</span>
+            <span>Entrar como {account.label}</span>
             <small>{account.email} → {account.route}</small>
           </button>
         ))}

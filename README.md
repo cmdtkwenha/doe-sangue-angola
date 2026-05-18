@@ -99,11 +99,11 @@ Use these mock accounts for stakeholder presentations:
 
 | Perfil | Email | Senha |
 | --- | --- | --- |
-| Admin Nacional | `admin@sangueangola.ao` | `Demo@2026` |
-| Hospital Verificado | `hospital@sangueangola.ao` | `Demo@2026` |
-| Dador Mobile | `donor@sangueangola.ao` | `Demo@2026` |
+| Admin Nacional | `admin@sangueangola.ao` | `demo@2026` |
+| Hospital Verificado | `hospital@sangueangola.ao` | `demo@2026` |
+| Dador Mobile | `donor@sangueangola.ao` | `demo@2026` |
 
-Também pode usar a senha fallback `demo@2026`. Para Vercel em modo demo,
+Também pode usar a senha antiga `Demo@2026`. Para Vercel em modo demo,
 configure `NEXT_PUBLIC_AUTH_MODE=mock`. Guia rápido:
 [docs/demo-login.md](./docs/demo-login.md).
 
