@@ -8,8 +8,8 @@ export function PushTokenManager({ donorId }: { donorId: string }) {
     <View style={styles.card}>
       <Text style={styles.title}>Notificações Push</Text>
       <Text style={styles.text}>Estado: {push.permissionStatus}</Text>
-      {push.runningInExpoGo ? (
-        <Text style={styles.mock}>Modo simulado ativo para Expo Go.</Text>
+      {push.runningInExpoGo || push.mockPush ? (
+        <Text style={styles.mock}>Modo simulado ativo para este ambiente.</Text>
       ) : (
         <Text style={styles.token} numberOfLines={1}>
           {push.expoPushToken || "Token ainda não registado"}
@@ -17,11 +17,17 @@ export function PushTokenManager({ donorId }: { donorId: string }) {
       )}
       {push.error ? <Text style={styles.error}>{push.error}</Text> : null}
       <TouchableOpacity
-        disabled={push.runningInExpoGo}
-        style={[styles.button, push.runningInExpoGo && styles.buttonDisabled]}
+        disabled={push.runningInExpoGo || push.mockPush || push.registering}
+        style={[
+          styles.button,
+          (push.runningInExpoGo || push.mockPush || push.registering) &&
+            styles.buttonDisabled
+        ]}
         onPress={push.registerForPush}
       >
-        <Text style={styles.buttonText}>Ativar notificações</Text>
+        <Text style={styles.buttonText}>
+          {push.registering ? "A ativar..." : "Ativar notificações"}
+        </Text>
       </TouchableOpacity>
     </View>
   );

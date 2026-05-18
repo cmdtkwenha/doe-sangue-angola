@@ -1,4 +1,5 @@
 import { inventory } from "@doe-sangue-angola/shared-services";
+import { EmptyState } from "../ui/EmptyState";
 import styles from "./hospitalPortal.module.css";
 
 export function InventoryPanel() {
@@ -6,10 +7,16 @@ export function InventoryPanel() {
     <section className={styles.panel}>
       <div className={styles.panelHead}>
         <strong>Inventário de Sangue</strong>
-        <a className="muted" href="#">Ver detalhes</a>
+        <a className="muted" href="/hospital/inventory">Ver detalhes</a>
       </div>
-      <div className={styles.table}>
-        {inventory.map((item) => {
+      {inventory.length === 0 ? (
+        <EmptyState
+          message="Registe unidades para acompanhar disponibilidade e reservas."
+          title="Inventário vazio"
+        />
+      ) : (
+        <div className={styles.table}>
+          {inventory.map((item) => {
           const reserve = Math.max(item.safeMinimum - item.units, 0);
           const critical = item.units < item.safeMinimum;
           return (
@@ -23,9 +30,10 @@ export function InventoryPanel() {
             </span>
           </article>
           );
-        })}
-      </div>
-      <a className={styles.footerLink} href="#">Ver inventário completo</a>
+          })}
+        </div>
+      )}
+      <a className={styles.footerLink} href="/hospital/inventory">Ver inventário completo</a>
     </section>
   );
 }

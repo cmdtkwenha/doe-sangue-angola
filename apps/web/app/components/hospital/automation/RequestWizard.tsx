@@ -2,11 +2,11 @@
 
 import {
   bloodTypes,
-  createWorkflowRequest,
   validateBloodRequestDraft
 } from "@doe-sangue-angola/shared-services";
 import type { BloodType, Urgency } from "@doe-sangue-angola/shared-types";
 import { useState } from "react";
+import { createRequestAction } from "../../workflow/workflowActions";
 import styles from "./hospitalAutomation.module.css";
 
 export function RequestWizard() {
@@ -21,15 +21,15 @@ export function RequestWizard() {
         <strong>Assistente de Pedido</strong>
         <span className="pill red">Automático</span>
       </div>
-      <form className={styles.form} onSubmit={(event) => {
+      <form className={styles.form} onSubmit={async (event) => {
         event.preventDefault();
         const validation = validateBloodRequestDraft({ bloodType, units, urgency, hospitalId: "h1" });
         if (!validation.valid) {
           setMessage(validation.errors.join(" "));
           return;
         }
-        const result = createWorkflowRequest({ bloodType, units, urgency, hospitalId: "h1" });
-        setMessage("request" in result ? `Pedido ${result.request.id} criado e dadores notificados.` : result.message);
+        const result = await createRequestAction({ bloodType, units, urgency, hospitalId: "h1" });
+        setMessage(result.ok ? "Pedido criado e dadores notificados." : result.message ?? "Falha ao criar pedido.");
       }}>
         <select className={styles.select} onChange={(event) => setBloodType(event.target.value as BloodType)} value={bloodType}>
           {bloodTypes.map((type) => <option key={type}>{type}</option>)}

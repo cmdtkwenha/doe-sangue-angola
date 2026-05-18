@@ -6,7 +6,7 @@ export function ShortageAlerts() {
     <section className={styles.panel}>
       <div className={styles.panelHead}>
         <strong>Alertas de Escassez</strong>
-        <a className="muted" href="#">Ver todos</a>
+        <a className="muted" href="/admin/reports">Ver todos</a>
       </div>
       {alerts.map((alert) => (
         <article className={styles.row} key={alert.id}>

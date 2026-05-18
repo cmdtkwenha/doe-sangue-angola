@@ -5,23 +5,39 @@ import {
   isCompletedRequest,
   listRequestsForHospital
 } from "@doe-sangue-angola/shared-services";
+import type { BloodRequest } from "@doe-sangue-angola/shared-types";
+import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import { useMemo } from "react";
+import { EmptyState } from "../ui/EmptyState";
 import styles from "./hospitalPortal.module.css";
 import { currentHospitalId } from "./hospitalPortalData";
 
 export function ActiveRequestsTable() {
   const version = useRealtimeVersion();
-  const requests = useMemo(() => listRequestsForHospital(currentHospitalId), [version]);
+  const fallback = useMemo(() => listRequestsForHospital(currentHospitalId), [version]);
+  const { data: requests, error, loading } = useApiData<BloodRequest[]>(
+    `/api/blood-requests?hospitalId=${currentHospitalId}`,
+    fallback,
+    version
+  );
 
   return (
     <section className={styles.panel}>
       <div className={styles.panelHead}>
         <strong>Pedidos de Sangue Ativos</strong>
-        <a className="muted" href="#">Ver todos</a>
+        <a className="muted" href="/hospital/requests">Ver todos</a>
       </div>
-      <div className={styles.table}>
-        {requests.map((request) => (
+      {loading ? <p className={styles.rowMuted}>A sincronizar pedidos reais...</p> : null}
+      {error ? <p className={styles.rowMuted}>{error}</p> : null}
+      {requests.length === 0 ? (
+        <EmptyState
+          message="Crie um pedido urgente quando precisar de dadores compatíveis."
+          title="Sem pedidos ativos"
+        />
+      ) : (
+        <div className={styles.table}>
+          {requests.map((request) => (
           <article className={styles.requestRow} key={request.id}>
             <div>
               <strong style={{ color: "#d01424", fontSize: 24 }}>{request.bloodType}</strong>
@@ -31,9 +47,10 @@ export function ActiveRequestsTable() {
             <span className={styles.rowMuted}>Criado<br /><strong>{request.createdAt.slice(11, 16)}</strong></span>
             <span className={statusTone(request.status)}>{statusLabel(request.status)}</span>
           </article>
-        ))}
-      </div>
-      <a className={styles.footerLink} href="#">Ver todos os pedidos</a>
+          ))}
+        </div>
+      )}
+      <a className={styles.footerLink} href="/hospital/requests">Ver todos os pedidos</a>
     </section>
   );
 }

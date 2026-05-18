@@ -1,16 +1,34 @@
 import { AccessibleModal } from "../accessibility";
+import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import styles from "./mobileApp.module.css";
-import { matchReasons, requests } from "./mobileMock";
+import { matchReasons } from "./mobileMock";
 
-export function RequestDetailsModal() {
-  const request = requests[0];
+export function RequestDetailsModal({
+  onAccept,
+  onClose,
+  onReject,
+  open,
+  request
+}: {
+  onAccept?: () => void;
+  onClose?: () => void;
+  onReject?: () => void;
+  open: boolean;
+  request: BloodRequest | null;
+}) {
+  if (!open || !request) return null;
 
   return (
-    <AccessibleModal title="Detalhes do pedido">
+    <AccessibleModal onClose={onClose} title="Detalhes do pedido">
       <div className={styles.modal}>
         <div className={styles.requestTop}>
           <h2 id="pedido-titulo">Detalhes do Pedido</h2>
-          <button aria-label="Fechar detalhes do pedido" className={styles.iconButton} type="button">
+          <button
+            aria-label="Fechar detalhes do pedido"
+            className={styles.iconButton}
+            onClick={onClose}
+            type="button"
+          >
             ×
           </button>
         </div>
@@ -18,11 +36,11 @@ export function RequestDetailsModal() {
           <span className={`${styles.blood} ${styles.criticalText}`}>{request.bloodType}</span>
           <span className="pill red" style={{ marginLeft: 12 }}>{request.urgency}</span>
         </p>
-        <h3>{request.hospital}</h3>
-        <p>{request.units}</p>
+        <h3>{request.patientCode}</h3>
+        <p>Precisam de {request.units} bolsas</p>
         <div className={styles.modalMeta}>
-          <small>Distância<br /><strong>{request.distance}</strong></small>
-          <small>Precisam até<br /><strong>{request.time}</strong></small>
+          <small>Estado<br /><strong>{request.status}</strong></small>
+          <small>Criado<br /><strong>{request.createdAt.slice(11, 16)}</strong></small>
           <small>Emergência<br /><strong className={styles.criticalText}>MUITO ALTA</strong></small>
         </div>
         <hr />
@@ -33,10 +51,20 @@ export function RequestDetailsModal() {
             <span>{reason}</span>
           </div>
         ))}
-        <button className={styles.accept} style={{ width: "100%", marginTop: 18 }} type="button">
+        <button
+          className={styles.accept}
+          onClick={onAccept}
+          style={{ width: "100%", marginTop: 18 }}
+          type="button"
+        >
           ACEITAR PEDIDO
         </button>
-        <button className={styles.cancel} style={{ width: "100%", marginTop: 10 }} type="button">
+        <button
+          className={styles.cancel}
+          onClick={onReject}
+          style={{ width: "100%", marginTop: 10 }}
+          type="button"
+        >
           RECUSAR
         </button>
       </div>

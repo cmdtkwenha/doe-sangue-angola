@@ -1,4 +1,5 @@
 import { adminNavigation } from "@constants/adminNavigation";
+import { SidebarNav } from "../shell/SidebarNav";
 import styles from "./adminCore.module.css";
 
 export function AdminSidebar() {
@@ -11,19 +12,14 @@ export function AdminSidebar() {
           <div className="muted">Administração Nacional</div>
         </div>
       </div>
-      <nav aria-label="Navegação da administração nacional" className={styles.nav}>
-        {adminNavigation.map((item, index) => (
-          <a
-            aria-current={index === 0 ? "page" : undefined}
-            className={`${styles.navItem} ${index === 0 ? styles.active : ""}`}
-            href={item.href}
-            key={item.href}
-          >
-            <span>□</span>
-            {item.label}
-          </a>
-        ))}
-      </nav>
+      <SidebarNav
+        activeClassName={styles.active}
+        ariaLabel="Navegação da administração nacional"
+        className={styles.nav}
+        itemClassName={styles.navItem}
+        items={adminNavigation}
+        rootHref="/admin"
+      />
       <div className={styles.onlineCard}>
         <div className="eyebrow">Doadores Online</div>
         <h2>2.487</h2>

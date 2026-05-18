@@ -1,6 +1,7 @@
 "use client";
 
 import { rowsToCsv } from "@utils/csv";
+import { useState } from "react";
 import styles from "./reports.module.css";
 
 export function ReportExportButtons({
@@ -10,14 +11,20 @@ export function ReportExportButtons({
   filename: string;
   rows: Record<string, string>[];
 }) {
+  const [message, setMessage] = useState("");
+
   return (
     <div className={styles.actions}>
-      <button className={styles.export} onClick={() => exportCsv(filename, rows)} type="button">
+      <button className={styles.export} onClick={() => {
+        exportCsv(filename, rows);
+        setMessage("CSV exportado.");
+      }} type="button">
         Exportar CSV
       </button>
-      <button className={styles.pdfPreview} type="button">
+      <button className={styles.pdfPreview} onClick={() => setMessage("PDF demonstrativo preparado em modo mock.")} type="button">
         Exportar PDF demonstrativo
       </button>
+      {message ? <span className="muted">{message}</span> : null}
     </div>
   );
 }

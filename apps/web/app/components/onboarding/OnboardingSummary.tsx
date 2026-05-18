@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import styles from "./onboarding.module.css";
 
 export function OnboardingSummary({
@@ -9,6 +12,8 @@ export function OnboardingSummary({
   fields: Array<[string, string]>;
   title: string;
 }) {
+  const [done, setDone] = useState(false);
+
   return (
     <aside className={styles.summary}>
       <div>
@@ -24,7 +29,10 @@ export function OnboardingSummary({
           </div>
         ))}
       </div>
-      <button className="button" type="button">{action}</button>
+      <button className="button" onClick={() => setDone(true)} type="button">
+        {done ? "Guardado" : action}
+      </button>
+      {done ? <span className="pill green">Fluxo concluído em modo mock</span> : null}
     </aside>
   );
 }

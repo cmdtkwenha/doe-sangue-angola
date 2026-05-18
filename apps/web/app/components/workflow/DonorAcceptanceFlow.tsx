@@ -1,7 +1,8 @@
 "use client";
 
-import { acceptWorkflowRequest, rejectWorkflowRequest } from "@doe-sangue-angola/shared-services";
+import { rejectWorkflowRequest } from "@doe-sangue-angola/shared-services";
 import styles from "./workflow.module.css";
+import { acceptRequestAction } from "./workflowActions";
 import { useWorkflowSnapshot } from "./useWorkflowSnapshot";
 
 const donorId = "d1";
@@ -30,7 +31,7 @@ export function DonorAcceptanceFlow() {
         ))}
       </div>
       <div className={styles.actions}>
-        <button className={`${styles.button} ${styles.primary}`} onClick={() => { acceptWorkflowRequest(donorId, request.id); refresh(); }} type="button">
+        <button className={`${styles.button} ${styles.primary}`} onClick={async () => { await acceptRequestAction(donorId, request.id); refresh(); }} type="button">
           Aceitar pedido
         </button>
         <button className={`${styles.button} ${styles.soft}`} onClick={() => { rejectWorkflowRequest(donorId, request.id); refresh(); }} type="button">

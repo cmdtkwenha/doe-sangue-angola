@@ -1,12 +1,22 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { getAllowedRolesForPath, normalizeRole } from "@doe-sangue-angola/shared-services";
+import {
+  getAllowedRolesForPath,
+  getAuthMode,
+  isDemoAuthAllowed,
+  isKnownRole,
+  normalizeRole
+} from "@doe-sangue-angola/shared-services";
 
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const allowedRoles = getAllowedRolesForPath(path);
 
-  if (!allowedRoles || !hasSupabaseEnv()) return NextResponse.next();
+  if (!allowedRoles) return NextResponse.next();
+  if (getAuthMode() !== "supabase") {
+    return isDemoAuthAllowed() ? NextResponse.next() : redirectToAuth(request);
+  }
+  if (!hasSupabaseEnv()) return redirectToAuth(request);
 
   let response = NextResponse.next({ request });
   const supabase = createServerClient(
@@ -29,12 +39,26 @@ export async function proxy(request: NextRequest) {
   const { data } = await supabase.auth.getUser();
   if (!data.user) return redirectToAuth(request);
 
-  const role = normalizeRole(data.user.user_metadata?.role);
+  const role = await resolveRole(supabase, data.user);
   if (!allowedRoles.includes(role)) {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
 
   return response;
+}
+
+async function resolveRole(
+  supabase: ReturnType<typeof createServerClient>,
+  user: { id: string; email?: string; user_metadata?: Record<string, unknown> }
+) {
+  if (isKnownRole(user.user_metadata?.role)) return user.user_metadata.role;
+  const { data } = await supabase
+    .from("users")
+    .select("role")
+    .or(`auth_user_id.eq.${user.id},email.eq.${user.email ?? ""}`)
+    .maybeSingle();
+
+  return normalizeRole(data?.role);
 }
 
 export const config = {

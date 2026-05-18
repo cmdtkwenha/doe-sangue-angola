@@ -1,8 +1,8 @@
 "use client";
 
-import { completeWorkflowDonation } from "@doe-sangue-angola/shared-services";
 import { useState } from "react";
 import styles from "./workflow.module.css";
+import { completeDonationAction } from "./workflowActions";
 import { useWorkflowSnapshot } from "./useWorkflowSnapshot";
 
 export function CompletionFlow() {
@@ -12,9 +12,10 @@ export function CompletionFlow() {
 
   if (!request) return null;
 
-  function complete() {
-    const result = completeWorkflowDonation(donorId, request.id);
-    if (result.ok) setMessage(`Concluído: +${result.reward.earned} pontos, nível ${result.reward.tier}.`);
+  async function complete() {
+    if (!request) return;
+    const result = await completeDonationAction(donorId, request.id);
+    if (result.ok) setMessage("Concluído: pontos e auditoria sincronizados.");
     refresh();
   }
 

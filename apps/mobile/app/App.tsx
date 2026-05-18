@@ -1,4 +1,3 @@
-import { getDonorHome } from "@doe-sangue-angola/shared-services";
 import {
   SafeAreaView,
   ScrollView,
@@ -7,15 +6,25 @@ import {
   Text,
   View
 } from "react-native";
+import { dataProvider } from "@doe-sangue-angola/shared-services";
+import type { BloodRequest } from "@doe-sangue-angola/shared-types";
+import { useState } from "react";
 import { AppointmentCard } from "./components/AppointmentCard";
 import { DigitalCard } from "./components/DigitalCard";
 import { DonorHero } from "./components/DonorHero";
 import { EligibilityCard } from "./components/EligibilityCard";
-import { EmptyState, ErrorBoundary, OfflineBanner } from "./components/feedback";
+import {
+  EmptyState,
+  ErrorBoundary,
+  ErrorState,
+  LoadingState,
+  OfflineBanner
+} from "./components/feedback";
 import { FeatureGrid } from "./components/FeatureGrid";
 import { NotificationPreferences } from "./components/notifications/NotificationPreferences";
 import { PushTokenManager } from "./components/notifications/PushTokenManager";
 import { NativeRequestCard } from "./components/NativeRequestCard";
+import { useMobileStartup } from "./hooks/useMobileStartup";
 import "./hooks/pushNotificationsSetup";
 
 export default function App() {
@@ -27,14 +36,40 @@ export default function App() {
 }
 
 function DonorApp() {
-  const home = getDonorHome("d1");
+  const { error, home, loading, offline, refresh } = useMobileStartup("d1");
+  const [actionMessage, setActionMessage] = useState("");
+  const [busyRequestId, setBusyRequestId] = useState("");
+
+  if (loading || !home) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <StatusBar barStyle="dark-content" />
+        <View style={styles.content}>
+          <LoadingState label="A preparar o app Doe Sangue Angola" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error && !home) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <StatusBar barStyle="dark-content" />
+        <View style={styles.content}>
+          <ErrorState message={error} title="Arranque interrompido" />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="dark-content" />
       <ScrollView contentContainerStyle={styles.content}>
-        <OfflineBanner />
-        <DonorHero donor={home.donor} />
+        <OfflineBanner offline={offline} />
+        {error ? <ErrorState message={error} title="Dados em modo seguro" /> : null}
+        <DonorHero donor={home.donor} unreadCount={home.unreadCount} />
+        {actionMessage ? <Text style={styles.notice}>{actionMessage}</Text> : null}
         <View style={styles.stats}>
           <Stat label="Pontos" value={String(home.donor.points)} />
           <Stat label="Estado" value={home.donor.available ? "Disponivel" : "Pausa"} />
@@ -48,7 +83,13 @@ function DonorApp() {
         <Text style={styles.sectionTitle}>Pedidos perto de si</Text>
         {home.nearbyRequests.length > 0 ? (
           home.nearbyRequests.map((request) => (
-            <NativeRequestCard key={request.id} request={request} />
+            <NativeRequestCard
+              busy={busyRequestId === request.id}
+              key={request.id}
+              onAccept={() => acceptRequest(home.donor.id, request)}
+              onReject={() => rejectRequest(home.donor.id, request)}
+              request={request}
+            />
           ))
         ) : (
           <EmptyState
@@ -59,6 +100,33 @@ function DonorApp() {
       </ScrollView>
     </SafeAreaView>
   );
+
+  async function acceptRequest(donorId: string, request: BloodRequest) {
+    setBusyRequestId(request.id);
+    setActionMessage("");
+    try {
+      await dataProvider.acceptRequest(donorId, request.id);
+      setActionMessage("Pedido aceite. O hospital já consegue ver o seu PIN.");
+      refresh();
+    } catch {
+      setActionMessage("Não foi possível aceitar o pedido. Tente novamente.");
+    } finally {
+      setBusyRequestId("");
+    }
+  }
+
+  async function rejectRequest(donorId: string, request: BloodRequest) {
+    setBusyRequestId(request.id);
+    try {
+      await dataProvider.createAuditLog("Dador Mobile", `Recusou pedido ${request.id}`);
+      setActionMessage("Pedido recusado. Continuaremos a mostrar pedidos compatíveis.");
+      refresh();
+    } catch {
+      setActionMessage("Não foi possível registar a recusa.");
+    } finally {
+      setBusyRequestId("");
+    }
+  }
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
@@ -102,6 +170,15 @@ const styles = StyleSheet.create({
   statLabel: {
     color: "#6f737b",
     marginTop: 4
+  },
+  notice: {
+    backgroundColor: "#fff3f0",
+    borderColor: "#f1cfd3",
+    borderRadius: 14,
+    borderWidth: 1,
+    color: "#b10f1f",
+    fontWeight: "800",
+    padding: 12
   },
   sectionTitle: {
     color: "#151515",

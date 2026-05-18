@@ -1,4 +1,5 @@
 export * from "./auditRepository";
+export * from "./appointmentRepository";
 export * from "./databaseTypes";
 export * from "./donorRepository";
 export * from "./hospitalRepository";
@@ -7,3 +8,4 @@ export * from "./notificationRepository";
 export * from "./repositoryRegistry";
 export * from "./requestRepository";
 export * from "./rewardRepository";
+export * from "./userRepository";

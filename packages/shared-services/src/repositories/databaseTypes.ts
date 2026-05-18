@@ -9,6 +9,16 @@ import type {
 } from "@doe-sangue-angola/shared-types";
 import type { MockNotification } from "../notificationService";
 
+export type UserRow = {
+  id: string;
+  auth_user_id: string | null;
+  role: "admin" | "hospital" | "donor";
+  name: string;
+  email: string;
+  phone: string | null;
+  created_at: string;
+};
+
 export type DonorRow = {
   id: string;
   blood_type: BloodType;
@@ -47,11 +57,33 @@ export type AppointmentRow = {
   id: string;
   donor_id: string;
   hospital_id: string;
+  blood_request_id?: string | null;
   date: string;
   time: string;
   pin: string;
   status: Appointment["status"];
 };
+
+export type RewardRow = {
+  id: string;
+  donor_id: string;
+  points: number;
+  reason: string;
+  tier: string | null;
+  created_at: string;
+};
+
+export function mapUser(row: UserRow) {
+  return {
+    id: row.id,
+    authUserId: row.auth_user_id ?? undefined,
+    role: row.role,
+    name: row.name,
+    email: row.email,
+    phone: row.phone ?? "",
+    createdAt: row.created_at
+  };
+}
 
 export function mapDonor(row: DonorRow): Donor {
   return {
@@ -88,6 +120,29 @@ export function mapRequest(row: RequestRow): BloodRequest {
     units: row.units,
     urgency: row.urgency,
     status: row.status,
+    createdAt: row.created_at
+  };
+}
+
+export function mapAppointment(row: AppointmentRow): Appointment {
+  return {
+    id: row.id,
+    donorId: row.donor_id,
+    hospitalId: row.hospital_id,
+    date: row.date,
+    time: row.time,
+    pin: row.pin,
+    status: row.status
+  };
+}
+
+export function mapReward(row: RewardRow) {
+  return {
+    id: row.id,
+    donorId: row.donor_id,
+    points: row.points,
+    reason: row.reason,
+    tier: row.tier ?? "",
     createdAt: row.created_at
   };
 }

@@ -138,11 +138,40 @@ See [ENVIRONMENT.md](./ENVIRONMENT.md) and [env/README.md](./env/README.md) for 
 
 ## Deployment
 
-- Web: deploy `apps/web` to Vercel.
-- Mobile: build `apps/mobile` with Expo EAS.
-- Backend: keep mock mode until Supabase RLS and production keys are reviewed.
+- Deployment overview: [docs/deployment.md](./docs/deployment.md)
+- Web on Vercel: [docs/vercel-deploy.md](./docs/vercel-deploy.md)
+- Supabase production: [docs/supabase-production.md](./docs/supabase-production.md)
+- Mobile builds: [docs/mobile-build.md](./docs/mobile-build.md)
+- Production checklist: [docs/production-checklist.md](./docs/production-checklist.md)
 
-See [SETUP.md](./SETUP.md), [ENVIRONMENT.md](./ENVIRONMENT.md), and [docs/deployment.md](./docs/deployment.md).
+Production uses `NEXT_PUBLIC_AUTH_MODE=supabase`,
+`NEXT_PUBLIC_DATA_MODE=supabase` and `NEXT_PUBLIC_PUSH_MODE=expo` after the
+Supabase security review is complete. Mock mode remains the safe rollback path.
+
+For Vercel, use:
+
+```bash
+npm install
+npm run build:web
+```
+
+For Expo Android builds, use:
+
+```bash
+cd apps/mobile
+eas build --profile development --platform android
+```
+
+Before release, run:
+
+```bash
+npm run check:lines
+npm run test
+npm run smoke
+npm run lint
+npm run typecheck
+npm run build
+```
 
 ## Screenshots
 

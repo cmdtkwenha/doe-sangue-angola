@@ -1,7 +1,15 @@
 import styles from "./mobileApp.module.css";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 
-export function RequestCard({ request }: { request: BloodRequest }) {
+export function RequestCard({
+  onAccept,
+  onOpen,
+  request
+}: {
+  onAccept?: (request: BloodRequest) => void;
+  onOpen?: (request: BloodRequest) => void;
+  request: BloodRequest;
+}) {
   const tone = request.urgency === "Critica"
     ? "critical"
     : request.urgency === "Alta"
@@ -15,7 +23,12 @@ export function RequestCard({ request }: { request: BloodRequest }) {
 
   return (
     <article className={`${styles.request} ${styles[tone]}`}>
-      <div className={styles.requestTop}>
+      <button
+        className={styles.cardButton}
+        onClick={() => onOpen?.(request)}
+        type="button"
+      >
+        <span className={styles.requestTop}>
         <span>
           <strong className={textTone}>{request.urgency}</strong>
           <br />
@@ -27,13 +40,15 @@ export function RequestCard({ request }: { request: BloodRequest }) {
           <small>{request.units} bolsas</small>
         </span>
         <span aria-hidden="true">⋮</span>
-      </div>
+        </span>
+      </button>
       <div className={styles.requestMeta}>
         <small>Estado {request.status}</small>
         <small>Criado {request.createdAt.slice(11, 16)}</small>
         <button
           aria-label={`Aceitar pedido ${request.bloodType} para ${request.units} bolsas`}
           className={styles.accept}
+          onClick={() => onAccept?.(request)}
           type="button"
         >
           ACEITAR

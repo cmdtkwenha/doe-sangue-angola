@@ -3,7 +3,7 @@ import type { BloodRequest, BloodType } from "@doe-sangue-angola/shared-types";
 import { acceptRequest, validatePin } from "./appointmentService";
 import { recordAudit } from "./auditService";
 import { appointments, donors, hospitals, requests } from "./mockStore";
-import { createInAppNotification } from "./notificationService";
+import { createInAppNotification, markAllNotificationsRead } from "./notificationService";
 import { publishRealtimeEvent } from "./realtimeService";
 import { createBloodRequest, updateRequestStatus } from "./requestService";
 import { formatTimePt } from "./utils";
@@ -74,7 +74,13 @@ export function acceptWorkflowRequest(donorId: string, requestId: string) {
   const result = acceptRequest(donorId, requestId);
   if (!result.ok) return result;
 
-  donorResponses.unshift({
+  const existing = donorResponses.find((item) =>
+    item.donorId === donorId && item.requestId === requestId
+  );
+  if (existing) {
+    existing.decision = "Aceite";
+    existing.time = nowTime();
+  } else donorResponses.unshift({
     id: `resp-${donorId}-${requestId}-${donorResponses.length}`,
     requestId,
     donorId,
@@ -92,7 +98,13 @@ export function rejectWorkflowRequest(donorId: string, requestId: string) {
   const donor = donors.find((item) => item.id === donorId);
   if (!donor) return { ok: false, message: "Dador não encontrado." };
 
-  donorResponses.unshift({
+  const existing = donorResponses.find((item) =>
+    item.donorId === donorId && item.requestId === requestId
+  );
+  if (existing) {
+    existing.decision = "Recusado";
+    existing.time = nowTime();
+  } else donorResponses.unshift({
     id: `resp-${donorId}-${requestId}-${donorResponses.length}`,
     requestId,
     donorId,
@@ -129,6 +141,7 @@ export function completeWorkflowDonation(donorId: string, requestId: string) {
   request.status = "Concluído";
   const reward = rewardAgent(donor, true);
   donor.points = reward.currentPoints;
+  markAllNotificationsRead(donorId);
   recordAudit("Hospital", `Marcou doação concluída para ${requestId}`);
   recordAudit("rewardAgent", `Atualizou pontos de ${donor.name}`);
   createInAppNotification(

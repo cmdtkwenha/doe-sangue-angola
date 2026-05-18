@@ -5,21 +5,18 @@
   background: linear-gradient(135deg, #f7f8fb, #eef2f6);
   color: #151923;
 }
-
 .sidebar {
   background: linear-gradient(180deg, #10161d, #080d12);
   color: white;
   padding: 24px 16px;
   box-shadow: inset -1px 0 rgba(255, 255, 255, 0.06);
 }
-
 .brand {
   display: flex;
   gap: 12px;
   align-items: center;
   padding: 0 8px 28px;
 }
-
 .drop {
   width: 42px;
   height: 52px;
@@ -28,12 +25,10 @@
   background: linear-gradient(150deg, #ff4a57, #b10f1f);
   box-shadow: 0 12px 28px rgba(225, 29, 46, 0.34);
 }
-
 .nav {
   display: grid;
   gap: 8px;
 }
-
 .navItem {
   display: flex;
   align-items: center;
@@ -43,13 +38,19 @@
   color: #eef2f5;
   font-weight: 750;
   min-height: 46px;
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
 }
-
+.navItem:hover,
+.navItem:focus-visible {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  outline: none;
+  transform: translateX(2px);
+}
 .active {
   background: linear-gradient(135deg, #e32635, #b10f1f);
   box-shadow: 0 12px 28px rgba(177, 15, 31, 0.28);
 }
-
 .onlineCard {
   margin-top: 54px;
   padding: 18px;
@@ -57,17 +58,14 @@
   border-radius: 12px;
   background: linear-gradient(180deg, rgba(0, 193, 119, 0.1), rgba(0, 0, 0, 0.12));
 }
-
 .sparkline {
   width: 100%;
   height: 60px;
   margin-top: 10px;
 }
-
 .content {
   min-width: 0;
 }
-
 .header {
   height: 88px;
   display: grid;
@@ -78,13 +76,11 @@
   background: white;
   border-bottom: 1px solid #e7ebf0;
 }
-
 .title {
   margin: 0;
   font-size: 25px;
   white-space: nowrap;
 }
-
 .search {
   width: 100%;
   border: 1px solid #dfe5ec;
@@ -93,7 +89,6 @@
   color: #323946;
   background: #fbfcfe;
 }
-
 .headerTools {
   display: flex;
   align-items: center;
@@ -101,19 +96,16 @@
   font-size: 13px;
   white-space: nowrap;
 }
-
 .workspace {
   display: grid;
   gap: 16px;
   padding: 24px 28px 34px;
 }
-
 .metricGrid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 14px;
 }
-
 .metricCard,
 .panel {
   background: white;
@@ -121,13 +113,11 @@
   border-radius: 14px;
   box-shadow: 0 14px 36px rgba(25, 35, 45, 0.06);
 }
-
 .metricCard {
   min-height: 124px;
   padding: 20px;
   position: relative;
 }
-
 .metricIcon {
   position: absolute;
   right: 16px;
@@ -141,37 +131,31 @@
   background: #fff0f1;
   font-weight: 900;
 }
-
 .metricValue {
   margin: 18px 0 8px;
   font-size: 30px;
   line-height: 1;
 }
-
 .mainGrid {
   display: grid;
   grid-template-columns: 1.05fr 1fr;
   gap: 18px;
 }
-
 .panel {
   padding: 18px;
 }
-
 .panelHead {
   display: flex;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 16px;
 }
-
 .requestList {
   display: grid;
   border: 1px solid #edf0f4;
   border-radius: 12px;
   overflow: hidden;
 }
-
 .requestRow,
 .inventoryRow {
   display: grid;
@@ -180,36 +164,30 @@
   padding: 13px 14px;
   border-top: 1px solid #edf0f4;
 }
-
 .requestRow {
   grid-template-columns: 0.35fr 1.3fr 0.8fr;
 }
-
 .bloodType {
   color: #d01424;
   font-size: 21px;
   font-weight: 900;
 }
-
 .bar {
   height: 8px;
   overflow: hidden;
   border-radius: 999px;
   background: #edf0f4;
 }
-
 .bar span {
   display: block;
   height: 100%;
   background: linear-gradient(90deg, #d01424, #f6a623);
 }
-
 .bottomGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
-
 @media (max-width: 1200px) {
   .shell,
   .header,
@@ -218,30 +196,29 @@
   .bottomGrid {
     grid-template-columns: 1fr;
   }
-
   .sidebar {
     position: sticky;
     top: 0;
     z-index: 20;
     padding: 12px;
   }
-
   .nav {
     grid-auto-flow: column;
     overflow-x: auto;
+    padding-bottom: 4px;
   }
-
+  .navItem {
+    min-width: max-content;
+  }
   .onlineCard {
     display: none;
   }
 }
-
 @media (max-width: 720px) {
   .header,
   .workspace {
     padding: 18px;
   }
-
   .title {
     white-space: normal;
   }

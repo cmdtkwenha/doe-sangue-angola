@@ -2,6 +2,7 @@ import type { BloodRequest, Donor } from "@doe-sangue-angola/shared-types";
 import { getPushMode } from "./config";
 import { getDatabaseClient, isDatabaseConfigured } from "./databaseService";
 import type { NotificationType } from "./notificationService";
+import { donorRepository } from "./repositories/donorRepository";
 
 export type PushCategory =
   | "emergency_request"
@@ -41,20 +42,23 @@ export async function registerPushToken(record: PushTokenRecord) {
     throw new Error("Token Expo inválido.");
   }
 
+  const donorId = await resolvePushDonorId(record.donorId);
+  const normalized = { ...record, donorId };
+
   if (!isDatabaseConfigured()) {
-    tokenStore.unshift(record);
-    return { ok: true, mode: "memory", record };
+    tokenStore.unshift(normalized);
+    return { ok: true, mode: "memory", record: normalized };
   }
 
   const { error } = await getDatabaseClient().from("push_tokens").upsert({
-    donor_id: record.donorId,
-    token: record.token,
-    platform: record.platform,
+    donor_id: normalized.donorId,
+    token: normalized.token,
+    platform: normalized.platform,
     active: true
   }, { onConflict: "token" });
 
   if (error) throw error;
-  return { ok: true, mode: "supabase", record };
+  return { ok: true, mode: "supabase", record: normalized };
 }
 
 export async function getPushPreferences(donorId: string) {
@@ -95,39 +99,51 @@ export async function sendExpoPushNotification(input: {
   if (getPushMode() !== "expo") {
     return { ok: true, mode: "mock-push", to: input.to, title: input.title };
   }
-  // Expo setup: mobile registers an ExpoPushToken, backend posts it here.
-  const response = await fetch("https://exp.host/--/api/v2/push/send", {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Accept-Encoding": "gzip, deflate",
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      to: input.to,
-      title: input.title,
-      body: input.body,
-      data: { category: input.category, type: input.type },
-      categoryId: input.category,
-      sound: "default"
-    })
-  });
+  try {
+    // Expo setup: mobile registers an ExpoPushToken, backend posts it here.
+    const response = await fetch("https://exp.host/--/api/v2/push/send", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Accept-Encoding": "gzip, deflate",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        to: input.to,
+        title: input.title,
+        body: input.body,
+        data: { category: input.category, type: input.type },
+        categoryId: input.category,
+        sound: "default"
+      })
+    });
 
-  const result = await response.json() as ExpoPushResult;
-  const data = Array.isArray(result.data) ? result.data : result.data ? [result.data] : [];
-  const failure = data.find((item) => item.status === "error") ?? result.errors?.[0];
-  if (!response.ok || failure) {
-    throw new Error(failure?.message ?? "Falha ao enviar push Expo.");
+    const result = await response.json() as ExpoPushResult;
+    const data = Array.isArray(result.data) ? result.data : result.data ? [result.data] : [];
+    const failure = data.find((item) => item.status === "error") ?? result.errors?.[0];
+    if (!response.ok || failure) {
+      return {
+        ok: false,
+        message: failure?.message ?? "Falha ao enviar push Expo.",
+        mode: "expo"
+      };
+    }
+
+    return { ok: true, mode: "expo", result };
+  } catch {
+    return {
+      ok: false,
+      message: "Push Expo indisponível. Notificação in-app mantida.",
+      mode: "expo"
+    };
   }
-
-  return result;
 }
 
 export async function sendRequestPushes(request: BloodRequest, donors: Donor[]) {
   const allowed = await filterDonorsByPreference(donors);
   const tokens = await listTokensForDonors(allowed.map((donor) => donor.id));
 
-  return Promise.all(tokens.map((record) =>
+  return Promise.all(tokens.map(async (record) =>
     sendExpoPushNotification({
       to: record.token,
       title: "Pedido urgente de sangue",
@@ -154,6 +170,8 @@ async function filterDonorsByPreference(donors: Donor[]) {
 }
 
 async function listTokensForDonors(donorIds: string[]) {
+  if (donorIds.length === 0) return [];
+
   if (!isDatabaseConfigured()) {
     return tokenStore.filter((record) => donorIds.includes(record.donorId));
   }
@@ -170,4 +188,10 @@ async function listTokensForDonors(donorIds: string[]) {
     platform: row.platform,
     token: row.token
   })) as PushTokenRecord[];
+}
+
+async function resolvePushDonorId(donorId: string) {
+  if (!isDatabaseConfigured() || donorId !== "d1") return donorId;
+  const donors = await donorRepository.listDonors();
+  return donors[0]?.id ?? donorId;
 }

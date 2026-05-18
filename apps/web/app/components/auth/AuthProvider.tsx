@@ -3,19 +3,22 @@
 import {
   getOnboardingRedirectForRole,
   getRedirectForRole,
-  getRoleFromMetadata,
   getAuthMode,
-  demoAccounts,
+  isDemoAuthAllowed,
   trackFailedAction,
   trackLoginEvent,
   type AuthUser
 } from "@doe-sangue-angola/shared-services";
 import type { UserRole } from "@doe-sangue-angola/shared-types";
-import type { Session } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { createContext, useEffect, useMemo, useState } from "react";
 import { supabase } from "../../../lib/supabaseClient";
+import {
+  findDemoAccount,
+  mapDemoSession,
+  resolveSupabaseSession
+} from "./authSession";
 
 type AuthContextValue = {
   error: string | null;
@@ -53,12 +56,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(mapSession(data.session));
+    const db = supabase;
+    db.auth.getSession().then(async ({ data }) => {
+      setSession(await resolveSupabaseSession(db, data.session));
       setLoading(false);
     });
-    const { data } = supabase.auth.onAuthStateChange((_event, next) => {
-      setSession(mapSession(next));
+    const { data } = db.auth.onAuthStateChange((_event, next) => {
+      void resolveSupabaseSession(db, next).then(setSession);
     });
 
     return () => data.subscription.unsubscribe();
@@ -69,17 +73,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     session,
     async login(email, password) {
-      if (!supabase) {
-        if (getAuthMode() === "supabase") {
-          setError("Supabase Auth não configurado. Verifique .env.local.");
-          return;
-        }
+      if (isDemoAuthAllowed()) {
         const demo = findDemoAccount(email, password);
         if (demo) {
           const next = mapDemoSession(demo);
           setSession(next);
           trackLoginEvent(next.user.email, next.user.role);
           router.push(getRedirectForRole(next.user.role));
+          return;
+        }
+      }
+      if (!supabase) {
+        if (!isDemoAuthAllowed()) {
+          setError("Supabase Auth não configurado. Verifique .env.local.");
           return;
         }
         trackFailedAction("Login demo falhou", { email });
@@ -95,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setError("Email ou palavra-passe inválidos.");
         return;
       }
-      const next = mapSession(data.session);
+      const next = await resolveSupabaseSession(supabase, data.session);
       setSession(next);
       if (next) {
         trackLoginEvent(next.user.email, next.user.role);
@@ -108,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       router.push("/auth");
     },
     async register(input) {
-      if (!supabase) {
+      if (!supabase || getAuthMode() !== "supabase") {
         setError("Registo real exige Supabase Auth. Use contas demo neste ambiente.");
         return;
       }
@@ -125,19 +131,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (data.user) {
-        await supabase.from("users").insert({
+        const { error: profileError } = await supabase.from("users").upsert({
           auth_user_id: data.user.id,
           email: input.email,
           name: input.name,
           role: input.role
+        }, {
+          onConflict: "email"
         });
+        if (profileError) setError("Conta criada, mas o perfil ainda não foi guardado.");
       }
-      const next = mapSession(data.session);
+      const next = await resolveSupabaseSession(supabase, data.session);
       setSession(next);
       router.push(next ? getOnboardingRedirectForRole(next.user.role) : "/auth");
     },
     async resetPassword(email) {
-      if (!supabase) {
+      if (!supabase || getAuthMode() !== "supabase") {
         setError("Recuperação real exige Supabase Auth.");
         return;
       }
@@ -150,40 +159,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }), [error, loading, router, session]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-type DemoAccount = typeof demoAccounts[number];
-
-function findDemoAccount(email: string, password: string) {
-  return demoAccounts.find((account) =>
-    account.email === email && account.password === password
-  );
-}
-
-function mapDemoSession(account: DemoAccount): NonNullable<AuthContextValue["session"]> {
-  return {
-    token: `demo-${account.role}`,
-    user: {
-      id: `demo-${account.role}`,
-      name: account.label,
-      email: account.email,
-      role: account.role
-    }
-  };
-}
-
-function mapSession(session: Session | null): AuthContextValue["session"] {
-  if (!session?.user) return null;
-  const metadata = session.user.user_metadata ?? {};
-  const role = getRoleFromMetadata(metadata);
-
-  return {
-    token: session.access_token,
-    user: {
-      id: session.user.id,
-      name: String(metadata.name ?? session.user.email ?? "Utilizador"),
-      email: session.user.email ?? "",
-      role
-    }
-  };
 }

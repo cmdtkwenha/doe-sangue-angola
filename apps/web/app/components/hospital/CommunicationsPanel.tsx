@@ -7,7 +7,7 @@ export function CommunicationsPanel() {
     <section className={base.panel}>
       <div className={base.panelHead}>
         <strong>Comunicações Recentes</strong>
-        <a className="muted" href="#">Ver todas</a>
+        <a className="muted" href="/hospital/reports">Ver todas</a>
       </div>
       {hospitalMessages.map((item) => (
         <article className={styles.messageRow} key={`${item.title}-${item.target}`}>

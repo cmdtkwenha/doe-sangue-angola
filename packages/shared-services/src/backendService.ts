@@ -1,18 +1,17 @@
+import { getDataProviderStatus } from "./dataProvider";
+
 type BackendMode = "mock" | "supabase";
 
 export function getBackendMode(): BackendMode {
-  return process.env.NEXT_PUBLIC_SUPABASE_URL ? "supabase" : "mock";
+  return getDataProviderStatus().mode;
 }
 
 export function getBackendStatus() {
-  const mode = getBackendMode();
+  const status = getDataProviderStatus();
 
   return {
-    mode,
-    ready: mode === "mock",
-    message:
-      mode === "mock"
-        ? "A usar dados mockados."
-        : "Supabase configurado para ligacao real."
+    mode: status.mode,
+    ready: status.ready,
+    message: status.message
   };
 }

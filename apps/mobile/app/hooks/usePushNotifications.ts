@@ -1,6 +1,7 @@
 import Constants, { ExecutionEnvironment } from "expo-constants";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
+import { getPushMode } from "@doe-sangue-angola/shared-services";
 import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import { registerTokenWithBackend } from "./pushApi";
@@ -13,30 +14,47 @@ export function usePushNotifications(donorId: string) {
   const [expoPushToken, setExpoPushToken] = useState("");
   const [permissionStatus, setPermissionStatus] = useState("A verificar");
   const [error, setError] = useState<string | null>(null);
+  const [registering, setRegistering] = useState(false);
   const runningInExpoGo = isExpoGo();
+  const mockPush = getPushMode() !== "expo";
 
   useEffect(() => {
+    if (mockPush || runningInExpoGo) {
+      setPermissionStatus(
+        runningInExpoGo
+          ? "Notificações push reais precisam de uma development build. No Expo Go, usamos notificações simuladas."
+          : "Notificações simuladas ativas neste ambiente."
+      );
+      return;
+    }
+
     const received = Notifications.addNotificationReceivedListener(() => {
-      void Notifications.setBadgeCountAsync(1);
+      void Notifications.setBadgeCountAsync(1).catch(() => undefined);
     });
     const response = Notifications.addNotificationResponseReceivedListener(() => {
-      void Notifications.setBadgeCountAsync(0);
+      void Notifications.setBadgeCountAsync(0).catch(() => undefined);
     });
 
-    void registerForPush();
+    void checkPermissionOnly();
     return () => {
       received.remove();
       response.remove();
     };
-  }, [donorId]);
+  }, [donorId, mockPush, runningInExpoGo]);
 
   async function registerForPush() {
     try {
+      setRegistering(true);
+      setError(null);
       if (runningInExpoGo) {
         setPermissionStatus(
           "Notificações push reais precisam de uma development build. No Expo Go, usamos notificações simuladas."
         );
         setExpoPushToken("");
+        return;
+      }
+      if (mockPush) {
+        setPermissionStatus("Notificações simuladas ativas neste ambiente.");
         return;
       }
 
@@ -62,8 +80,12 @@ export function usePushNotifications(donorId: string) {
       }
 
       const projectId = getProjectId();
+      if (!projectId) {
+        setPermissionStatus("Projeto EAS em falta. Push real fica desativado.");
+        return;
+      }
       const token = (await Notifications.getExpoPushTokenAsync(
-        projectId ? { projectId } : undefined
+        { projectId }
       )).data;
       setExpoPushToken(token);
       await registerTokenWithBackend({
@@ -75,10 +97,29 @@ export function usePushNotifications(donorId: string) {
       });
     } catch {
       setError("Não foi possível ativar notificações push.");
+    } finally {
+      setRegistering(false);
     }
   }
 
-  return { error, expoPushToken, permissionStatus, registerForPush, runningInExpoGo };
+  async function checkPermissionOnly() {
+    try {
+      const current = await Notifications.getPermissionsAsync();
+      setPermissionStatus(current.status);
+    } catch {
+      setPermissionStatus("Notificações indisponíveis neste dispositivo.");
+    }
+  }
+
+  return {
+    error,
+    expoPushToken,
+    mockPush,
+    permissionStatus,
+    registerForPush,
+    registering,
+    runningInExpoGo
+  };
 }
 
 async function ensurePermission() {

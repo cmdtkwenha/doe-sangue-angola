@@ -32,6 +32,20 @@
         "EXPO_PUBLIC_PUSH_MODE": "mock"
       }
     },
+    "pilot": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "staging",
+        "EXPO_PUBLIC_AUTH_MODE": "supabase",
+        "EXPO_PUBLIC_DATA_MODE": "supabase",
+        "EXPO_PUBLIC_PUSH_MODE": "expo",
+        "EXPO_PUBLIC_PILOT_MODE": "true",
+        "EXPO_PUBLIC_PILOT_SAFE_NOTIFICATIONS": "true"
+      }
+    },
     "production": {
       "autoIncrement": true,
       "android": {
@@ -42,9 +56,9 @@
       },
       "env": {
         "EXPO_PUBLIC_APP_ENV": "production",
-        "EXPO_PUBLIC_AUTH_MODE": "demo",
-        "EXPO_PUBLIC_DATA_MODE": "mock",
-        "EXPO_PUBLIC_PUSH_MODE": "mock"
+        "EXPO_PUBLIC_AUTH_MODE": "supabase",
+        "EXPO_PUBLIC_DATA_MODE": "supabase",
+        "EXPO_PUBLIC_PUSH_MODE": "expo"
       }
     }
   },

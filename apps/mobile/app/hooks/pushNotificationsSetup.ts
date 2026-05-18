@@ -10,70 +10,84 @@ export const notificationCategories = {
   reward: "reward_unlocked"
 } as const;
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true
-  })
-});
+try {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+      shouldShowBanner: true,
+      shouldShowList: true
+    })
+  });
+} catch {
+  // Development builds without native notification support keep in-app alerts.
+}
 
-TaskManager.defineTask<Notifications.NotificationTaskPayload>(
-  BLOOD_PUSH_TASK,
-  async ({ data, error }) => {
-    if (error) return Notifications.BackgroundNotificationTaskResult.Failed;
-    const raw = data as {
-      category?: string;
-      notification?: { request?: { content?: { data?: { category?: string } } } } | null;
-    };
-    const payload = raw.notification?.request?.content?.data ?? raw;
+if (!TaskManager.isTaskDefined(BLOOD_PUSH_TASK)) {
+  TaskManager.defineTask<Notifications.NotificationTaskPayload>(
+    BLOOD_PUSH_TASK,
+    async ({ data, error }) => {
+      if (error) return Notifications.BackgroundNotificationTaskResult.Failed;
+      const raw = data as {
+        category?: string;
+        notification?: { request?: { content?: { data?: { category?: string } } } } | null;
+      };
+      const payload = raw.notification?.request?.content?.data ?? raw;
 
-    if (payload?.category === notificationCategories.emergency) {
-      return Notifications.BackgroundNotificationTaskResult.NewData;
+      if (payload?.category === notificationCategories.emergency) {
+        return Notifications.BackgroundNotificationTaskResult.NewData;
+      }
+
+      return Notifications.BackgroundNotificationTaskResult.NoData;
     }
-
-    return Notifications.BackgroundNotificationTaskResult.NoData;
-  }
-);
+  );
+}
 
 export async function configureNotificationCategories() {
-  await Notifications.setNotificationCategoryAsync(notificationCategories.emergency, [
-    {
-      buttonTitle: "Ver pedido",
-      identifier: "VIEW_REQUEST",
-      options: { opensAppToForeground: true }
-    },
-    {
-      buttonTitle: "Aceitar",
-      identifier: "ACCEPT_REQUEST",
-      options: { opensAppToForeground: true }
-    }
-  ]);
-  await Notifications.setNotificationCategoryAsync(notificationCategories.appointment, [
-    {
-      buttonTitle: "Ver PIN",
-      identifier: "VIEW_PIN",
-      options: { opensAppToForeground: true }
-    }
-  ]);
-  await Notifications.setNotificationCategoryAsync(notificationCategories.reward, [
-    {
-      buttonTitle: "Ver recompensa",
-      identifier: "VIEW_REWARD",
-      options: { opensAppToForeground: true }
-    }
-  ]);
-  await Notifications.setNotificationCategoryAsync(notificationCategories.family, [
-    {
-      buttonTitle: "Responder",
-      identifier: "RESPOND_FAMILY",
-      options: { opensAppToForeground: true }
-    }
-  ]);
+  try {
+    await Notifications.setNotificationCategoryAsync(notificationCategories.emergency, [
+      {
+        buttonTitle: "Ver pedido",
+        identifier: "VIEW_REQUEST",
+        options: { opensAppToForeground: true }
+      },
+      {
+        buttonTitle: "Aceitar",
+        identifier: "ACCEPT_REQUEST",
+        options: { opensAppToForeground: true }
+      }
+    ]);
+    await Notifications.setNotificationCategoryAsync(notificationCategories.appointment, [
+      {
+        buttonTitle: "Ver PIN",
+        identifier: "VIEW_PIN",
+        options: { opensAppToForeground: true }
+      }
+    ]);
+    await Notifications.setNotificationCategoryAsync(notificationCategories.reward, [
+      {
+        buttonTitle: "Ver recompensa",
+        identifier: "VIEW_REWARD",
+        options: { opensAppToForeground: true }
+      }
+    ]);
+    await Notifications.setNotificationCategoryAsync(notificationCategories.family, [
+      {
+        buttonTitle: "Responder",
+        identifier: "RESPOND_FAMILY",
+        options: { opensAppToForeground: true }
+      }
+    ]);
+  } catch {
+    return;
+  }
 }
 
 export async function registerBackgroundNotificationTask() {
-  const registered = await TaskManager.isTaskRegisteredAsync(BLOOD_PUSH_TASK);
-  if (!registered) await Notifications.registerTaskAsync(BLOOD_PUSH_TASK);
+  try {
+    const registered = await TaskManager.isTaskRegisteredAsync(BLOOD_PUSH_TASK);
+    if (!registered) await Notifications.registerTaskAsync(BLOOD_PUSH_TASK);
+  } catch {
+    return;
+  }
 }

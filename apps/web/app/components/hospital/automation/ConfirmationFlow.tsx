@@ -1,11 +1,10 @@
 "use client";
 
 import {
-  acceptWorkflowRequest,
-  getWorkflowSnapshot,
-  markDonorOnWay
+  getWorkflowSnapshot
 } from "@doe-sangue-angola/shared-services";
 import { useState } from "react";
+import { acceptRequestAction, updateStatusAction } from "../../workflow/workflowActions";
 import styles from "./hospitalAutomation.module.css";
 
 export function ConfirmationFlow() {
@@ -27,10 +26,10 @@ export function ConfirmationFlow() {
         <span className="muted">{donor.bloodType} · compatível · {donor.municipality}</span>
       </div>
       <div className={styles.row}>
-        <button className={styles.button} onClick={() => { acceptWorkflowRequest(donor.id, request.id); refresh((item) => item + 1); }} type="button">
+        <button className={styles.button} onClick={async () => { await acceptRequestAction(donor.id, request.id); refresh((item) => item + 1); }} type="button">
           Confirmar aceitação
         </button>
-        <button className={styles.secondary} onClick={() => { markDonorOnWay(request.id); refresh((item) => item + 1); }} type="button">
+        <button className={styles.secondary} onClick={async () => { await updateStatusAction(request.id, "Doador a Caminho"); refresh((item) => item + 1); }} type="button">
           Dador a caminho
         </button>
       </div>

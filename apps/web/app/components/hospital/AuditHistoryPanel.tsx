@@ -7,7 +7,7 @@ export function AuditHistoryPanel() {
     <section className={base.panel}>
       <div className={base.panelHead}>
         <strong>Histórico de Auditoria</strong>
-        <a className="muted" href="#">Ver logs</a>
+        <a className="muted" href="/hospital/reports">Ver logs</a>
       </div>
       {auditHistory.map((log) => (
         <article className={styles.auditRow} key={log.id}>

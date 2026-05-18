@@ -6,8 +6,9 @@ import { supabaseProvider } from "./supabaseProvider";
 export function getDataProvider() {
   const mode = getDataMode();
 
-  // TODO(production): change NEXT_PUBLIC_DATA_MODE to "supabase" only after real queries exist.
-  return mode === "supabase" ? supabaseProvider : mockProvider;
+  return mode === "supabase" && isDatabaseConfigured()
+    ? supabaseProvider
+    : mockProvider;
 }
 
 export const dataProvider = getDataProvider();

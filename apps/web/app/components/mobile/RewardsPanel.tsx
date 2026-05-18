@@ -1,8 +1,15 @@
-import { rewards } from "./mobileDonorAgents";
+"use client";
+
+import { rewardAgent } from "@doe-sangue-angola/agents";
+import { listDonors } from "@doe-sangue-angola/shared-services";
+import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import styles from "./mobileGamification.module.css";
 import { RewardBadge } from "./RewardBadge";
 
 export function RewardsPanel() {
+  useRealtimeVersion();
+  const rewards = rewardAgent(listDonors()[0], false);
+
   return (
     <section className={styles.panel}>
       <div>

@@ -45,9 +45,14 @@ test("fluxo completo liga hospital, admin, dador, PIN, recompensa, notificaçõe
   assert.equal(getWorkflowSnapshot(created.request.id).request.status, "PIN Validado");
 
   const completed = completeWorkflowDonation(donorId, created.request.id);
+  const notificationsAfterCompletion = listNotifications(donorId);
+  const pendingNotifications = notificationsAfterCompletion.filter((item) => !item.read);
+
   assert.equal(completed.ok, true);
   assert.equal(completed.request.status, "Concluído");
   assert.equal(completed.donor.points, beforePoints + completed.reward.earned);
-  assert.ok(listNotifications(donorId).length > beforeNotifications + 1);
+  assert.ok(notificationsAfterCompletion.length > beforeNotifications + 1);
+  assert.equal(pendingNotifications.length, 1);
+  assert.equal(pendingNotifications[0].title, "Recompensa atualizada");
   assert.ok(listAuditLogs().length > beforeAudit);
 });

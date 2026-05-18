@@ -36,6 +36,17 @@ export const notificationRepository = {
 
     if (error) throw error;
     return mapNotification(data as never);
+  },
+
+  async markAllNotificationsRead(donorId: string) {
+    const userId = await findUserIdForDonor(donorId);
+    const { error } = await getDatabaseClient()
+      .from("notifications")
+      .update({ read: true })
+      .eq("user_id", userId);
+
+    if (error) throw error;
+    return true;
   }
 };
 

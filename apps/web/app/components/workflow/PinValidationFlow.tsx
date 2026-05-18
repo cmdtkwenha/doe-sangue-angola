@@ -1,8 +1,8 @@
 "use client";
 
-import { markDonorOnWay, validateWorkflowPin } from "@doe-sangue-angola/shared-services";
 import { useState } from "react";
 import styles from "./workflow.module.css";
+import { updateStatusAction, validatePinAction } from "./workflowActions";
 import { useWorkflowSnapshot } from "./useWorkflowSnapshot";
 
 export function PinValidationFlow() {
@@ -23,11 +23,11 @@ export function PinValidationFlow() {
       </div>
       <div className={styles.pinBox}>{expected}</div>
       <div className={styles.actions}>
-        <button className={`${styles.button} ${styles.soft}`} onClick={() => { markDonorOnWay(request.id); refresh(); }} type="button">
+        <button className={`${styles.button} ${styles.soft}`} onClick={async () => { await updateStatusAction(request.id, "Doador a Caminho"); refresh(); }} type="button">
           Dador a caminho
         </button>
         <input className={styles.input} maxLength={4} onChange={(event) => setPin(event.target.value)} placeholder="PIN" value={pin} />
-        <button className={`${styles.button} ${styles.primary}`} onClick={() => { validateWorkflowPin(pin || expected, request.id); refresh(); }} type="button">
+        <button className={`${styles.button} ${styles.primary}`} onClick={async () => { await validatePinAction(pin || expected, request.id); refresh(); }} type="button">
           Validar PIN
         </button>
       </div>

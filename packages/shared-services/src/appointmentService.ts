@@ -16,6 +16,16 @@ export function acceptRequest(donorId: string, requestId: string) {
     return { ok: false, message: "Pedido nao encontrado." };
   }
 
+  const existing = appointments.find((item) => item.id === `a-${donorId}-${requestId}`);
+  if (existing) {
+    request.status = "Agendado";
+    return {
+      ok: true,
+      message: "Pedido já aceite. PIN existente mantido.",
+      appointment: existing
+    };
+  }
+
   const appointment = schedulingAgent(donor, hospital);
   request.status = "Agendado";
   appointments.unshift({ ...appointment, id: `a-${donorId}-${requestId}` });

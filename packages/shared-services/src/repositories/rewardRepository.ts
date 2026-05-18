@@ -1,4 +1,5 @@
 import { getDatabaseClient } from "../databaseService";
+import { mapReward, type RewardRow } from "./databaseTypes";
 
 export const rewardRepository = {
   async createReward(input: {
@@ -19,7 +20,17 @@ export const rewardRepository = {
       .single();
 
     if (error) throw error;
-    return data;
+    return mapReward(data as unknown as RewardRow);
+  },
+
+  async listRewards() {
+    const { data, error } = await getDatabaseClient()
+      .from("rewards")
+      .select("id,donor_id,points,reason,tier,created_at")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return (data as unknown as RewardRow[]).map(mapReward);
   },
 
   async listRewardsForDonor(donorId: string) {
@@ -30,6 +41,6 @@ export const rewardRepository = {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return data;
+    return (data as unknown as RewardRow[]).map(mapReward);
   }
 };

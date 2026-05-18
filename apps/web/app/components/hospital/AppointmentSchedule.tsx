@@ -1,4 +1,5 @@
 import { donors, getHospitalDashboard } from "@doe-sangue-angola/shared-services";
+import { EmptyState } from "../ui/EmptyState";
 import styles from "./hospitalPortal.module.css";
 import { currentHospitalId } from "./hospitalPortalData";
 
@@ -11,10 +12,16 @@ export function AppointmentSchedule() {
     <section className={styles.panel}>
       <div className={styles.panelHead}>
         <strong>Agendamentos de Hoje</strong>
-        <a className="muted" href="#">Ver calendário</a>
+        <a className="muted" href="/hospital/schedule">Ver calendário</a>
       </div>
-      <div className={styles.table}>
-        {appointments.map((appointment) => {
+      {appointments.length === 0 ? (
+        <EmptyState
+          message="Os agendamentos confirmados pelos dadores aparecerão aqui."
+          title="Sem agendamentos"
+        />
+      ) : (
+        <div className={styles.table}>
+          {appointments.map((appointment) => {
           const donor = donorById.get(appointment.donorId);
           return (
           <article className={styles.scheduleRow} key={appointment.id}>
@@ -28,9 +35,10 @@ export function AppointmentSchedule() {
             </span>
           </article>
           );
-        })}
-      </div>
-      <a className={styles.footerLink} href="#">Ver todos os agendamentos</a>
+          })}
+        </div>
+      )}
+      <a className={styles.footerLink} href="/hospital/schedule">Ver todos os agendamentos</a>
     </section>
   );
 }

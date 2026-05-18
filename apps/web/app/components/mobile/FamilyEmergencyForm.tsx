@@ -1,4 +1,7 @@
+"use client";
+
 import { getFamilyEmergency } from "@doe-sangue-angola/shared-services";
+import { useState } from "react";
 import styles from "./familyEmergency.module.css";
 
 const labels = [
@@ -12,6 +15,7 @@ const labels = [
 
 export function FamilyEmergencyForm() {
   const emergency = getFamilyEmergency();
+  const [message, setMessage] = useState("Pronto para criar pedido familiar.");
 
   return (
     <section className={styles.panel}>
@@ -28,11 +32,13 @@ export function FamilyEmergencyForm() {
       <button
         aria-label="Criar pedido familiar de emergência verificado"
         className="button"
+        onClick={() => setMessage("Pedido familiar criado e pronto para partilha.")}
         style={{ width: "100%", marginTop: 12 }}
         type="button"
       >
         Criar pedido verificado
       </button>
+      <p className="muted" role="status">{message}</p>
     </section>
   );
 }

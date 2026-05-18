@@ -1,59 +1,49 @@
 # Deployment
 
-Doe Sangue Angola is ready for a safe investor demo deployment. The web app can
-go to Vercel, the mobile app can go through Expo, and Supabase remains planned
-while mock data stays active.
+Este é o guia principal para colocar Doe Sangue Angola online sem mudar o
+produto. O deploy tem três partes: Web no Vercel, backend no Supabase e app
+mobile no Expo EAS.
 
-## What Gets Deployed
+## Ambientes
 
-- Web: Admin Portal, Hospital Portal, and mobile preview at `/mobile`.
-- Mobile: Expo donor app in `apps/mobile`.
-- Backend: not live yet. The app still uses mock services by default.
+- Desenvolvimento: usa mock por defeito e roda no computador local.
+- Staging: usa Supabase de teste para ensaiar com uma equipa pequena.
+- Produção: usa Supabase real, autenticação real e push Expo.
 
-## Web Deployment on Vercel
+## Ordem Recomendada
 
-1. Create a Vercel project from this repository.
-2. Use `npm install` as the install command.
-3. Use `npm run build:web` as the build command.
-4. Keep the output directory as `apps/web/.next`.
-5. Add environment variables from `.env.example`.
+1. Criar projeto Supabase e aplicar migrations.
+2. Criar projeto Vercel e configurar variáveis.
+3. Fazer deploy web e testar `/auth`, `/admin`, `/hospital` e `/mobile`.
+4. Configurar EAS e gerar build Android de desenvolvimento.
+5. Testar fluxo completo com uma clínica e dadores internos.
+6. Só depois gerar build de produção.
 
-For demo mode, keep:
+## Variáveis
 
-```bash
-NEXT_PUBLIC_APP_ENV=production
-NEXT_PUBLIC_DATA_MODE=mock
-```
+Use estes ficheiros como modelos:
 
-Switch to Supabase only after the backend tables, RLS policies, and auth flow
-are verified.
+- `.env.development.example`
+- `.env.staging.example`
+- `.env.production.example`
+- `env/vercel.production.example`
+- `env/eas.production.example`
 
-## Local Production Check
+Nunca coloque `SUPABASE_SERVICE_ROLE_KEY` no mobile.
 
-Run these before a demo:
+## Comandos Antes do Deploy
 
 ```bash
 npm run check:lines
 npm run test
+npm run smoke
 npm run typecheck
-npm run build:web
+npm run build
 ```
 
-## Folder Cleanup
+## Guias Detalhados
 
-Do not upload these folders manually:
-
-- `node_modules`
-- `.next`
-- `.expo`
-- `dist`
-- `build`
-
-They are already ignored in `.gitignore`.
-
-## Owner Checklist
-
-- Confirm Portuguese text is correct.
-- Confirm demo data does not contain real patient information.
-- Confirm all dashboards load on a laptop and tablet.
-- Keep `NEXT_PUBLIC_DATA_MODE=mock` until Supabase is approved.
+- Web: `docs/vercel-deploy.md`
+- Supabase: `docs/supabase-production.md`
+- Mobile: `docs/mobile-build.md`
+- Checklist final: `docs/production-checklist.md`

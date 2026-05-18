@@ -7,7 +7,7 @@ export function BloodInventoryTable() {
     <section className={styles.panel}>
       <div className={styles.panelHead}>
         <strong>Inventário de Sangue</strong>
-        <a className="muted" href="#">Ver detalhes</a>
+        <a className="muted" href="/admin/reports">Ver detalhes</a>
       </div>
       <MobileTable
         columns={["Tipo", "Unidades", "Nível", "Estado"]}

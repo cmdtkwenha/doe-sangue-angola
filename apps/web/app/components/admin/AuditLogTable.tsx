@@ -6,7 +6,7 @@ export function AuditLogTable() {
     <section className={styles.panel}>
       <div className={styles.panelHead}>
         <strong>Logs de Auditoria Recentes</strong>
-        <a className="muted" href="#">Ver todos</a>
+        <a className="muted" href="/admin/audit">Ver todos</a>
       </div>
       {listAuditLogs().slice(0, 8).map((log) => (
         <article className={styles.row} key={log.id}>

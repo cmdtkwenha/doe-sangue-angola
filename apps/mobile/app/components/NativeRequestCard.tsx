@@ -2,7 +2,17 @@ import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { StyleSheet, Text, View } from "react-native";
 import { ActionButton } from "./ActionButton";
 
-export function NativeRequestCard({ request }: { request: BloodRequest }) {
+export function NativeRequestCard({
+  busy,
+  onAccept,
+  onReject,
+  request
+}: {
+  busy?: boolean;
+  onAccept?: (request: BloodRequest) => void;
+  onReject?: (request: BloodRequest) => void;
+  request: BloodRequest;
+}) {
   return (
     <View style={styles.card}>
       <View>
@@ -12,7 +22,18 @@ export function NativeRequestCard({ request }: { request: BloodRequest }) {
           {request.units} unidades necessarias · {request.patientCode}
         </Text>
       </View>
-      <ActionButton label="Responder" tone="light" />
+      <View style={styles.actions}>
+        <ActionButton
+          label={busy ? "A registar..." : "Aceitar"}
+          onPress={() => onAccept?.(request)}
+          tone="primary"
+        />
+        <ActionButton
+          label="Recusar"
+          onPress={() => onReject?.(request)}
+          tone="light"
+        />
+      </View>
     </View>
   );
 }
@@ -38,6 +59,10 @@ const styles = StyleSheet.create({
     color: "#b10f1f",
     fontSize: 12,
     fontWeight: "900"
+  },
+  actions: {
+    gap: 10,
+    marginTop: 6
   },
   title: {
     color: "#151515",

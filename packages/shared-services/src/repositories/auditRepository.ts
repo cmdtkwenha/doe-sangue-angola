@@ -1,6 +1,16 @@
 import { getDatabaseClient } from "../databaseService";
 
 export const auditRepository = {
+  async listAuditLogs() {
+    const { data, error } = await getDatabaseClient()
+      .from("audit_logs")
+      .select("id,actor_label,action,created_at")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return data.map(mapAuditLog);
+  },
+
   async createAuditLog(actor: string, action: string) {
     const { data, error } = await getDatabaseClient()
       .from("audit_logs")
@@ -10,14 +20,23 @@ export const auditRepository = {
 
     if (error) throw error;
 
-    return {
-      id: data.id,
-      actor: data.actor_label,
-      action: data.action,
-      time: new Date(data.created_at).toLocaleTimeString("pt-PT", {
-        hour: "2-digit",
-        minute: "2-digit"
-      })
-    };
+    return mapAuditLog(data);
   }
 };
+
+function mapAuditLog(row: {
+  action: string;
+  actor_label: string;
+  created_at: string;
+  id: string;
+}) {
+  return {
+    id: row.id,
+    actor: row.actor_label,
+    action: row.action,
+    time: new Date(row.created_at).toLocaleTimeString("pt-PT", {
+      hour: "2-digit",
+      minute: "2-digit"
+    })
+  };
+}

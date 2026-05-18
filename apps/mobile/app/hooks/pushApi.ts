@@ -9,12 +9,16 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 export async function registerTokenWithBackend(record: PushTokenRecord) {
   if (!apiUrl) return registerPushToken(record);
 
-  const response = await fetch(`${apiUrl}/api/push/register`, {
-    body: JSON.stringify(record),
-    headers: { "Content-Type": "application/json" },
-    method: "POST"
-  });
+  try {
+    const response = await fetch(`${apiUrl}/api/push/register`, {
+      body: JSON.stringify(record),
+      headers: { "Content-Type": "application/json" },
+      method: "POST"
+    });
 
-  if (!response.ok) throw new Error("Falha ao registar token push.");
-  return response.json();
+    if (!response.ok) throw new Error("Falha ao registar token push.");
+    return response.json();
+  } catch {
+    return registerPushToken(record);
+  }
 }

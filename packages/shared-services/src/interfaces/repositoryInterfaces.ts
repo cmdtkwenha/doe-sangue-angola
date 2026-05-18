@@ -50,6 +50,7 @@ export type NotificationRepositoryInterface = {
 };
 
 export type AuditRepositoryInterface = {
+  listAuditLogs?: () => Promise<AuditLog[]> | AuditLog[];
   createAuditLog: (actor: string, action: string) => Promise<AuditLog> | AuditLog;
 };
 

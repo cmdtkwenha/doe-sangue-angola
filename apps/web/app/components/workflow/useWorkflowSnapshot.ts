@@ -1,11 +1,72 @@
 "use client";
 
-import { getWorkflowSnapshot, subscribeRealtime } from "@doe-sangue-angola/shared-services";
+import {
+  getWorkflowSnapshot,
+  isSupabaseMode,
+  subscribeRealtime
+} from "@doe-sangue-angola/shared-services";
+import type {
+  Appointment,
+  BloodRequest,
+  Hospital,
+  MatchResult
+} from "@doe-sangue-angola/shared-types";
 import { useEffect, useState } from "react";
+
+type Snapshot = {
+  appointment?: Appointment;
+  hospital?: Hospital;
+  matches: MatchResult[];
+  request?: BloodRequest;
+  responses: Array<{
+    decision: "Aceite" | "Recusado";
+    donorId: string;
+    donorName: string;
+    id: string;
+    requestId: string;
+    time: string;
+  }>;
+};
+
+type Envelope<T> = { ok: boolean; data?: T };
 
 export function useWorkflowSnapshot() {
   const [version, setVersion] = useState(0);
-  const snapshot = getWorkflowSnapshot();
+  const [snapshot, setSnapshot] = useState<Snapshot>(() => getWorkflowSnapshot());
+
+  useEffect(() => {
+    if (!isSupabaseMode()) {
+      setSnapshot(getWorkflowSnapshot());
+      return;
+    }
+
+    let active = true;
+    Promise.all([
+      fetch("/api/blood-requests").then((item) => item.json() as Promise<Envelope<BloodRequest[]>>),
+      fetch("/api/appointments?hospitalId=h1").then((item) => item.json() as Promise<Envelope<Appointment[]>>)
+    ]).then(([requestPayload, appointmentPayload]) => {
+      if (!active) return;
+      const request = requestPayload.data?.[0];
+      const appointment = appointmentPayload.data?.[0];
+      setSnapshot({
+        appointment,
+        matches: [],
+        request,
+        responses: appointment && request ? [{
+          decision: "Aceite",
+          donorId: appointment.donorId,
+          donorName: "Dador compatível",
+          id: appointment.id,
+          requestId: request.id,
+          time: appointment.time
+        }] : []
+      });
+    }).catch(() => active && setSnapshot(getWorkflowSnapshot()));
+
+    return () => {
+      active = false;
+    };
+  }, [version]);
 
   useEffect(() => {
     return subscribeRealtime(() => setVersion((item) => item + 1));

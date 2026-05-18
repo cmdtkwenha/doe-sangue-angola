@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import styles from "./management.module.css";
 import { ActionMenu } from "./ActionMenu";
+import { EmptyState } from "../../ui/EmptyState";
 import { ExportButton } from "./ExportButton";
 import { StatusBadge } from "./StatusBadge";
 
@@ -64,6 +65,12 @@ export function ManagementTable({
           <ExportButton filename={exportName} rows={filtered.map((row) => row.values)} />
         </div>
       </div>
+      {visible.length === 0 ? (
+        <EmptyState
+          message="Ajuste os filtros ou limpe a pesquisa para ver registos."
+          title="Sem resultados"
+        />
+      ) : (
       <table className={styles.table}>
         <thead><tr>{columns.map((column) => <th key={column}>{column}</th>)}<th>Estado</th><th>Ações</th></tr></thead>
         <tbody>
@@ -76,6 +83,7 @@ export function ManagementTable({
           ))}
         </tbody>
       </table>
+      )}
       <div className={styles.pager}>
         <span className="muted">{filtered.length} registos · Página {safePage} de {totalPages}</span>
         <div className={styles.controls}>

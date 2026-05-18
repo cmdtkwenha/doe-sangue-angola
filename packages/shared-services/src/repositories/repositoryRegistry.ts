@@ -6,6 +6,7 @@ import { notificationRepository } from "./notificationRepository";
 import { auditRepository } from "./auditRepository";
 import { mockRepositories } from "./mockRepositories";
 import type { AppRepositories } from "../interfaces";
+import { isDatabaseConfigured } from "../databaseService";
 
 const supabaseRepositories: AppRepositories = {
   audit: auditRepository,
@@ -16,5 +17,7 @@ const supabaseRepositories: AppRepositories = {
 };
 
 export function getRepositories() {
-  return getDataMode() === "supabase" ? supabaseRepositories : mockRepositories;
+  return getDataMode() === "supabase" && isDatabaseConfigured()
+    ? supabaseRepositories
+    : mockRepositories;
 }

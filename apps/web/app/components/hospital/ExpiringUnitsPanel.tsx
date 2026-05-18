@@ -7,7 +7,7 @@ export function ExpiringUnitsPanel() {
     <section className={base.panel}>
       <div className={base.panelHead}>
         <strong>Unidades Próximas do Vencimento</strong>
-        <a className="muted" href="#">Ver todas</a>
+        <a className="muted" href="/hospital/inventory">Ver todas</a>
       </div>
       {expiringUnits.map(([type, units, window]) => (
         <article className={styles.unitRow} key={type}>

@@ -1,4 +1,5 @@
 import type { UserRole } from "@doe-sangue-angola/shared-types";
+import { loadEnvironment } from "./env";
 
 export type AuthUser = {
   id: string;
@@ -36,6 +37,15 @@ export function normalizeRole(role: unknown): UserRole {
   return "donor";
 }
 
+export function isKnownRole(role: unknown): role is UserRole {
+  return role === "admin" || role === "hospital" || role === "donor";
+}
+
 export function getRoleFromMetadata(metadata?: Record<string, unknown>) {
   return normalizeRole(metadata?.role);
+}
+
+export function isDemoAuthAllowed() {
+  const env = loadEnvironment();
+  return env.mode === "development" && env.authMode === "demo";
 }

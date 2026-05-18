@@ -1,7 +1,8 @@
 "use client";
 
-import { createWorkflowRequest, workflowStatuses } from "@doe-sangue-angola/shared-services";
+import { workflowStatuses } from "@doe-sangue-angola/shared-services";
 import styles from "./workflow.module.css";
+import { createRequestAction } from "./workflowActions";
 import { useWorkflowSnapshot } from "./useWorkflowSnapshot";
 
 export function RequestStatusTimeline() {
@@ -30,7 +31,7 @@ export function RequestStatusTimeline() {
         ))}
       </div>
       <div className={styles.actions}>
-        <button className={`${styles.button} ${styles.primary}`} onClick={() => { createWorkflowRequest(); refresh(); }} type="button">
+        <button className={`${styles.button} ${styles.primary}`} onClick={async () => { await createRequestAction(); refresh(); }} type="button">
           Criar pedido O- urgente
         </button>
       </div>

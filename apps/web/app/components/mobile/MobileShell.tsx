@@ -10,7 +10,7 @@ export function MobileShell({
   children: ReactNode;
 }) {
   return (
-    <article className={styles.phone}>
+    <article className={styles.phone} id={active}>
       <section className={styles.screen}>
         <div className={styles.status}>
           <span>9:41</span>

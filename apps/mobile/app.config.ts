@@ -1,15 +1,21 @@
 import type { ExpoConfig } from "expo/config";
 
-const projectId = process.env.EXPO_PUBLIC_EAS_PROJECT_ID ?? "";
+const easProjectId = process.env.EXPO_PUBLIC_EAS_PROJECT_ID ??
+  "1673a331-7f7e-4a57-af56-d59bc3850b27";
 
 const config: ExpoConfig = {
+  owner: "kwenha",
   name: "Doe Sangue Angola",
   slug: "doe-sangue-angola",
   scheme: "doesangue",
   version: "0.1.0",
   orientation: "portrait",
   userInterfaceStyle: "light",
-  owner: "kwenha",
+  extra: {
+    eas: {
+      projectId: easProjectId
+    }
+  },
   plugins: [
     "expo-dev-client",
     [
@@ -20,13 +26,13 @@ const config: ExpoConfig = {
       }
     ]
   ],
-  
   ios: {
     bundleIdentifier: "ao.doesangue.app",
     supportsTablet: false,
     infoPlist: {
       UIBackgroundModes: ["remote-notification"],
-      NSUserTrackingUsageDescription: "Usado apenas para melhorar notificações de doação."
+      NSUserTrackingUsageDescription:
+        "Usado apenas para melhorar notificações de doação."
     }
   },
   android: {

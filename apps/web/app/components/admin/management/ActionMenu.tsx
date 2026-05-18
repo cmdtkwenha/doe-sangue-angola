@@ -1,20 +1,26 @@
 "use client";
 
+import { useState } from "react";
 import styles from "./management.module.css";
 
 export function ActionMenu({ actions, label }: { actions: string[]; label?: string }) {
+  const [message, setMessage] = useState("");
+
   return (
-    <select
-      aria-label={label ?? "Ações"}
-      className={styles.menu}
-      defaultValue=""
-      onChange={(event) => {
-        if (event.target.value) window.alert(`Ação simulada: ${event.target.value}`);
-        event.target.value = "";
-      }}
-    >
-      <option value="">Ações</option>
-      {actions.map((action) => <option key={action}>{action}</option>)}
-    </select>
+    <span>
+      <select
+        aria-label={label ?? "Ações"}
+        className={styles.menu}
+        defaultValue=""
+        onChange={(event) => {
+          if (event.target.value) setMessage(`${event.target.value} aplicado em modo mock.`);
+          event.target.value = "";
+        }}
+      >
+        <option value="">Ações</option>
+        {actions.map((action) => <option key={action}>{action}</option>)}
+      </select>
+      {message ? <small className="muted" role="status">{message}</small> : null}
+    </span>
   );
 }

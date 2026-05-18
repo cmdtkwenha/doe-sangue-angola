@@ -9,7 +9,7 @@ export function VerificationQueue() {
     <section className={styles.panel}>
       <div className={styles.panelHead}>
         <strong>Verificação de Entidades</strong>
-        <a className="muted" href="#">Ver todos</a>
+        <a className="muted" href="/admin/hospitals">Ver todos</a>
       </div>
       {queue.map((item) => (
         <article className={styles.row} key={item.id}>

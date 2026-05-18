@@ -3,7 +3,6 @@
   padding: 36px;
   background: radial-gradient(circle at top, #fff2f3, #f7f8fb 42%, #e9edf4);
 }
-
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 390px));
@@ -11,7 +10,6 @@
   justify-content: center;
   align-items: start;
 }
-
 .phone {
   width: 100%;
   aspect-ratio: 390 / 800;
@@ -21,12 +19,10 @@
   box-shadow: 0 30px 86px rgba(17, 24, 32, 0.2);
   transition: transform 180ms ease, box-shadow 180ms ease;
 }
-
 .phone:hover {
   transform: translateY(-3px);
   box-shadow: 0 34px 90px rgba(17, 24, 32, 0.22);
 }
-
 .screen {
   position: relative;
   height: 100%;
@@ -36,7 +32,6 @@
   background: linear-gradient(180deg, #ffffff, #fbfcfe 36%, #f7f8fb);
   color: #111820;
 }
-
 .status,
 .header,
 .brand,
@@ -45,17 +40,14 @@
   display: flex;
   align-items: center;
 }
-
 .status,
 .header,
 .requestTop {
   justify-content: space-between;
 }
-
 .status { margin-bottom: 18px; font-size: 12px; font-weight: 900; }
 .header { gap: 12px; margin-bottom: 16px; }
 .brand, .reason { gap: 10px; }
-
 .drop {
   width: 28px;
   height: 34px;
@@ -63,7 +55,6 @@
   background: linear-gradient(160deg, #ff5362, #c8102e);
   transform: rotate(45deg);
 }
-
 .hero {
   padding: 18px;
   border-radius: 14px;
@@ -71,7 +62,6 @@
   background: linear-gradient(135deg, #e22232, #9f0d18);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
-
 .heroMeta,
 .requestMeta,
 .modalMeta,
@@ -79,27 +69,23 @@
 .nav {
   display: grid;
 }
-
 .heroMeta,
 .requestMeta,
 .modalMeta {
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
-
 .heroMeta { grid-template-columns: 1fr 1fr auto; margin-top: 18px; }
 .points, .level, .blood { font-weight: 950; }
 .points { color: white; font-size: 26px; }
 .level { color: #ffd66b; font-size: 24px; }
 .medal { color: #ffd66b; font-size: 24px; }
 .progress { width: 100%; accent-color: #d01424; }
-
 .shortcutGrid {
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   margin: 16px 0;
 }
-
 .shortcut {
   display: grid;
   place-items: center;
@@ -111,7 +97,6 @@
   color: #111820;
   font-weight: 800;
 }
-
 .badge,
 .check {
   display: grid;
@@ -120,9 +105,7 @@
   color: white;
   font-size: 11px;
 }
-
 .badge { min-width: 22px; min-height: 22px; background: #d01424; }
-
 .card,
 .request,
 .modal {
@@ -131,52 +114,51 @@
   background: white;
   box-shadow: 0 14px 34px rgba(25, 35, 45, 0.075);
 }
-
 .card { padding: 14px; margin-top: 12px; }
-
 .request {
   display: grid;
   gap: 12px;
   padding: 14px;
   margin-bottom: 12px;
 }
-
+.cardButton {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  text-align: left;
+}
 .critical {
   border-color: #e94350;
   background: linear-gradient(135deg, #fff8f8, #fff);
 }
-
 .warning {
   border-color: #f0a41a;
   background: linear-gradient(135deg, #fff9ed, #fff);
 }
-
 .stable {
   border-color: #2da66a;
   background: linear-gradient(135deg, #effcf5, #fff);
 }
-
 .requestTop { gap: 12px; }
 .blood { font-size: 38px; }
 .criticalText { color: #d01424; }
 .warningText { color: #d98a05; }
 .stableText { color: #178a4f; }
-
 .accept,
 .cancel {
   border-radius: 12px;
   padding: 12px 18px;
   font-weight: 950;
 }
-
 .accept {
   border: 0;
   background: linear-gradient(135deg, #df1d2d, #b10f1f);
   color: white;
 }
-
 .cancel { border: 1px solid #d8dee7; background: white; color: #111820; }
-
 .iconButton {
   display: grid;
   place-items: center;
@@ -189,7 +171,6 @@
   font-size: 22px;
   font-weight: 900;
 }
-
 .modalShade {
   position: absolute;
   inset: 0;
@@ -198,11 +179,9 @@
   padding: 16px;
   background: rgba(10, 13, 18, 0.64);
 }
-
 .modal { padding: 20px; border-radius: 16px; }
 .reason { margin-top: 12px; gap: 8px; }
 .check { width: 18px; height: 18px; background: #2da66a; }
-
 .nav {
   position: absolute;
   right: 0;
@@ -214,7 +193,6 @@
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(16px);
 }
-
 .navItem {
   display: grid;
   place-items: center;
@@ -226,20 +204,16 @@
   min-height: 44px;
   transition: background 180ms ease, color 180ms ease, transform 180ms ease;
 }
-
 .active {
   background: #fff0f1;
   color: #d01424;
 }
-
 .navItem:active { transform: scale(0.96); }
-
 @media (max-width: 1180px) {
   .grid { grid-template-columns: minmax(310px, 390px); }
   .stage { padding: 22px; }
   .phone:hover { transform: none; }
 }
-
 @media (max-width: 430px) {
   .stage { padding: 10px; }
   .phone { border-radius: 26px; padding: 8px; }

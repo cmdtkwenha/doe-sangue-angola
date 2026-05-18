@@ -3,7 +3,7 @@ import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { getDatabaseClient } from "../databaseService";
 import { donorRepository } from "./donorRepository";
 import { hospitalRepository } from "./hospitalRepository";
-import { mapRequest, type AppointmentRow, type RequestRow } from "./databaseTypes";
+import { mapAppointment, mapRequest, type AppointmentRow, type RequestRow } from "./databaseTypes";
 
 type CreateRequestInput = Omit<BloodRequest, "createdAt" | "id" | "status">;
 
@@ -60,6 +60,13 @@ export const requestRepository = {
   },
 
   async completeRequest(donorId: string, requestId: string) {
+    const { error } = await getDatabaseClient()
+      .from("appointments")
+      .update({ status: "Concluido" })
+      .eq("donor_id", donorId)
+      .eq("blood_request_id", requestId);
+    if (error) throw error;
+
     await donorRepository.addRewardPoints(donorId, 120);
     return this.updateRequestStatus(requestId, "Concluído");
   },
@@ -81,7 +88,7 @@ export const requestRepository = {
         pin: appointment.pin,
         status: "Pendente"
       })
-      .select("id,donor_id,hospital_id,date,time,pin,status")
+      .select("id,donor_id,hospital_id,blood_request_id,date,time,pin,status")
       .single();
 
     if (error) throw error;
@@ -127,16 +134,4 @@ async function findRequest(id: string) {
 
   if (error) throw error;
   return mapRequest(data as unknown as RequestRow);
-}
-
-function mapAppointment(row: AppointmentRow) {
-  return {
-    id: row.id,
-    donorId: row.donor_id,
-    hospitalId: row.hospital_id,
-    date: row.date,
-    time: row.time,
-    pin: row.pin,
-    status: row.status
-  };
 }

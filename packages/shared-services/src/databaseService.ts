@@ -9,10 +9,16 @@ const env = (globalThis as RuntimeGlobal).process?.env ?? {};
 let client: SupabaseClient | null = null;
 
 export function getDatabaseConfig() {
+  const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
+
   return {
     url: env.NEXT_PUBLIC_SUPABASE_URL ?? env.EXPO_PUBLIC_SUPABASE_URL,
     anonKey:
-      env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+      env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+    key: serviceRoleKey ??
+      env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+      env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+    serverMode: Boolean(serviceRoleKey)
   };
 }
 
@@ -23,11 +29,13 @@ export function isDatabaseConfigured() {
 
 export function getDatabaseClient() {
   const config = getDatabaseConfig();
-  if (!config.url || !config.anonKey) {
+  if (!config.url || !config.key) {
     throw new Error("Supabase não configurado. Verifique as variáveis públicas.");
   }
 
-  client ??= createClient(config.url, config.anonKey);
+  client ??= createClient(config.url, config.key, {
+    auth: { persistSession: !config.serverMode }
+  });
   return client;
 }
 
