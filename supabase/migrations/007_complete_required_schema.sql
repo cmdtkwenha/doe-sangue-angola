@@ -1,10 +1,11 @@
 -- Idempotent production schema guard for Doe Sangue Angola.
 -- Safe to run after older migrations or against a fresh empty Supabase project.
 
-create extension if not exists pgcrypto;
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
 
 create table if not exists public.users (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.gen_random_uuid(),
   auth_user_id uuid unique references auth.users(id) on delete cascade,
   role text not null check (role in ('admin', 'hospital', 'donor')),
   name text not null,
@@ -14,7 +15,7 @@ create table if not exists public.users (
 );
 
 create table if not exists public.hospitals (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.gen_random_uuid(),
   user_id uuid references public.users(id) on delete set null,
   name text not null,
   facility_type text not null default 'Hospital',
@@ -30,7 +31,7 @@ create table if not exists public.hospitals (
 );
 
 create table if not exists public.donors (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.gen_random_uuid(),
   user_id uuid unique references public.users(id) on delete cascade,
   blood_type text not null,
   province text not null,
@@ -44,7 +45,7 @@ create table if not exists public.donors (
 );
 
 create table if not exists public.blood_requests (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.gen_random_uuid(),
   hospital_id uuid not null references public.hospitals(id) on delete cascade,
   patient_code text not null,
   blood_type text not null,
@@ -55,7 +56,7 @@ create table if not exists public.blood_requests (
 );
 
 create table if not exists public.appointments (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.gen_random_uuid(),
   donor_id uuid not null references public.donors(id) on delete cascade,
   hospital_id uuid not null references public.hospitals(id) on delete cascade,
   blood_request_id uuid references public.blood_requests(id) on delete set null,
@@ -67,7 +68,7 @@ create table if not exists public.appointments (
 );
 
 create table if not exists public.notifications (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.gen_random_uuid(),
   user_id uuid references public.users(id) on delete cascade,
   title text not null,
   body text not null,
@@ -77,7 +78,7 @@ create table if not exists public.notifications (
 );
 
 create table if not exists public.rewards (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.gen_random_uuid(),
   donor_id uuid not null references public.donors(id) on delete cascade,
   points integer not null,
   reason text not null,
@@ -86,7 +87,7 @@ create table if not exists public.rewards (
 );
 
 create table if not exists public.audit_logs (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.gen_random_uuid(),
   actor_user_id uuid references public.users(id) on delete set null,
   actor_label text not null,
   action text not null,
@@ -94,7 +95,7 @@ create table if not exists public.audit_logs (
 );
 
 create table if not exists public.fraud_reviews (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.gen_random_uuid(),
   blood_request_id uuid references public.blood_requests(id) on delete cascade,
   donor_id uuid references public.donors(id) on delete set null,
   risk text not null default 'baixo',

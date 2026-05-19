@@ -1,20 +1,23 @@
 -- Angola healthcare reference datasets for production imports.
 
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
+
 create table if not exists public.provinces (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.gen_random_uuid(),
   name text not null,
   created_at timestamptz not null default now()
 );
 
 create table if not exists public.municipalities (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.gen_random_uuid(),
   province text not null,
   name text not null,
   created_at timestamptz not null default now()
 );
 
 create table if not exists public.clinics (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.gen_random_uuid(),
   name text not null,
   facility_type text not null default 'Clínica',
   province text not null,
@@ -28,7 +31,7 @@ create table if not exists public.clinics (
 );
 
 create table if not exists public.blood_banks (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.gen_random_uuid(),
   name text not null,
   province text not null,
   municipality text not null,

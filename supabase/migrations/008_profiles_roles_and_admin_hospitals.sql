@@ -1,8 +1,11 @@
 -- Real role source linked to Supabase Auth.
 -- public.users remains for existing app relationships; public.profiles owns access roles.
 
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
+
 create table if not exists public.profiles (
-  id uuid primary key default gen_random_uuid(),
+  id uuid primary key default extensions.gen_random_uuid(),
   auth_user_id uuid not null unique references auth.users(id) on delete cascade,
   role text not null check (role in ('admin', 'hospital', 'donor')),
   name text not null,
