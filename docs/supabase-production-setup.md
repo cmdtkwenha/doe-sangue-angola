@@ -31,6 +31,8 @@ npx supabase link --project-ref seu-project-ref
 npx supabase db push
 ```
 
+Se o Table Editor estiver vazio, siga também `docs/supabase-schema-apply.md`.
+
 As migrations criam:
 
 - `users`
@@ -41,6 +43,7 @@ As migrations criam:
 - `notifications`
 - `rewards`
 - `audit_logs`
+- `fraud_reviews`
 
 Também existem tabelas preparadas para fraude, push e preferências.
 
@@ -49,7 +52,7 @@ Também existem tabelas preparadas para fraude, push e preferências.
 Para um ambiente de teste:
 
 ```bash
-npx supabase db execute --file supabase/seed/development_seed.sql
+npx supabase db execute --file supabase/seed/core_required_seed.sql
 ```
 
 Contas de referência:
@@ -57,6 +60,23 @@ Contas de referência:
 - `admin@sangueangola.ao`
 - `hospital@sangueangola.ao`
 - `donor@sangueangola.ao`
+
+## Importar Hospitais Reais
+
+O ficheiro principal está em:
+
+```text
+data/imports/angola_hospitals.csv
+```
+
+Depois de aplicar o schema e configurar `SUPABASE_SERVICE_ROLE_KEY`, rode:
+
+```bash
+npm run import:hospitals
+```
+
+O import valida as colunas obrigatórias e evita duplicados por hospital,
+província e município.
 
 ## RLS
 

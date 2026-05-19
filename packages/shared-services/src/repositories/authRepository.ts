@@ -17,14 +17,24 @@ export const authRepository = {
     const query = email
       ? `auth_user_id.eq.${authUserId},email.eq.${email}`
       : `auth_user_id.eq.${authUserId}`;
-    const { data, error } = await getDatabaseClient()
-      .from("users")
+    const db = getDatabaseClient();
+    const { data, error } = await db
+      .from("profiles")
       .select(authUserColumns)
       .or(query)
       .maybeSingle();
 
     if (error) throw error;
-    return data ? mapUser(data as unknown as UserRow) : undefined;
+    if (data) return mapUser(data as unknown as UserRow);
+
+    const { data: legacy, error: legacyError } = await db
+      .from("users")
+      .select(authUserColumns)
+      .or(query)
+      .maybeSingle();
+
+    if (legacyError) throw legacyError;
+    return legacy ? mapUser(legacy as unknown as UserRow) : undefined;
   },
 
   async upsertProfile(input: {
@@ -34,8 +44,9 @@ export const authRepository = {
     phone?: string;
     role: UserRole;
   }) {
-    const { data, error } = await getDatabaseClient()
-      .from("users")
+    const db = getDatabaseClient();
+    const { data, error } = await db
+      .from("profiles")
       .upsert({
         auth_user_id: input.authUserId,
         email: input.email,
@@ -47,6 +58,21 @@ export const authRepository = {
       .single();
 
     if (error) throw error;
-    return mapUser(data as unknown as UserRow);
+    const profile = data as unknown as UserRow;
+    const { data: user, error: userError } = await db
+      .from("users")
+      .upsert({
+        id: profile.id,
+        auth_user_id: input.authUserId,
+        email: input.email,
+        name: input.name,
+        phone: input.phone,
+        role: input.role
+      }, { onConflict: "email" })
+      .select(authUserColumns)
+      .single();
+
+    if (userError) throw userError;
+    return mapUser(user as unknown as UserRow);
   }
 };

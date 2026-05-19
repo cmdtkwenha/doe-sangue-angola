@@ -1,8 +1,8 @@
 "use client";
 
 import {
+  getDataMode,
   hospitals as mockHospitals,
-  isSupabaseMode
 } from "@doe-sangue-angola/shared-services";
 import type { Hospital } from "@doe-sangue-angola/shared-types";
 import { useMemo } from "react";
@@ -12,7 +12,7 @@ import { useAuth } from "../auth/useAuth";
 export function useCurrentHospital() {
   const { session } = useAuth();
   const fallback = useMemo(() =>
-    !isSupabaseMode() && process.env.NODE_ENV === "development"
+    getDataMode() === "mock"
       ? mockHospitals[0] ?? null
       : null, []);
   const userId = session?.user.id ?? "";

@@ -16,11 +16,13 @@ export type ManagementRow = {
 
 export function ManagementTable({
   columns,
+  disableFilters = false,
   exportName,
   rows,
   title
 }: {
   columns: string[];
+  disableFilters?: boolean;
   exportName: string;
   rows: ManagementRow[];
   title: string;
@@ -35,11 +37,11 @@ export function ManagementTable({
   ], [rows]);
   const pageSize = 6;
   const normalizedQuery = query.trim().toLowerCase();
-  const filtered = useMemo(() => rows
-    .filter((row) => status === "Todos" || row.status === status)
-    .filter((row) => Object.values(row.values).join(" ").toLowerCase().includes(normalizedQuery))
-    .sort((a, b) => (a.values[sort] ?? "").localeCompare(b.values[sort] ?? "")),
-  [normalizedQuery, rows, sort, status]);
+  const filtered = useMemo(() => disableFilters ? rows : rows
+      .filter((row) => status === "Todos" || row.status === status)
+      .filter((row) => Object.values(row.values).join(" ").toLowerCase().includes(normalizedQuery))
+      .sort((a, b) => (a.values[sort] ?? "").localeCompare(b.values[sort] ?? "")),
+  [disableFilters, normalizedQuery, rows, sort, status]);
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const safePage = Math.min(page, totalPages);
   const visible = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
@@ -49,19 +51,23 @@ export function ManagementTable({
       <div className={styles.toolbar}>
         <strong>{title}</strong>
         <div className={styles.controls}>
-          <input className={styles.input} onChange={(event) => {
-            setQuery(event.target.value);
-            setPage(1);
-          }} placeholder="Pesquisar..." />
-          <select className={styles.select} onChange={(event) => {
-            setStatus(event.target.value);
-            setPage(1);
-          }} value={status}>
-            {statuses.map((item) => <option key={item}>{item}</option>)}
-          </select>
-          <select className={styles.select} onChange={(event) => setSort(event.target.value)} value={sort}>
-            {columns.map((item) => <option key={item}>{item}</option>)}
-          </select>
+          {!disableFilters ? (
+            <>
+              <input className={styles.input} onChange={(event) => {
+                setQuery(event.target.value);
+                setPage(1);
+              }} placeholder="Pesquisar..." />
+              <select className={styles.select} onChange={(event) => {
+                setStatus(event.target.value);
+                setPage(1);
+              }} value={status}>
+                {statuses.map((item) => <option key={item}>{item}</option>)}
+              </select>
+              <select className={styles.select} onChange={(event) => setSort(event.target.value)} value={sort}>
+                {columns.map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </>
+          ) : null}
           <ExportButton filename={exportName} rows={filtered.map((row) => row.values)} />
         </div>
       </div>
@@ -85,7 +91,9 @@ export function ManagementTable({
       </table>
       )}
       <div className={styles.pager}>
-        <span className="muted">{filtered.length} registos · Página {safePage} de {totalPages}</span>
+        <span className="muted">
+          {filtered.length} visíveis de {rows.length} registos · Página {safePage} de {totalPages}
+        </span>
         <div className={styles.controls}>
           <button className={styles.pageButton} disabled={page === 1} onClick={() => setPage(page - 1)} type="button">Anterior</button>
           <button className={styles.pageButton} disabled={page === totalPages} onClick={() => setPage(page + 1)} type="button">Seguinte</button>

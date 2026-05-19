@@ -1,35 +1,29 @@
 import { getDatabaseClient } from "../databaseService";
 import { mapHospital, type HospitalRow } from "./databaseTypes";
 
-const hospitalColumns = [
-  "id",
-  "address",
-  "capacity",
-  "contact",
-  "email",
-  "facility_type",
-  "license_number",
-  "municipality",
-  "name",
-  "province",
-  "verified"
-].join(",");
-
 export const hospitalRepository = {
   async listHospitals() {
-    const { data, error } = await getDatabaseClient()
+    const db = getDatabaseClient();
+    const { data, error } = await db
       .from("hospitals")
-      .select(hospitalColumns)
+      .select("*")
       .order("name");
 
-    if (error) throw error;
+    console.info("[supabase-hospitals] public.hospitals result", {
+      count: data?.length ?? 0,
+      query: "supabase.from('hospitals').select('*').order('name')"
+    });
+    if (error) {
+      console.error("[supabase-hospitals] public.hospitals error", error);
+      throw error;
+    }
     return (data as unknown as HospitalRow[]).map(mapHospital);
   },
 
   async getHospital(id: string) {
     const { data, error } = await getDatabaseClient()
       .from("hospitals")
-      .select(hospitalColumns)
+      .select("*")
       .eq("id", id)
       .single();
 
@@ -40,7 +34,7 @@ export const hospitalRepository = {
   async findHospitalByUserId(userId: string) {
     const { data, error } = await getDatabaseClient()
       .from("hospitals")
-      .select(hospitalColumns)
+      .select("*")
       .eq("user_id", userId)
       .maybeSingle();
 
@@ -54,7 +48,7 @@ export const hospitalRepository = {
       .update({ user_id: userId })
       .eq("id", hospitalId)
       .eq("verified", true)
-      .select(hospitalColumns)
+      .select("*")
       .single();
 
     if (error) throw error;
@@ -75,8 +69,8 @@ export const hospitalRepository = {
     }));
     const { data, error } = await getDatabaseClient()
       .from("hospitals")
-      .upsert(payload, { onConflict: "name,province" })
-      .select(hospitalColumns);
+      .upsert(payload, { onConflict: "name,province,municipality" })
+      .select("*");
 
     if (error) throw error;
     return (data as unknown as HospitalRow[]).map(mapHospital);

@@ -35,7 +35,7 @@ export async function resolveSupabaseSession(
   if (!session?.user) return null;
   const metadata = session.user.user_metadata ?? {};
   const { data } = await supabase
-    .from("users")
+    .from("profiles")
     .select("id,name,email,role")
     .or(`auth_user_id.eq.${session.user.id},email.eq.${session.user.email ?? ""}`)
     .maybeSingle();

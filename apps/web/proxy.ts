@@ -52,7 +52,7 @@ async function resolveRole(
 ) {
   if (isKnownRole(user.user_metadata?.role)) return user.user_metadata.role;
   const { data } = await supabase
-    .from("users")
+    .from("profiles")
     .select("role")
     .or(`auth_user_id.eq.${user.id},email.eq.${user.email ?? ""}`)
     .maybeSingle();

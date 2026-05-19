@@ -16,7 +16,8 @@
     "lint": "node scripts/project-audit.cjs --lint",
     "smoke": "node scripts/smoke-routes.cjs",
     "test": "node scripts/run-tests.cjs",
-    "typecheck": "npm --workspace apps/web run build && npm --workspace apps/mobile exec -- tsc --noEmit"
+    "typecheck": "npm --workspace apps/web run build && npm --workspace apps/mobile exec -- tsc --noEmit",
+    "import:hospitals": "node --experimental-strip-types scripts/import-hospitals.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",

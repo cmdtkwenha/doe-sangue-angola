@@ -1,7 +1,7 @@
 "use client";
 
 import { isSupabaseMode } from "@doe-sangue-angola/shared-services";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 type Envelope<T> = { ok: boolean; data?: T; message?: string };
 
@@ -9,7 +9,7 @@ export function useApiData<T>(path: string, fallback: T, version = 0) {
   const [data, setData] = useState<T>(fallback);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const enabled = useMemo(() => isSupabaseMode(), []);
+  const enabled = isSupabaseMode();
 
   useEffect(() => {
     if (!enabled) {

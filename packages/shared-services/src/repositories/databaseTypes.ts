@@ -40,8 +40,10 @@ export type HospitalRow = {
   facility_type?: string | null;
   license_number?: string | null;
   name: string;
+  phone?: string | null;
   province: string;
   municipality: string;
+  type?: string | null;
   verified: boolean;
   capacity: number;
   contact: string | null;
@@ -113,12 +115,12 @@ export function mapHospital(row: HospitalRow): Hospital {
     email: row.email ?? undefined,
     licenseNumber: row.license_number ?? undefined,
     name: row.name,
-    type: row.facility_type ?? undefined,
     province: row.province,
     municipality: row.municipality,
     verified: row.verified,
     capacity: row.capacity,
-    contact: row.contact ?? ""
+    contact: row.contact ?? row.phone ?? "",
+    type: row.facility_type ?? row.type ?? undefined
   };
 }
 
