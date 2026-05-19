@@ -3,7 +3,7 @@
 
 create extension if not exists pgcrypto;
 
-create table public.users (
+create table if not exists public.users (
   id uuid primary key default gen_random_uuid(),
   auth_user_id uuid unique,
   role text not null check (role in ('admin', 'hospital', 'donor')),
@@ -13,7 +13,7 @@ create table public.users (
   created_at timestamptz not null default now()
 );
 
-create table public.hospitals (
+create table if not exists public.hospitals (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references public.users(id) on delete set null,
   name text not null,
@@ -25,7 +25,7 @@ create table public.hospitals (
   created_at timestamptz not null default now()
 );
 
-create table public.donors (
+create table if not exists public.donors (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references public.users(id) on delete cascade,
   blood_type text not null,
@@ -38,7 +38,7 @@ create table public.donors (
   created_at timestamptz not null default now()
 );
 
-create table public.blood_requests (
+create table if not exists public.blood_requests (
   id uuid primary key default gen_random_uuid(),
   hospital_id uuid not null references public.hospitals(id) on delete cascade,
   patient_code text not null,
@@ -49,7 +49,7 @@ create table public.blood_requests (
   created_at timestamptz not null default now()
 );
 
-create table public.appointments (
+create table if not exists public.appointments (
   id uuid primary key default gen_random_uuid(),
   donor_id uuid not null references public.donors(id) on delete cascade,
   hospital_id uuid not null references public.hospitals(id) on delete cascade,
@@ -61,7 +61,7 @@ create table public.appointments (
   created_at timestamptz not null default now()
 );
 
-create table public.notifications (
+create table if not exists public.notifications (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references public.users(id) on delete cascade,
   title text not null,
@@ -71,7 +71,7 @@ create table public.notifications (
   created_at timestamptz not null default now()
 );
 
-create table public.rewards (
+create table if not exists public.rewards (
   id uuid primary key default gen_random_uuid(),
   donor_id uuid not null references public.donors(id) on delete cascade,
   points integer not null,
@@ -80,7 +80,7 @@ create table public.rewards (
   created_at timestamptz not null default now()
 );
 
-create table public.referrals (
+create table if not exists public.referrals (
   id uuid primary key default gen_random_uuid(),
   referrer_donor_id uuid not null references public.donors(id) on delete cascade,
   invited_name text not null,
@@ -89,7 +89,7 @@ create table public.referrals (
   created_at timestamptz not null default now()
 );
 
-create table public.family_emergency_requests (
+create table if not exists public.family_emergency_requests (
   id uuid primary key default gen_random_uuid(),
   requester_name text not null,
   relationship text not null,
@@ -103,7 +103,7 @@ create table public.family_emergency_requests (
   created_at timestamptz not null default now()
 );
 
-create table public.audit_logs (
+create table if not exists public.audit_logs (
   id uuid primary key default gen_random_uuid(),
   actor_user_id uuid references public.users(id) on delete set null,
   actor_label text not null,
@@ -111,7 +111,7 @@ create table public.audit_logs (
   created_at timestamptz not null default now()
 );
 
-create table public.fraud_reviews (
+create table if not exists public.fraud_reviews (
   id uuid primary key default gen_random_uuid(),
   blood_request_id uuid references public.blood_requests(id) on delete cascade,
   donor_id uuid references public.donors(id) on delete set null,
@@ -120,6 +120,40 @@ create table public.fraud_reviews (
   flags text[] not null default '{}',
   created_at timestamptz not null default now()
 );
+
+alter table public.users add column if not exists auth_user_id uuid unique;
+alter table public.users add column if not exists role text;
+alter table public.users add column if not exists name text;
+alter table public.users add column if not exists email text;
+alter table public.users add column if not exists phone text;
+alter table public.users add column if not exists created_at timestamptz not null default now();
+
+alter table public.hospitals add column if not exists user_id uuid references public.users(id) on delete set null;
+alter table public.hospitals add column if not exists name text;
+alter table public.hospitals add column if not exists province text;
+alter table public.hospitals add column if not exists municipality text;
+alter table public.hospitals add column if not exists verified boolean not null default false;
+alter table public.hospitals add column if not exists capacity integer not null default 0;
+alter table public.hospitals add column if not exists contact text;
+alter table public.hospitals add column if not exists created_at timestamptz not null default now();
+
+alter table public.donors add column if not exists user_id uuid references public.users(id) on delete cascade;
+alter table public.donors add column if not exists blood_type text;
+alter table public.donors add column if not exists province text;
+alter table public.donors add column if not exists municipality text;
+alter table public.donors add column if not exists available boolean not null default true;
+alter table public.donors add column if not exists last_donation date;
+alter table public.donors add column if not exists points integer not null default 0;
+alter table public.donors add column if not exists preferred_hospital_id uuid references public.hospitals(id);
+alter table public.donors add column if not exists created_at timestamptz not null default now();
+
+alter table public.blood_requests add column if not exists hospital_id uuid references public.hospitals(id) on delete cascade;
+alter table public.blood_requests add column if not exists patient_code text;
+alter table public.blood_requests add column if not exists blood_type text;
+alter table public.blood_requests add column if not exists units integer;
+alter table public.blood_requests add column if not exists urgency text;
+alter table public.blood_requests add column if not exists status text not null default 'Aberto';
+alter table public.blood_requests add column if not exists created_at timestamptz not null default now();
 
 alter table public.users enable row level security;
 alter table public.donors enable row level security;
@@ -133,45 +167,57 @@ alter table public.family_emergency_requests enable row level security;
 alter table public.audit_logs enable row level security;
 alter table public.fraud_reviews enable row level security;
 
-create policy "Authenticated users read own profile"
-on public.users for select using (auth.uid() = auth_user_id);
-
-create policy "Authenticated users create own profile"
-on public.users for insert with check (auth.uid() = auth_user_id);
-
-create policy "Public can read verified hospitals"
-on public.hospitals for select using (verified = true);
-
-create policy "Donors read own donor row"
-on public.donors for select using (
-  user_id in (select id from public.users where auth_user_id = auth.uid())
-);
-
-create policy "Hospitals manage own requests"
-on public.blood_requests for all using (
-  hospital_id in (
-    select h.id from public.hospitals h
-    join public.users u on u.id = h.user_id
-    where u.auth_user_id = auth.uid()
-  )
-);
-
-create policy "Authenticated users create appointments"
-on public.appointments for insert with check (auth.uid() is not null);
-
-create policy "Authenticated users update appointments"
-on public.appointments for update using (auth.uid() is not null);
-
-create policy "Users read own notifications"
-on public.notifications for select using (
-  user_id in (select id from public.users where auth_user_id = auth.uid())
-);
-
-create policy "Authenticated users create notifications"
-on public.notifications for insert with check (auth.uid() is not null);
-
-create policy "Authenticated users create rewards"
-on public.rewards for insert with check (auth.uid() is not null);
-
-create policy "Authenticated users create audit logs"
-on public.audit_logs for insert with check (auth.uid() is not null);
+do $$
+begin
+  if not exists (select 1 from pg_policies where policyname = 'Authenticated users read own profile') then
+    create policy "Authenticated users read own profile"
+      on public.users for select using (auth.uid() = auth_user_id);
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'Authenticated users create own profile') then
+    create policy "Authenticated users create own profile"
+      on public.users for insert with check (auth.uid() = auth_user_id);
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'Public can read verified hospitals') then
+    create policy "Public can read verified hospitals"
+      on public.hospitals for select using (verified = true);
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'Donors read own donor row') then
+    create policy "Donors read own donor row" on public.donors for select using (
+      user_id in (select id from public.users where auth_user_id = auth.uid())
+    );
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'Hospitals manage own requests') then
+    create policy "Hospitals manage own requests" on public.blood_requests for all using (
+      hospital_id in (
+        select h.id from public.hospitals h
+        join public.users u on u.id = h.user_id
+        where u.auth_user_id = auth.uid()
+      )
+    );
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'Authenticated users create appointments') then
+    create policy "Authenticated users create appointments"
+      on public.appointments for insert with check (auth.uid() is not null);
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'Authenticated users update appointments') then
+    create policy "Authenticated users update appointments"
+      on public.appointments for update using (auth.uid() is not null);
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'Users read own notifications') then
+    create policy "Users read own notifications" on public.notifications for select using (
+      user_id in (select id from public.users where auth_user_id = auth.uid())
+    );
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'Authenticated users create notifications') then
+    create policy "Authenticated users create notifications"
+      on public.notifications for insert with check (auth.uid() is not null);
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'Authenticated users create rewards') then
+    create policy "Authenticated users create rewards"
+      on public.rewards for insert with check (auth.uid() is not null);
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'Authenticated users create audit logs') then
+    create policy "Authenticated users create audit logs"
+      on public.audit_logs for insert with check (auth.uid() is not null);
+  end if;
+end $$;
