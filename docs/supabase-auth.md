@@ -46,14 +46,36 @@ Supabase. Configure o domínio final nas opções de Auth do painel Supabase.
 
 ## Seed Users
 
-O seed cria os perfis:
+Primeiro crie os utilizadores em Supabase Auth:
+
+1. Abra Supabase Dashboard.
+2. Vá a Authentication > Users.
+3. Clique em Add user.
+4. Crie estes emails com uma palavra-passe temporária segura:
 
 - `admin@sangueangola.ao`
 - `hospital@sangueangola.ao`
 - `donor@sangueangola.ao`
 
-Crie os utilizadores Auth correspondentes no painel Supabase ou por convite,
-usando os mesmos emails.
+Depois aplique o SQL de perfis:
+
+```bash
+npx supabase db execute --file supabase/seed/auth_onboarding_profiles.sql
+```
+
+Este seed liga `public.users.auth_user_id` aos IDs reais de `auth.users`.
+
+Também existe seed local para desenvolvimento:
+
+```bash
+npx supabase db execute --file supabase/seed/development_seed.sql
+```
+
+Esse seed cria perfis base:
+
+- `admin@sangueangola.ao`
+- `hospital@sangueangola.ao`
+- `donor@sangueangola.ao`
 
 ## Fallback Seguro
 

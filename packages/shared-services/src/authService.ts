@@ -1,5 +1,5 @@
 import type { UserRole } from "@doe-sangue-angola/shared-types";
-import { loadEnvironment } from "./env";
+import { getAuthMode } from "./config";
 
 export type AuthUser = {
   id: string;
@@ -46,6 +46,5 @@ export function getRoleFromMetadata(metadata?: Record<string, unknown>) {
 }
 
 export function isDemoAuthAllowed() {
-  const env = loadEnvironment();
-  return env.authMode === "demo";
+  return getAuthMode() !== "supabase";
 }

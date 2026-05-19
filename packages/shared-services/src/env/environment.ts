@@ -17,11 +17,7 @@ export type EnvironmentConfig = {
   monitoringEnabled: boolean;
 };
 
-type RuntimeGlobal = typeof globalThis & {
-  process?: { env?: Record<string, string | undefined> };
-};
-
-const runtimeEnv = () => (globalThis as RuntimeGlobal).process?.env ?? {};
+const runtimeEnv = () => process.env;
 
 const read = (
   env: Record<string, string | undefined>,
@@ -60,8 +56,8 @@ export function loadEnvironment(
   return {
     mode,
     label: mode === "production" ? "Produção" : mode === "staging" ? "Staging" : "Desenvolvimento",
-    dataMode: dataModeFrom(read(env, ["NEXT_PUBLIC_DATA_MODE", "EXPO_PUBLIC_DATA_MODE"], "mock")),
-    authMode: authModeFrom(read(env, ["NEXT_PUBLIC_AUTH_MODE", "EXPO_PUBLIC_AUTH_MODE"], "demo")),
+    dataMode: dataModeFrom(read(env, ["NEXT_PUBLIC_DATA_MODE"], "mock")),
+    authMode: authModeFrom(read(env, ["NEXT_PUBLIC_AUTH_MODE"], "demo")),
     appUrl: siteUrl,
     apiUrl: read(env, ["EXPO_PUBLIC_API_URL", "NEXT_PUBLIC_API_URL"], siteUrl),
     supabaseUrl: read(env, ["NEXT_PUBLIC_SUPABASE_URL", "EXPO_PUBLIC_SUPABASE_URL"]),

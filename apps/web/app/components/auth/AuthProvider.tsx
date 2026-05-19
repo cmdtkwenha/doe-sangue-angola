@@ -6,7 +6,6 @@ import {
   getRedirectForRole,
   getAuthMode,
   isDemoAuthAllowed,
-  authRepository,
   trackFailedAction,
   trackLoginEvent,
   type AuthUser
@@ -148,7 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     async register(input) {
       if (!supabase || getAuthMode() !== "supabase") {
-        setError("Registo real exige Supabase Auth. Use contas demo neste ambiente.");
+        setError("Registo exige NEXT_PUBLIC_AUTH_MODE=supabase e Supabase configurado.");
         return;
       }
       setLoading(true);
@@ -165,7 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       if (data.user) {
         try {
-          await authRepository.upsertProfile({
+          await createSupabaseProfile({
             authUserId: data.user.id,
             email: input.email,
             name: input.name,
@@ -226,3 +225,18 @@ function debugAuth(message: string, email: string) {
 
 const findDemoAccountByRole = (role: UserRole) =>
   demoAccounts.find((account) => account.role === role);
+
+async function createSupabaseProfile(input: {
+  authUserId: string;
+  email: string;
+  name: string;
+  role: UserRole;
+}) {
+  const response = await fetch("/api/auth/profile", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input)
+  });
+
+  if (!response.ok) throw new Error("Falha ao guardar perfil.");
+}
