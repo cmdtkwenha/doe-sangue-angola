@@ -2,13 +2,18 @@
 
 import { rewardAgent } from "@doe-sangue-angola/agents";
 import { listDonors } from "@doe-sangue-angola/shared-services";
+import type { Donor } from "@doe-sangue-angola/shared-types";
+import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
+import { useMemo } from "react";
 import styles from "./mobileGamification.module.css";
 import { RewardBadge } from "./RewardBadge";
 
 export function RewardsPanel() {
-  useRealtimeVersion();
-  const rewards = rewardAgent(listDonors()[0], false);
+  const version = useRealtimeVersion();
+  const fallback = useMemo(() => listDonors(), [version]);
+  const { data: donors } = useApiData<Donor[]>("/api/donors", fallback, version);
+  const rewards = rewardAgent(donors[0] ?? fallback[0], false);
 
   return (
     <section className={styles.panel}>

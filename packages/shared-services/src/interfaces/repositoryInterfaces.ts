@@ -25,7 +25,10 @@ export type RequestRepositoryInterface = {
     id: string,
     status: BloodRequest["status"]
   ) => Promise<BloodRequest | undefined> | BloodRequest | undefined;
-  validatePin: (pin: string) => Promise<Appointment | undefined> | Appointment | undefined;
+  validatePin: (
+    pin: string,
+    requestId?: string
+  ) => Promise<Appointment | undefined> | Appointment | undefined;
 };
 
 export type DonorRepositoryInterface = {

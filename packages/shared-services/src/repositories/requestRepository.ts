@@ -72,6 +72,12 @@ export const requestRepository = {
   },
 
   async acceptRequest(donorId: string, requestId: string) {
+    const existing = await findAppointment(donorId, requestId);
+    if (existing) {
+      await this.updateRequestStatus(requestId, "Doador a Caminho");
+      return existing;
+    }
+
     const request = await findRequest(requestId);
     const donor = await donorRepository.findDonor(donorId);
     const hospital = await hospitalRepository.getHospital(request.hospitalId);
@@ -92,18 +98,20 @@ export const requestRepository = {
       .single();
 
     if (error) throw error;
-    await this.updateRequestStatus(requestId, "Agendado");
+    await this.updateRequestStatus(requestId, "Doador a Caminho");
 
     return mapAppointment(data as unknown as AppointmentRow);
   },
 
-  async validatePin(pin: string) {
-    const { data, error } = await getDatabaseClient()
+  async validatePin(pin: string, requestId?: string) {
+    let query = getDatabaseClient()
       .from("appointments")
       .update({ status: "Confirmado" })
       .eq("pin", pin)
-      .select("id,donor_id,hospital_id,date,time,pin,status,blood_request_id")
-      .single();
+      .select("id,donor_id,hospital_id,date,time,pin,status,blood_request_id");
+
+    if (requestId) query = query.eq("blood_request_id", requestId);
+    const { data, error } = await query.single();
 
     if (error) throw error;
     if (data.blood_request_id) {
@@ -134,4 +142,16 @@ async function findRequest(id: string) {
 
   if (error) throw error;
   return mapRequest(data as unknown as RequestRow);
+}
+
+async function findAppointment(donorId: string, requestId: string) {
+  const { data, error } = await getDatabaseClient()
+    .from("appointments")
+    .select("id,donor_id,hospital_id,blood_request_id,date,time,pin,status")
+    .eq("donor_id", donorId)
+    .eq("blood_request_id", requestId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data ? mapAppointment(data as unknown as AppointmentRow) : undefined;
 }

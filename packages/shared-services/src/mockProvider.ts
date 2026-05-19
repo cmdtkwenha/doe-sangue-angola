@@ -42,7 +42,7 @@ export type DataProvider = {
     requestId: string,
     status: BloodRequest["status"]
   ) => MaybePromise<unknown>;
-  validatePin: (pin: string) => MaybePromise<unknown>;
+  validatePin: (pin: string, requestId?: string) => MaybePromise<unknown>;
 };
 
 export const mockProvider: DataProvider = {

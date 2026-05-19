@@ -17,7 +17,7 @@ export const appointmentRepository = {
     const { data, error } = await getDatabaseClient()
       .from("appointments")
       .select(appointmentColumns)
-      .order("date", { ascending: true });
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
     return (data as unknown as AppointmentRow[]).map(mapAppointment);
@@ -28,7 +28,7 @@ export const appointmentRepository = {
       .from("appointments")
       .select(appointmentColumns)
       .eq("donor_id", donorId)
-      .order("date", { ascending: true });
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
     return (data as unknown as AppointmentRow[]).map(mapAppointment);
@@ -39,7 +39,7 @@ export const appointmentRepository = {
       .from("appointments")
       .select(appointmentColumns)
       .eq("hospital_id", hospitalId)
-      .order("date", { ascending: true });
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
     return (data as unknown as AppointmentRow[]).map(mapAppointment);

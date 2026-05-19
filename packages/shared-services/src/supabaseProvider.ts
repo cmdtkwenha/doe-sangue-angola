@@ -80,7 +80,7 @@ export const supabaseProvider: DataProvider = {
       "Em Correspondência"
     );
 
-    await Promise.all(matches.map((match) =>
+    const notifications = await Promise.allSettled(matches.map((match) =>
       notificationRepository.createNotification({
         donorId: match.donor.id,
         title: "Pedido urgente de sangue",
@@ -88,10 +88,11 @@ export const supabaseProvider: DataProvider = {
         type: "urgent"
       })
     ));
+    const sent = notifications.filter((item) => item.status === "fulfilled").length;
     await sendRequestPushes(request, matches.map((match) => match.donor));
     await auditRepository.createAuditLog(
       "Hospital",
-      `Criou pedido ${request.bloodType} e notificou ${matches.length} dadores`
+      `Criou pedido ${request.bloodType} e notificou ${sent} dadores`
     );
     publishRealtimeEvent("REQUEST_CREATED", { request });
     publishRealtimeEvent("DONOR_MATCHED", {
@@ -134,8 +135,8 @@ export const supabaseProvider: DataProvider = {
     publishRealtimeEvent("REQUEST_UPDATED", { request });
     return request;
   },
-  async validatePin(pin: string) {
-    const appointment = await requestRepository.validatePin(pin);
+  async validatePin(pin: string, requestId?: string) {
+    const appointment = await requestRepository.validatePin(pin, requestId);
     await auditRepository.createAuditLog("Hospital", "Validou PIN de dador");
     publishRealtimeEvent("PIN_VALIDATED", { appointment, pin });
     return appointment;

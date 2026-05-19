@@ -1,11 +1,9 @@
 "use client";
 
-import { rejectWorkflowRequest } from "@doe-sangue-angola/shared-services";
+import { isSupabaseMode, rejectWorkflowRequest } from "@doe-sangue-angola/shared-services";
 import styles from "./workflow.module.css";
 import { acceptRequestAction } from "./workflowActions";
 import { useWorkflowSnapshot } from "./useWorkflowSnapshot";
-
-const donorId = "d1";
 
 export function DonorAcceptanceFlow() {
   const { matches, request, responses, refresh } = useWorkflowSnapshot();
@@ -31,10 +29,10 @@ export function DonorAcceptanceFlow() {
         ))}
       </div>
       <div className={styles.actions}>
-        <button className={`${styles.button} ${styles.primary}`} onClick={async () => { await acceptRequestAction(donorId, request.id); refresh(); }} type="button">
+        <button className={`${styles.button} ${styles.primary}`} onClick={async () => { await acceptRequestAction(primaryDonor.id, request.id); refresh(); }} type="button">
           Aceitar pedido
         </button>
-        <button className={`${styles.button} ${styles.soft}`} onClick={() => { rejectWorkflowRequest(donorId, request.id); refresh(); }} type="button">
+        <button className={`${styles.button} ${styles.soft}`} onClick={() => { if (!isSupabaseMode()) rejectWorkflowRequest(primaryDonor.id, request.id); refresh(); }} type="button">
           Recusar
         </button>
       </div>

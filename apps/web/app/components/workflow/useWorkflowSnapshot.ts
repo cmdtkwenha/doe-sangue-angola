@@ -5,9 +5,11 @@ import {
   isSupabaseMode,
   subscribeRealtime
 } from "@doe-sangue-angola/shared-services";
+import { matchingAgent } from "@doe-sangue-angola/agents";
 import type {
   Appointment,
   BloodRequest,
+  Donor,
   Hospital,
   MatchResult
 } from "@doe-sangue-angola/shared-types";
@@ -43,19 +45,23 @@ export function useWorkflowSnapshot() {
     let active = true;
     Promise.all([
       fetch("/api/blood-requests").then((item) => item.json() as Promise<Envelope<BloodRequest[]>>),
-      fetch("/api/appointments?hospitalId=h1").then((item) => item.json() as Promise<Envelope<Appointment[]>>)
-    ]).then(([requestPayload, appointmentPayload]) => {
+      fetch("/api/appointments?hospitalId=h1").then((item) => item.json() as Promise<Envelope<Appointment[]>>),
+      fetch("/api/donors").then((item) => item.json() as Promise<Envelope<Donor[]>>)
+    ]).then(([requestPayload, appointmentPayload, donorPayload]) => {
       if (!active) return;
       const request = requestPayload.data?.[0];
       const appointment = appointmentPayload.data?.[0];
+      const donors = donorPayload.data ?? [];
+      const matches = request ? matchingAgent(request, donors) : [];
+      const donor = donors.find((item) => item.id === appointment?.donorId);
       setSnapshot({
         appointment,
-        matches: [],
+        matches,
         request,
         responses: appointment && request ? [{
           decision: "Aceite",
           donorId: appointment.donorId,
-          donorName: "Dador compatível",
+          donorName: donor?.name ?? "Dador compatível",
           id: appointment.id,
           requestId: request.id,
           time: appointment.time
