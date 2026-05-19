@@ -109,6 +109,14 @@
   padding: 12px;
 }
 
+.input {
+  width: 100%;
+  border: 1px solid #d8dee7;
+  border-radius: 10px;
+  background: white;
+  padding: 12px;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;

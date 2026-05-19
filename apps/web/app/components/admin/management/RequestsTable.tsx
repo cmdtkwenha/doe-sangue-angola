@@ -1,8 +1,15 @@
+"use client";
+
 import { requestActions } from "@constants/adminActions";
-import { hospitals, requests } from "@doe-sangue-angola/shared-services";
+import { hospitals as mockHospitals, requests } from "@doe-sangue-angola/shared-services";
+import type { Hospital } from "@doe-sangue-angola/shared-types";
+import { useApiData } from "../../../hooks/useApiData";
 import { ManagementTable } from "./ManagementTable";
 
 export function RequestsTable() {
+  const fallback = process.env.NODE_ENV === "development" ? mockHospitals : [];
+  const { data: hospitals } = useApiData<Hospital[]>("/api/hospitals", fallback, 0);
+
   return (
     <ManagementTable
       title="Pedidos de Sangue"

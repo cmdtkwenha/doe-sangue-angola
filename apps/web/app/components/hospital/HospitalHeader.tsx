@@ -1,17 +1,21 @@
-import { hospitals } from "@doe-sangue-angola/shared-services";
+"use client";
+
 import styles from "./hospitalPortal.module.css";
+import { useCurrentHospital } from "./useCurrentHospital";
 
 export function HospitalHeader() {
-  const hospital = hospitals.find((item) => item.id === "h1") ?? hospitals[0];
+  const { data: hospital, loading } = useCurrentHospital();
 
   return (
     <header className={styles.topbar}>
       <div className={styles.identity}>
         <span className={styles.avatar} />
         <div>
-          <strong style={{ fontSize: 20 }}>{hospital.name}</strong>
-          <span className="pill" style={{ marginLeft: 10 }}>Verificado</span>
-          <div className="muted">{hospital.municipality}, {hospital.province}</div>
+          <strong style={{ fontSize: 20 }}>
+            {hospital?.name ?? (loading ? "A carregar hospital" : "Hospital não ligado")}
+          </strong>
+          {hospital?.verified ? <span className="pill" style={{ marginLeft: 10 }}>Verificado</span> : null}
+          <div className="muted">{hospital ? `${hospital.municipality}, ${hospital.province}` : "Escolha hospital no onboarding"}</div>
         </div>
       </div>
       <div className={styles.headerActions}>

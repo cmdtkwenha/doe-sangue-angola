@@ -34,12 +34,18 @@ export type Donor = {
   available: boolean;
   lastDonation: string;
   points: number;
+  birthDate?: string;
+  phone?: string;
   preferredHospitalId?: string;
 };
 
 export type Hospital = {
   id: string;
+  address?: string;
   name: string;
+  type?: string;
+  email?: string;
+  licenseNumber?: string;
   province: string;
   municipality: string;
   verified: boolean;

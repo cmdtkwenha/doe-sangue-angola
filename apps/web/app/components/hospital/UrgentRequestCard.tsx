@@ -4,11 +4,17 @@ import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { useState } from "react";
 import { createRequestAction } from "../workflow/workflowActions";
 import styles from "./hospitalPortal.module.css";
+import { useCurrentHospital } from "./useCurrentHospital";
 
 export function UrgentRequestCard() {
   const [message, setMessage] = useState("Crie um pedido urgente e notifique dadores compatíveis.");
+  const { data: hospital } = useCurrentHospital();
   const create = async () => {
-    const result = await createRequestAction({ hospitalId: "h1", bloodType: "O-", units: 4 });
+    if (!hospital?.id) {
+      setMessage("Ligue a conta a um hospital aprovado antes de criar pedidos.");
+      return;
+    }
+    const result = await createRequestAction({ hospitalId: hospital.id, bloodType: "O-", units: 4 });
     const request = ("request" in result
       ? result.request
       : "data" in result ? result.data?.request : undefined) as BloodRequest | undefined;

@@ -11,13 +11,16 @@ import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import { useMemo } from "react";
 import { EmptyState } from "../ui/EmptyState";
 import styles from "./hospitalPortal.module.css";
-import { currentHospitalId } from "./hospitalPortalData";
+import { useCurrentHospital } from "./useCurrentHospital";
 
 export function ActiveRequestsTable() {
   const version = useRealtimeVersion();
-  const fallback = useMemo(() => listRequestsForHospital(currentHospitalId), [version]);
+  const { data: hospital } = useCurrentHospital();
+  const hospitalId = hospital?.id ?? "";
+  const fallback = useMemo(() =>
+    hospitalId ? listRequestsForHospital(hospitalId) : [], [hospitalId, version]);
   const { data: requests, error, loading } = useApiData<BloodRequest[]>(
-    `/api/blood-requests?hospitalId=${currentHospitalId}`,
+    hospitalId ? `/api/blood-requests?hospitalId=${hospitalId}` : "/api/blood-requests?hospitalId=missing",
     fallback,
     version
   );

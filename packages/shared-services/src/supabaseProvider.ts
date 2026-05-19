@@ -18,6 +18,12 @@ export const supabaseProvider: DataProvider = {
   listDonors() {
     return donorRepository.listDonors();
   },
+  findDonorByUserId(userId: string) {
+    return donorRepository.findDonorByUserId(userId);
+  },
+  upsertDonorProfile(input) {
+    return donorRepository.upsertDonorProfile(input);
+  },
   listHospitals() {
     return hospitalRepository.listHospitals();
   },

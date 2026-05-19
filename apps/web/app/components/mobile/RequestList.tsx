@@ -1,6 +1,8 @@
 "use client";
 
-import { listAvailableRequestsForDonor } from "@doe-sangue-angola/shared-services";
+import {
+  listAvailableRequestsForDonor
+} from "@doe-sangue-angola/shared-services";
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import { useMemo } from "react";
@@ -8,6 +10,11 @@ import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import styles from "./mobileApp.module.css";
 import { MobileShell } from "./MobileShell";
 import { RequestCard } from "./RequestCard";
+import {
+  canUseDevelopmentMock,
+  isDonorProfileComplete,
+  useCurrentDonor
+} from "./useCurrentDonor";
 
 export function RequestList({
   onAccept,
@@ -17,9 +24,13 @@ export function RequestList({
   onOpen?: (request: BloodRequest) => void;
 }) {
   const version = useRealtimeVersion();
-  const fallback = useMemo(() => listAvailableRequestsForDonor("d1"), [version]);
+  const { data: donor } = useCurrentDonor();
+  const donorReady = isDonorProfileComplete(donor);
+  const donorId = donorReady ? donor?.id ?? "" : canUseDevelopmentMock() ? "d1" : "";
+  const fallback = useMemo(() =>
+    donorId ? listAvailableRequestsForDonor(donorId) : [], [donorId, version]);
   const { data: requests, error, loading } = useApiData<BloodRequest[]>(
-    "/api/blood-requests?donorId=d1",
+    donorId ? `/api/blood-requests?donorId=${donorId}` : "/api/blood-requests?donorId=missing",
     fallback,
     version
   );

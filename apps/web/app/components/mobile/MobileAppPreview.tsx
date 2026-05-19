@@ -11,6 +11,7 @@ import { MobileShell } from "./MobileShell";
 import { RequestDetailsModal } from "./RequestDetailsModal";
 import { RequestList } from "./RequestList";
 import { acceptRequestAction } from "../workflow/workflowActions";
+import { useCurrentDonor } from "./useCurrentDonor";
 
 const load = (label: string) => () => <LoadingSkeleton label={label} />;
 const DonationSuccessScreen = dynamic(() =>
@@ -41,13 +42,18 @@ const FamilyEmergencyScreen = dynamic(() =>
 export function MobileAppPreview() {
   const [selected, setSelected] = useState<BloodRequest | null>(null);
   const [message, setMessage] = useState("Toque num pedido para ver detalhes.");
+  const { data: donor } = useCurrentDonor();
   const accept = async (request: BloodRequest) => {
-    const result = await acceptRequestAction("d1", request.id);
+    if (!donor) {
+      setMessage("Complete o perfil de dador antes de aceitar pedidos.");
+      return;
+    }
+    const result = await acceptRequestAction(donor.id, request.id);
     setMessage(result.ok ? "Pedido aceite. PIN gerado para o hospital." : result.message);
     setSelected(null);
   };
   const reject = (request: BloodRequest) => {
-    rejectWorkflowRequest("d1", request.id);
+    if (donor) rejectWorkflowRequest(donor.id, request.id);
     setMessage("Pedido recusado. Continuamos a procurar pedidos compatíveis.");
     setSelected(null);
   };

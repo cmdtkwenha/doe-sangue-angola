@@ -1,4 +1,5 @@
 import type { BloodRequest, UserRole } from "@doe-sangue-angola/shared-types";
+import type { DonorProfileInput } from "./repositories/donorRepository";
 import { appointments, auditLogs, donors, requests } from "./mockStore";
 import { mockRepositories } from "./repositories/mockRepositories";
 
@@ -31,6 +32,8 @@ export type DataProvider = {
   listAppointmentsForHospital: (hospitalId: string) => MaybePromise<unknown>;
   listAuditLogs: () => MaybePromise<unknown>;
   listDonors: () => MaybePromise<unknown>;
+  findDonorByUserId: (userId: string) => MaybePromise<unknown>;
+  upsertDonorProfile: (input: DonorProfileInput) => MaybePromise<unknown>;
   listHospitals: () => MaybePromise<unknown>;
   listNotifications: (donorId: string) => MaybePromise<unknown>;
   listRequests: () => MaybePromise<unknown>;
@@ -84,6 +87,19 @@ export const mockProvider: DataProvider = {
     appointments.filter((item) => item.hospitalId === hospitalId),
   listAuditLogs: () => auditLogs,
   listDonors: mockRepositories.donor.listDonors,
+  findDonorByUserId: () => donors[0] ?? null,
+  upsertDonorProfile: (input) => ({
+    id: "d1",
+    name: "Dador Demo",
+    bloodType: input.bloodType,
+    province: input.province,
+    municipality: input.municipality,
+    available: true,
+    birthDate: input.birthDate,
+    lastDonation: "",
+    phone: input.phone,
+    points: 0
+  }),
   listHospitals: mockRepositories.hospital.listHospitals,
   listNotifications: mockRepositories.notification.listNotifications,
   listRequests: mockRepositories.request.listRequests,

@@ -25,15 +25,20 @@ export type DonorRow = {
   province: string;
   municipality: string;
   available: boolean;
-  last_donation: string;
+  birth_date?: string | null;
+  last_donation: string | null;
   points: number;
   preferred_hospital_id: string | null;
   user_id?: string | null;
-  users?: { name?: string | null } | null;
+  users?: { name?: string | null; phone?: string | null } | null;
 };
 
 export type HospitalRow = {
   id: string;
+  address?: string | null;
+  email?: string | null;
+  facility_type?: string | null;
+  license_number?: string | null;
   name: string;
   province: string;
   municipality: string;
@@ -93,7 +98,9 @@ export function mapDonor(row: DonorRow): Donor {
     province: row.province,
     municipality: row.municipality,
     available: row.available,
-    lastDonation: row.last_donation,
+    birthDate: row.birth_date ?? undefined,
+    lastDonation: row.last_donation ?? "",
+    phone: row.users?.phone ?? undefined,
     points: row.points,
     preferredHospitalId: row.preferred_hospital_id ?? undefined
   };
@@ -102,7 +109,11 @@ export function mapDonor(row: DonorRow): Donor {
 export function mapHospital(row: HospitalRow): Hospital {
   return {
     id: row.id,
+    address: row.address ?? undefined,
+    email: row.email ?? undefined,
+    licenseNumber: row.license_number ?? undefined,
     name: row.name,
+    type: row.facility_type ?? undefined,
     province: row.province,
     municipality: row.municipality,
     verified: row.verified,

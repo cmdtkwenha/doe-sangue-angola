@@ -1,11 +1,7 @@
 import {
   eligibilityAgent,
-  referralAgent,
-  rewardAgent
+  referralAgent
 } from "@doe-sangue-angola/agents";
-import { listDonors } from "@doe-sangue-angola/shared-services";
-
-const donor = listDonors()[0];
 
 export const eligibilityQuestions = [
   ["feelingSick", "Como você está se sentindo hoje?", "Estou bem, saudável", true],
@@ -22,8 +18,6 @@ export const eligibility = eligibilityAgent({
   medication: false,
   lastDonationOk: true
 });
-
-export const rewards = rewardAgent(donor, true);
 
 export const milestones = [
   ["Primeira Doação", "Parabéns pela sua primeira doação", true],

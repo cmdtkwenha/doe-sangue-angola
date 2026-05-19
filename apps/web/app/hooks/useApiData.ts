@@ -25,7 +25,7 @@ export function useApiData<T>(path: string, fallback: T, version = 0) {
       .then((response) => response.json() as Promise<Envelope<T>>)
       .then((payload) => {
         if (!active) return;
-        if (payload.ok && payload.data) setData(payload.data);
+        if (payload.ok && "data" in payload) setData(payload.data as T);
         else setError(payload.message ?? "Supabase indisponível. Dados mock continuam seguros.");
       })
       .catch(() =>

@@ -7,13 +7,15 @@ import { useMemo } from "react";
 import { EmptyState } from "../ui/EmptyState";
 import styles from "./hospitalPortal.module.css";
 import { donorArrivals } from "./hospitalAgentService";
-import { currentHospitalId } from "./hospitalPortalData";
+import { useCurrentHospital } from "./useCurrentHospital";
 
 export function IncomingDonorsList() {
   const version = useRealtimeVersion();
+  const { data: hospital } = useCurrentHospital();
+  const hospitalId = hospital?.id ?? "";
   const fallback = useMemo(() => donorArrivals, [version]);
   const { data: appointments, usingApi } = useApiData<Appointment[]>(
-    `/api/appointments?hospitalId=${currentHospitalId}`,
+    hospitalId ? `/api/appointments?hospitalId=${hospitalId}` : "/api/appointments?hospitalId=missing",
     [],
     version
   );

@@ -1,0 +1,26 @@
+name,type,province,municipality,address,phone,email,license_number,verified
+Hospital Josina Machel,Hospital,Luanda,Ingombotas,"Largo Josina Machel, Luanda, Angola",1234567890,hospitaljosinamachel@hospital.com,LIC001,True
+Luanda Medical Center,Centro Médico,Luanda,Ingombotas,"R. Amílcar Cabral 3, Luanda, Angola",+244 923 167 730,geral@lmc.co.ao,LIC002,True
+Clínica Sagrada Esperança,Clínica,Luanda,Ingombotas,"Av. Murtala Mohammed 298, Luanda, Angola",+244 923 167 950,geral@cse.co.ao,LIC003,True
+Clinica Girassol,Clínica,Luanda,Talatona,"Comandante Gika 225, Luanda, Angola",+244 226 698 000,info@clinicagirassol.co.ao,LIC004,True
+International SOS Clinic - Talatona,Clínica,Luanda,Talatona,"Rua S10 Sector Talatona, Zona CC-B2, Luanda, Angola",1234567890,internationalsosclinic.talatona@hospital.com,LIC005,True
+International SOS Clinic - Ilha,Clínica,Luanda,Ingombotas,"Ilha de Luanda, Av. Murtala Mohammed 298, Luanda, Angola",+244 927 034 220,isos.ilha@ms.internationalsos.com,LIC006,True
+International SOS Clinic - Maianga,Clínica,Luanda,Maianga,"R. Cmte. Stona 144, Luanda, Angola",1234567890,internationalsosclinic.maianga@hospital.com,LIC007,True
+Clínica Vida de Luanda (CLIGEST Sede),Clínica,Luanda,Ingombotas,"Rua Albano Machado Nº29 e 31, Luanda, Angola",+244 225 900 900,climed@netangola.com,LIC008,True
+Clinica Centro Vita,Clínica,Luanda,Talatona,"Av. Talatona, Luanda, Angola",1234567890,clinicacentrovita@hospital.com,LIC009,True
+Clínica ATLANTIC,Clínica,Luanda,Ingombotas,"R. Dr. Américo Boavida, Luanda, Angola",1234567890,clinicaatlantic@hospital.com,LIC010,True
+CSE - Luanda SUL,Clínica,Luanda,Talatona,"Luanda Sul, Talatona, Luanda, Angola",+244 923 167 960,geral@cse.co.ao,LIC011,True
+Clínica Clixaro,Clínica,Luanda,Ingombotas,"R. Frederico Welwitsch, Luanda, Angola",1234567890,clinicaclixaro@hospital.com,LIC012,True
+Clínica Isabel Fançony,Clínica,Luanda,Ingombotas,"R. dos Generais, Luanda, Angola",1234567890,clinicaisabelfancony@hospital.com,LIC013,True
+Clínica Central de Diagnóstico Avançado,Clínica,Luanda,Ingombotas,"R. Rainha Ginga, Luanda, Angola",1234567890,clinicacentraldediagnosticoavancado@hospital.com,LIC014,True
+Clínica Máxima Saude,Clínica,Luanda,Ingombotas,"Av. Cmte. Valódia 106, Luanda, Angola",1234567890,clinicamaximasaude@hospital.com,LIC015,True
+Clínica Bom Dr. Gao,Clínica,Luanda,Ingombotas,"R. de São Tomé 12, Luanda, Angola",1234567890,clinicabomdr.gao@hospital.com,LIC016,True
+EUROPEAN MEDICAL CENTER,Centro Médico,Luanda,Maianga,"R. Cmte. Kwenha 22, Luanda, Angola",1234567890,europeanmedicalcenter@hospital.com,LIC017,True
+Centro Médico Equilibrium,Centro Médico,Luanda,Talatona,"Talatona, Luanda, Angola",1234567890,centromedicoequilibrium@hospital.com,LIC018,False
+Clinica da Chevron - CABGOC,Clínica,Luanda,Maianga,"R. Cmte. Kwenha 86, Luanda, Angola",1234567890,clinicadachevron.cabgoc@hospital.com,LIC019,True
+Hospital Américo Boavida,Hospital,Luanda,Rangel,"Marçal, Luanda, Angola",1234567890,hospitalamericoboavida@hospital.com,LIC020,True
+Hospital do Prenda,Hospital,Luanda,Maianga,"Prenda, Luanda, Angola",1234567890,hospitaldoprenda@hospital.com,LIC021,False
+Hospital Geral Camama,Hospital,Luanda,Talatona,"Camama, Luanda, Angola",1234567890,hospitalgeralcamama@hospital.com,LIC022,True
+Hospital Geral Kilamba Kiaxi,Hospital,Luanda,Kilamba Kiaxi,"Kilamba Kiaxi, Luanda, Angola",1234567890,hospitalgeralkilambakiaxi@hospital.com,LIC023,True
+Hospital Pediátrico David Bernardino,Hospital Pediátrico,Luanda,Ingombotas,"Luanda, Angola",1234567890,hospitalpediatricodavidbernardino@hospital.com,LIC024,False
+Lucrécia Paím Maternity Hospital,Maternidade,Luanda,Ingombotas,"Luanda, Angola",1234567890,lucreciapaimmaternityhospital@hospital.com,LIC025,False

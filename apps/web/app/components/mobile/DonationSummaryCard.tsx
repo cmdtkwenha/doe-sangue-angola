@@ -1,25 +1,30 @@
+import type { Donor } from "@doe-sangue-angola/shared-types";
 import styles from "./mobileProfile.module.css";
-import { donationHistory, donationSummary } from "./mobileMock";
 
-export function DonationSummaryCard() {
+export function DonationSummaryCard({ donor }: { donor: Donor }) {
+  const summary = [
+    ["Pontos", donor.points.toLocaleString("pt-AO")],
+    ["Tipo sanguíneo", donor.bloodType],
+    ["Província", donor.province],
+    ["Município", donor.municipality]
+  ];
+
   return (
     <section className={styles.panel}>
       <strong>Resumo de doações</strong>
       <div className={styles.summaryGrid}>
-        {donationSummary.map(([label, value]) => (
+        {summary.map(([label, value]) => (
           <article className={styles.summaryTile} key={label}>
             <small>{label}</small>
             <span className={styles.summaryValue}>{value}</span>
           </article>
         ))}
       </div>
-      {donationHistory.map(([date, place, type]) => (
-        <article className={styles.historyRow} key={`${date}-${place}`}>
-          <span>{date}</span>
-          <span className="muted">{place}</span>
-          <strong>{type}</strong>
-        </article>
-      ))}
+      <article className={styles.historyRow}>
+        <span>Última doação</span>
+        <span className="muted">{donor.lastDonation || "Sem registo"}</span>
+        <strong>{donor.bloodType}</strong>
+      </article>
     </section>
   );
 }

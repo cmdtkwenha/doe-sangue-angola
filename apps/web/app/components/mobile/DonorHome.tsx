@@ -1,25 +1,38 @@
 "use client";
 
 import { useState } from "react";
-import { listDonors } from "@doe-sangue-angola/shared-services";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
+import { EmptyState } from "../ui/EmptyState";
 import styles from "./mobileApp.module.css";
-import { donor as donorMock, shortcuts } from "./mobileMock";
+import { shortcuts } from "./mobileMock";
 import { MobileHeader } from "./MobileHeader";
 import { MobileShell } from "./MobileShell";
+import { isDonorProfileComplete, useCurrentDonor } from "./useCurrentDonor";
 
 export function DonorHome() {
   const [message, setMessage] = useState("Atalhos prontos.");
   useRealtimeVersion();
-  const donor = listDonors()[0];
+  const { data: donor, loading } = useCurrentDonor();
+  if (!isDonorProfileComplete(donor)) {
+    return (
+      <MobileShell active="home">
+        <MobileHeader title="Sangue Angola" subtitle="Doe sangue, salve vidas" />
+        <EmptyState
+          message={loading ? "A carregar perfil do dador..." : "Complete o onboarding para ver pedidos e recompensas reais."}
+          title={loading ? "A sincronizar" : "Perfil de dador em falta"}
+        />
+      </MobileShell>
+    );
+  }
   const points = donor.points.toLocaleString("pt-AO");
   const level = donor.points >= 2000 ? "PLATINA" : donor.points >= 1000 ? "OURO" : "PRATA";
+  const firstName = donor.name.split(" ")[0] || "Dador";
 
   return (
     <MobileShell active="home">
       <MobileHeader title="Sangue Angola" subtitle="Doe sangue, salve vidas" />
       <section className={styles.hero}>
-        <h2>Olá, Maria!</h2>
+        <h2>Olá, {firstName}!</h2>
         <p>Obrigado por fazer a diferença.</p>
         <div className={styles.heroMeta}>
           <span><small>Pontos</small><br /><strong className={styles.points}>{points}</strong></span>
@@ -45,7 +58,7 @@ export function DonorHome() {
       <p className="muted" role="status">{message}</p>
       <article className={styles.card}>
         <strong>Próxima conquista</strong>
-        <p className="muted">{donorMock.nextLevel}</p>
+        <p className="muted">Continue a doar para subir de nível.</p>
         <progress className={styles.progress} max="2000" value={donor.points} />
       </article>
       <article className={styles.card}>

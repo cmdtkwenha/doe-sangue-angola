@@ -1,18 +1,18 @@
+import type { Donor } from "@doe-sangue-angola/shared-types";
 import styles from "./mobileProfile.module.css";
-import { emergencyContact } from "./mobileMock";
 
-export function EmergencyContactCard() {
+export function EmergencyContactCard({ donor }: { donor: Donor }) {
   return (
     <section className={styles.panel}>
       <div className={styles.contact}>
         <span>
-          <strong>{emergencyContact.name}</strong>
+          <strong>Contacto principal</strong>
           <br />
-          <small className="muted">{emergencyContact.relation}</small>
+          <small className="muted">Telefone registado no perfil</small>
         </span>
-        <a className="pill red" href={`tel:${emergencyContact.phone}`}>Ligar</a>
+        {donor.phone ? <a className="pill red" href={`tel:${donor.phone}`}>Ligar</a> : null}
       </div>
-      <p className="muted">{emergencyContact.phone}</p>
+      <p className="muted">{donor.phone || "Sem telefone registado"}</p>
     </section>
   );
 }

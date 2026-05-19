@@ -1,10 +1,10 @@
+import type { Donor } from "@doe-sangue-angola/shared-types";
 import styles from "./mobileProfile.module.css";
-import { donor } from "./mobileMock";
 
 const qrCells = Array.from({ length: 16 }, (_, index) => index);
 const darkCells = new Set([0, 1, 3, 4, 6, 9, 10, 12, 14, 15]);
 
-export function DigitalDonorCard() {
+export function DigitalDonorCard({ donor }: { donor: Donor }) {
   return (
     <section className={styles.digitalCard}>
       <div className={styles.cardTop}>
