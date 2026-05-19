@@ -9,14 +9,7 @@ export const hospitalRepository = {
       .select("*")
       .order("name");
 
-    console.info("[supabase-hospitals] public.hospitals result", {
-      count: data?.length ?? 0,
-      query: "supabase.from('hospitals').select('*').order('name')"
-    });
-    if (error) {
-      console.error("[supabase-hospitals] public.hospitals error", error);
-      throw error;
-    }
+    if (error) throw error;
     return (data as unknown as HospitalRow[]).map(mapHospital);
   },
 
@@ -43,7 +36,8 @@ export const hospitalRepository = {
   },
 
   async assignHospitalUser(hospitalId: string, userId: string) {
-    const { data, error } = await getDatabaseClient()
+    const db = getDatabaseClient();
+    const { data, error } = await db
       .from("hospitals")
       .update({ user_id: userId })
       .eq("id", hospitalId)
@@ -52,6 +46,10 @@ export const hospitalRepository = {
       .single();
 
     if (error) throw error;
+    await db
+      .from("profiles")
+      .update({ linked_entity_id: hospitalId })
+      .eq("id", userId);
     return mapHospital(data as unknown as HospitalRow);
   },
 

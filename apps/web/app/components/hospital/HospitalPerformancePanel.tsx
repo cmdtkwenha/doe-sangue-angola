@@ -1,8 +1,31 @@
+"use client";
+
+import type { Appointment, BloodRequest } from "@doe-sangue-angola/shared-types";
+import { useApiData } from "@hooks/useApiData";
 import base from "./hospitalPortal.module.css";
 import styles from "./hospitalAdvanced.module.css";
-import { performanceKpis } from "./hospitalAgentService";
+import { useCurrentHospital } from "./useCurrentHospital";
 
 export function HospitalPerformancePanel() {
+  const { data: hospital } = useCurrentHospital();
+  const hospitalId = hospital?.id ?? "";
+  const { data: requests } = useApiData<BloodRequest[]>(
+    hospitalId ? `/api/blood-requests?hospitalId=${hospitalId}` : "/api/blood-requests?hospitalId=missing",
+    [],
+    hospitalId.length
+  );
+  const { data: appointments } = useApiData<Appointment[]>(
+    hospitalId ? `/api/appointments?hospitalId=${hospitalId}` : "/api/appointments?hospitalId=missing",
+    [],
+    hospitalId.length
+  );
+  const completed = requests.filter((request) => ["Concluído", "Concluido"].includes(request.status));
+  const metrics = [
+    ["Pedidos ativos", String(requests.length), "Supabase"],
+    ["Agendamentos", String(appointments.length), "Reais"],
+    ["Concluídos", String(completed.length), "Este ciclo"]
+  ];
+
   return (
     <section className={base.panel}>
       <div className={base.panelHead}>
@@ -10,7 +33,7 @@ export function HospitalPerformancePanel() {
         <span className="pill">Este mês</span>
       </div>
       <div className={styles.metricStrip}>
-        {performanceKpis.map(([label, value, delta]) => (
+        {metrics.map(([label, value, delta]) => (
           <article className={styles.metricBox} key={label}>
             <span className={base.rowMuted}>{label}</span>
             <h3>{value}</h3>

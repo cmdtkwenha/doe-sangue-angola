@@ -1,18 +1,25 @@
 import { dataProvider } from "@doe-sangue-angola/shared-services";
-import { apiResponse } from "../_utils/apiResponse";
+import { ApiError, apiResponse } from "../_utils/apiResponse";
+import { requireApiSession, requireEntityAccess } from "../_utils/security";
 
 export async function GET(request: Request) {
-  const params = new URL(request.url).searchParams;
-  const donorId = params.get("donorId");
-  const hospitalId = params.get("hospitalId");
+  return apiResponse(async () => {
+    const principal = await requireApiSession();
+    const params = new URL(request.url).searchParams;
+    const donorId = params.get("donorId");
+    const hospitalId = params.get("hospitalId");
 
-  if (donorId) {
-    return apiResponse(() => dataProvider.listAppointmentsForDonor(donorId));
-  }
+    if (donorId) {
+      requireEntityAccess(principal, "donor", donorId);
+      return dataProvider.listAppointmentsForDonor(donorId);
+    }
 
-  if (hospitalId) {
-    return apiResponse(() => dataProvider.listAppointmentsForHospital(hospitalId));
-  }
+    if (hospitalId) {
+      requireEntityAccess(principal, "hospital", hospitalId);
+      return dataProvider.listAppointmentsForHospital(hospitalId);
+    }
 
-  return apiResponse(() => dataProvider.listAppointments());
+    if (principal.role !== "admin") throw new ApiError(403, "Lista restrita ao admin.");
+    return dataProvider.listAppointments();
+  });
 }

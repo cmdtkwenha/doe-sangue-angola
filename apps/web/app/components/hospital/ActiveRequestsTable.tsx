@@ -2,6 +2,7 @@
 
 import {
   getRequestStatusLabel,
+  getDataMode,
   isCompletedRequest,
   listRequestsForHospital
 } from "@doe-sangue-angola/shared-services";
@@ -12,13 +13,15 @@ import { useMemo } from "react";
 import { EmptyState } from "../ui/EmptyState";
 import styles from "./hospitalPortal.module.css";
 import { useCurrentHospital } from "./useCurrentHospital";
+import { updateStatusAction } from "../workflow/workflowActions";
 
 export function ActiveRequestsTable() {
   const version = useRealtimeVersion();
   const { data: hospital } = useCurrentHospital();
   const hospitalId = hospital?.id ?? "";
   const fallback = useMemo(() =>
-    hospitalId ? listRequestsForHospital(hospitalId) : [], [hospitalId, version]);
+    getDataMode() === "mock" && hospitalId ? listRequestsForHospital(hospitalId) : [],
+  [hospitalId, version]);
   const { data: requests, error, loading } = useApiData<BloodRequest[]>(
     hospitalId ? `/api/blood-requests?hospitalId=${hospitalId}` : "/api/blood-requests?hospitalId=missing",
     fallback,
@@ -49,6 +52,15 @@ export function ActiveRequestsTable() {
             <span>ID: #{request.id}<br /><span className={styles.rowMuted}>UTI Geral</span></span>
             <span className={styles.rowMuted}>Criado<br /><strong>{request.createdAt.slice(11, 16)}</strong></span>
             <span className={statusTone(request.status)}>{statusLabel(request.status)}</span>
+            {!isCompletedRequest(request.status) ? (
+              <button
+                className="button secondary"
+                onClick={() => void updateStatusAction(request.id, "Cancelado")}
+                type="button"
+              >
+                Fechar
+              </button>
+            ) : null}
           </article>
           ))}
         </div>

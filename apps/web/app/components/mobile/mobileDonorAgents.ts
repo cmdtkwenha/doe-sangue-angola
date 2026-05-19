@@ -1,7 +1,4 @@
-import {
-  eligibilityAgent,
-  referralAgent
-} from "@doe-sangue-angola/agents";
+import { eligibilityAgent } from "@doe-sangue-angola/agents";
 
 export const eligibilityQuestions = [
   ["feelingSick", "Como você está se sentindo hoje?", "Estou bem, saudável", true],
@@ -25,16 +22,3 @@ export const milestones = [
   ["Herói da Comunidade", "Indique 3 amigos", false],
   ["Platina Nacional", "Alcance 2.000 pontos", false]
 ] as const;
-
-export const referrals = referralAgent([
-  { name: "João Paulo", status: "Concluiu cadastro" },
-  { name: "Ana Costa", status: "Concluiu cadastro" },
-  { name: "Carlos Manuel", status: "Pendente" }
-]);
-
-export const provinceLeaderboard = [
-  ["1", "Maria João Santos", "Luanda", "1.250 pts"],
-  ["2", "Adão Domingos", "Luanda", "1.140 pts"],
-  ["3", "Celina Mateus", "Huambo", "980 pts"],
-  ["4", "Lourenço Miguel", "Luanda", "920 pts"]
-];

@@ -5,6 +5,7 @@ import { AppointmentSchedule } from "./AppointmentSchedule";
 import advanced from "./hospitalAdvanced.module.css";
 import { HospitalHeader } from "./HospitalHeader";
 import { HospitalSidebar } from "./HospitalSidebar";
+import { HospitalSummaryCards } from "./HospitalSummaryCards";
 import { IncomingDonorsList } from "./IncomingDonorsList";
 import { LoadingSkeleton } from "../ui/LoadingSkeleton";
 import { UrgentRequestCard } from "./UrgentRequestCard";
@@ -83,9 +84,7 @@ export function HospitalPortal() {
         <div className={styles.workspace}>
           <section className={styles.topGrid}>
             <UrgentRequestCard />
-            <SummaryCard title="Pedidos Ativos" value="18" note="Aberto" />
-            <SummaryCard title="Dadores a Caminho" value="7" note="ETA médio 18 min" />
-            <SummaryCard title="Taxa de Resposta" value="89%" note="Estável" />
+            <HospitalSummaryCards />
           </section>
           <section className={styles.grid3}>
             <ActiveRequestsTable />
@@ -128,15 +127,5 @@ export function HospitalPortal() {
         </div>
       </section>
     </main>
-  );
-}
-
-function SummaryCard({ title, value, note }: { title: string; value: string; note: string }) {
-  return (
-    <article className={styles.card}>
-      <div className="muted">{title}</div>
-      <h2 className={styles.kpiValue}>{value}</h2>
-      <span className="pill gold">{note}</span>
-    </article>
   );
 }

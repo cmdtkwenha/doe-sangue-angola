@@ -17,6 +17,7 @@ export * from "./eventTypes";
 export * from "./errorTrackingService";
 export * from "./familyEmergencyService";
 export * from "./hospitalService";
+export * from "./healthcareImport";
 export * from "./i18n";
 export * from "./inventoryAutomationService";
 export * from "./interfaces";

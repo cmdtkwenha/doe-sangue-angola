@@ -1,10 +1,11 @@
 import type { UserRole } from "@doe-sangue-angola/shared-types";
-import { getAuthMode } from "./config";
 
 export type AuthUser = {
   id: string;
+  authUserId?: string;
   name: string;
   email: string;
+  linkedEntityId?: string;
   role: UserRole;
 };
 
@@ -39,12 +40,4 @@ export function normalizeRole(role: unknown): UserRole {
 
 export function isKnownRole(role: unknown): role is UserRole {
   return role === "admin" || role === "hospital" || role === "donor";
-}
-
-export function getRoleFromMetadata(metadata?: Record<string, unknown>) {
-  return normalizeRole(metadata?.role);
-}
-
-export function isDemoAuthAllowed() {
-  return getAuthMode() !== "supabase";
 }

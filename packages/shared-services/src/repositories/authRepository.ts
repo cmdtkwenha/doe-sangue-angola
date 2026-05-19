@@ -6,6 +6,17 @@ const authUserColumns = [
   "id",
   "auth_user_id",
   "role",
+  "linked_entity_id",
+  "name",
+  "email",
+  "phone",
+  "created_at"
+].join(",");
+
+const legacyUserColumns = [
+  "id",
+  "auth_user_id",
+  "role",
   "name",
   "email",
   "phone",
@@ -29,7 +40,7 @@ export const authRepository = {
 
     const { data: legacy, error: legacyError } = await db
       .from("users")
-      .select(authUserColumns)
+      .select(legacyUserColumns)
       .or(query)
       .maybeSingle();
 
@@ -43,6 +54,7 @@ export const authRepository = {
     name: string;
     phone?: string;
     role: UserRole;
+    linkedEntityId?: string;
   }) {
     const db = getDatabaseClient();
     const { data, error } = await db
@@ -50,11 +62,12 @@ export const authRepository = {
       .upsert({
         auth_user_id: input.authUserId,
         email: input.email,
+        linked_entity_id: input.linkedEntityId,
         name: input.name,
         phone: input.phone,
         role: input.role
       }, { onConflict: "email" })
-      .select(authUserColumns)
+      .select(legacyUserColumns)
       .single();
 
     if (error) throw error;

@@ -75,9 +75,14 @@ export const supabaseProvider: DataProvider = {
   },
   async createRequest(input: CreateRequestInput) {
     const hospitalId = await resolveHospitalId(input.hospitalId);
-    const created = await requestRepository.createRequest({ ...input, hospitalId });
+    const hospital = await hospitalRepository.getHospital(hospitalId);
+    const created = await requestRepository.createRequest({
+      ...input,
+      hospitalId,
+      municipality: input.municipality ?? hospital.municipality,
+      province: input.province ?? hospital.province
+    });
     const donors = await donorRepository.listDonors();
-    const hospital = await hospitalRepository.getHospital(created.hospitalId);
     const matches = matchingAgent(created, donors)
       .filter((item) => item.recommendation === "Notificar")
       .slice(0, 12);

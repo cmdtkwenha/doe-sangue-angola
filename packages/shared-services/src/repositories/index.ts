@@ -3,6 +3,7 @@ export * from "./appointmentRepository";
 export * from "./authRepository";
 export * from "./databaseTypes";
 export * from "./donorRepository";
+export * from "./healthcareImportRepository";
 export * from "./hospitalRepository";
 export * from "./mockRepositories";
 export * from "./notificationRepository";

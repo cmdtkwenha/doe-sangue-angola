@@ -13,6 +13,7 @@ export type UserRow = {
   id: string;
   auth_user_id: string | null;
   role: "admin" | "hospital" | "donor";
+  linked_entity_id?: string | null;
   name: string;
   email: string;
   phone: string | null;
@@ -21,14 +22,22 @@ export type UserRow = {
 
 export type DonorRow = {
   id: string;
+  auth_user_id?: string | null;
   blood_type: BloodType;
   province: string;
   municipality: string;
   available: boolean;
   birth_date?: string | null;
+  email?: string | null;
+  eligibility_status?: string | null;
+  full_name?: string | null;
+  gender?: string | null;
   last_donation: string | null;
+  last_donation_date?: string | null;
+  phone?: string | null;
   points: number;
   preferred_hospital_id: string | null;
+  total_donations?: number | null;
   user_id?: string | null;
   users?: { name?: string | null; phone?: string | null } | null;
 };
@@ -51,11 +60,16 @@ export type HospitalRow = {
 
 export type RequestRow = {
   id: string;
+  created_by?: string | null;
   hospital_id: string;
-  patient_code: string;
+  patient_code?: string | null;
   blood_type: BloodType;
-  units: number;
+  units?: number | null;
+  units_needed?: number | null;
   urgency: Urgency;
+  province?: string | null;
+  municipality?: string | null;
+  notes?: string | null;
   status: RequestStatus;
   created_at: string;
 };
@@ -84,6 +98,7 @@ export function mapUser(row: UserRow) {
   return {
     id: row.id,
     authUserId: row.auth_user_id ?? undefined,
+    linkedEntityId: row.linked_entity_id ?? undefined,
     role: row.role,
     name: row.name,
     email: row.email,
@@ -95,15 +110,19 @@ export function mapUser(row: UserRow) {
 export function mapDonor(row: DonorRow): Donor {
   return {
     id: row.id,
-    name: row.users?.name ?? "Dador verificado",
+    name: row.full_name ?? row.users?.name ?? "Dador verificado",
     bloodType: row.blood_type,
     province: row.province,
     municipality: row.municipality,
     available: row.available,
     birthDate: row.birth_date ?? undefined,
-    lastDonation: row.last_donation ?? "",
-    phone: row.users?.phone ?? undefined,
+    email: row.email ?? undefined,
+    eligibilityStatus: row.eligibility_status ?? "Pendente",
+    gender: row.gender ?? undefined,
+    lastDonation: row.last_donation_date ?? row.last_donation ?? "",
+    phone: row.phone ?? row.users?.phone ?? undefined,
     points: row.points,
+    totalDonations: row.total_donations ?? 0,
     preferredHospitalId: row.preferred_hospital_id ?? undefined
   };
 }
@@ -128,11 +147,15 @@ export function mapRequest(row: RequestRow): BloodRequest {
   return {
     id: row.id,
     hospitalId: row.hospital_id,
-    patientCode: row.patient_code,
+    patientCode: row.patient_code ?? row.id.slice(0, 8),
     bloodType: row.blood_type,
-    units: row.units,
+    units: row.units_needed ?? row.units ?? 1,
     urgency: row.urgency,
+    province: row.province ?? undefined,
+    municipality: row.municipality ?? undefined,
+    notes: row.notes ?? undefined,
     status: row.status,
+    createdBy: row.created_by ?? undefined,
     createdAt: row.created_at
   };
 }

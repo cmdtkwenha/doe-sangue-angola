@@ -42,6 +42,10 @@ export async function createRequestAction(input?: RequestDraft) {
     hospitalId: input?.hospitalId ?? "h1",
     patientCode: input?.patientCode ?? `PAC-${Date.now().toString().slice(-4)}`,
     bloodType: input?.bloodType ?? "O-",
+    createdBy: input?.createdBy,
+    municipality: input?.municipality,
+    notes: input?.notes,
+    province: input?.province,
     units: input?.units ?? 4,
     urgency: input?.urgency ?? "Critica"
   });

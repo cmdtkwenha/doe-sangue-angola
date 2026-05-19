@@ -13,25 +13,46 @@ import {
   listRequests
 } from "@doe-sangue-angola/shared-services";
 import { currentHospitalId } from "./hospitalPortalData";
+import type { Donor, Hospital } from "@doe-sangue-angola/shared-types";
 
 const dashboard = getHospitalDashboard(currentHospitalId);
-const hospital = dashboard.hospital ?? getHospitalById(currentHospitalId)!;
+const fallbackHospital: Hospital = {
+  id: currentHospitalId,
+  name: "Hospital selecionado",
+  province: "Luanda",
+  municipality: "Luanda",
+  verified: true,
+  capacity: 0,
+  contact: ""
+};
+const fallbackDonor: Donor = {
+  id: "sem-dador",
+  name: "Dador pendente",
+  bloodType: "O-",
+  province: "Luanda",
+  municipality: "Luanda",
+  available: false,
+  lastDonation: "",
+  points: 0
+};
+const hospital = dashboard.hospital ?? getHospitalById(currentHospitalId) ?? fallbackHospital;
 const hospitalRequests = dashboard.requests;
 const primaryRequest = hospitalRequests[0] ?? listRequests()[0];
 const matches = dashboard.incomingDonors.length
   ? dashboard.incomingDonors
   : matchingAgent(primaryRequest, listDonors());
-const scheduled = schedulingAgent(matches[0].donor, hospital);
-const risk = fraudAgent(primaryRequest, matches[0].donor);
+const primaryDonor = matches[0]?.donor ?? fallbackDonor;
+const scheduled = schedulingAgent(primaryDonor, hospital);
+const risk = fraudAgent(primaryRequest, primaryDonor);
 
 export const pinValidation = {
-  donor: matches[0].donor.name,
-  bloodType: matches[0].donor.bloodType,
+  donor: primaryDonor.name,
+  bloodType: primaryDonor.bloodType,
   pin: scheduled.pin,
   risk: risk.risk
 };
 
-export const donorArrivals = matches.slice(0, 3).map((match, index) => ({
+export const donorArrivals = (matches.length ? matches : [{ donor: primaryDonor, score: 0 }]).slice(0, 3).map((match, index) => ({
   name: match.donor.name,
   bloodType: match.donor.bloodType,
   eta: `${15 + index * 4} min`,

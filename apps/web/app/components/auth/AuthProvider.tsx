@@ -1,11 +1,9 @@
 "use client";
 
 import {
-  demoAccounts,
   getOnboardingRedirectForRole,
   getRedirectForRole,
   getAuthMode,
-  isDemoAuthAllowed,
   trackFailedAction,
   trackLoginEvent,
   type AuthUser
@@ -15,16 +13,10 @@ import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { createContext, useEffect, useMemo, useState } from "react";
 import { supabase } from "../../../lib/supabaseClient";
-import {
-  findDemoAccount,
-  type AppSession,
-  mapDemoSession,
-  resolveSupabaseSession
-} from "./authSession";
+import { resolveSupabaseSession } from "./authSession";
 
 type AuthContextValue = {
   error: string | null;
-  loginDemo: (role: UserRole) => void;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -41,27 +33,22 @@ type RegisterInput = {
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
-const demoSessionKey = "doe-sangue-angola-demo-session";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<AuthContextValue["session"]>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const demoMode = getAuthMode() !== "supabase";
+  const authMode = getAuthMode();
 
   useEffect(() => {
-    if (demoMode) {
-      setSession(readDemoSession());
-      setLoading(false);
-      return;
-    }
-    if (!supabase && getAuthMode() === "supabase") {
-      setError("Supabase Auth não configurado. Crie .env.local com as chaves públicas.");
+    if (authMode !== "supabase") {
+      setError("Configure NEXT_PUBLIC_AUTH_MODE=supabase para autenticação real.");
       setLoading(false);
       return;
     }
     if (!supabase) {
+      setError("Supabase Auth não configurado. Crie .env.local com as chaves públicas.");
       setLoading(false);
       return;
     }
@@ -76,50 +63,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => data.subscription.unsubscribe();
-  }, [demoMode]);
+  }, [authMode]);
 
   const value = useMemo<AuthContextValue>(() => ({
     error,
-    loginDemo(role) {
-      if (!demoMode) {
-        setError("Acesso demo disponível apenas quando NEXT_PUBLIC_AUTH_MODE=mock.");
-        return;
-      }
-      const demo = findDemoAccountByRole(role);
-      if (!demo) {
-        setError("Conta demo não encontrada para este perfil.");
-        return;
-      }
-      const next = mapDemoSession(demo);
-      writeDemoSession(next);
-      setError(null);
-      setSession(next);
-      trackLoginEvent(next.user.email, next.user.role);
-      debugAuth("Login demo direto", next.user.email);
-      router.push(getRedirectForRole(next.user.role));
-    },
     loading,
     session,
     async login(email, password) {
-      if (isDemoAuthAllowed()) {
-        const demo = findDemoAccount(email, password);
-        if (demo) {
-          const next = mapDemoSession(demo);
-          writeDemoSession(next);
-          setSession(next);
-          trackLoginEvent(next.user.email, next.user.role);
-          debugAuth("Login demo efetuado", next.user.email);
-          router.push(getRedirectForRole(next.user.role));
-          return;
-        }
-      }
-      if (demoMode) {
-        trackFailedAction("Login demo falhou", { email });
-        debugAuth("Login demo falhou", email);
-        setError("Conta demo inválida. Confirme email e palavra-passe.");
-        return;
-      }
-      if (!supabase) {
+      if (!supabase || authMode !== "supabase") {
         setError("Supabase Auth não configurado. Verifique .env.local.");
         return;
       }
@@ -141,7 +92,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     async logout() {
       if (supabase) await supabase.auth.signOut();
-      clearDemoSession();
       setSession(null);
       router.push("/auth");
     },
@@ -189,42 +139,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .resetPasswordForEmail(email, { redirectTo: `${origin}/auth` });
       if (authError) setError("Não foi possível enviar o email de recuperação.");
     }
-  }), [demoMode, error, loading, router, session]);
+  }), [authMode, error, loading, router, session]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
-
-function readDemoSession(): AppSession | null {
-  if (typeof window === "undefined") return null;
-  const raw = window.localStorage.getItem(demoSessionKey);
-  if (!raw) return null;
-
-  try {
-    return JSON.parse(raw) as AppSession;
-  } catch {
-    clearDemoSession();
-    return null;
-  }
-}
-
-function writeDemoSession(session: AppSession) {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(demoSessionKey, JSON.stringify(session));
-}
-
-function clearDemoSession() {
-  if (typeof window === "undefined") return;
-  window.localStorage.removeItem(demoSessionKey);
-}
-
-function debugAuth(message: string, email: string) {
-  if (process.env.NODE_ENV === "development") {
-    console.info(`[auth-demo] ${message}`, { email });
-  }
-}
-
-const findDemoAccountByRole = (role: UserRole) =>
-  demoAccounts.find((account) => account.role === role);
 
 async function createSupabaseProfile(input: {
   authUserId: string;

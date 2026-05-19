@@ -1,4 +1,3 @@
-import { AuthModeDebug } from "../components/auth/AuthModeDebug";
 import { LoginForm } from "../components/auth/LoginForm";
 import styles from "../components/auth/auth.module.css";
 
@@ -22,7 +21,6 @@ export default function AuthPage() {
             Admin, hospitais e dadores entram pelo mesmo ponto com sessão
             persistente e acesso protegido.
           </p>
-          <AuthModeDebug />
           <LoginForm />
         </div>
       </section>

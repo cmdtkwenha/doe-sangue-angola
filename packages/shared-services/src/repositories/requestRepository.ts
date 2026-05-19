@@ -6,6 +6,7 @@ import { hospitalRepository } from "./hospitalRepository";
 import { mapAppointment, mapRequest, type AppointmentRow, type RequestRow } from "./databaseTypes";
 
 type CreateRequestInput = Omit<BloodRequest, "createdAt" | "id" | "status">;
+type UpdateRequestInput = Partial<CreateRequestInput> & { status?: BloodRequest["status"] };
 
 export const requestRepository = {
   async listRequests() {
@@ -33,10 +34,15 @@ export const requestRepository = {
     const { data, error } = await getDatabaseClient()
       .from("blood_requests")
       .insert({
+        created_by: input.createdBy,
         hospital_id: input.hospitalId,
         patient_code: input.patientCode,
         blood_type: input.bloodType,
         units: input.units,
+        units_needed: input.units,
+        province: input.province,
+        municipality: input.municipality,
+        notes: input.notes,
         urgency: input.urgency,
         status: "Aberto"
       })
@@ -45,6 +51,35 @@ export const requestRepository = {
 
     if (error) throw error;
     return mapRequest(data as unknown as RequestRow);
+  },
+
+  async updateRequest(id: string, input: UpdateRequestInput) {
+    const payload = {
+      blood_type: input.bloodType,
+      created_by: input.createdBy,
+      hospital_id: input.hospitalId,
+      municipality: input.municipality,
+      notes: input.notes,
+      patient_code: input.patientCode,
+      province: input.province,
+      status: input.status,
+      units: input.units,
+      units_needed: input.units,
+      urgency: input.urgency
+    };
+    const { data, error } = await getDatabaseClient()
+      .from("blood_requests")
+      .update(removeUndefined(payload))
+      .eq("id", id)
+      .select(requestColumns)
+      .single();
+
+    if (error) throw error;
+    return mapRequest(data as unknown as RequestRow);
+  },
+
+  closeRequest(id: string) {
+    return this.updateRequestStatus(id, "Cancelado");
   },
 
   async updateRequestStatus(id: string, status: BloodRequest["status"]) {
@@ -124,14 +159,25 @@ export const requestRepository = {
 
 const requestColumns = [
   "id",
+  "created_by",
   "hospital_id",
   "patient_code",
   "blood_type",
   "units",
+  "units_needed",
+  "province",
+  "municipality",
+  "notes",
   "urgency",
   "status",
   "created_at"
 ].join(",");
+
+function removeUndefined<T extends Record<string, unknown>>(input: T) {
+  return Object.fromEntries(
+    Object.entries(input).filter(([, value]) => value !== undefined)
+  );
+}
 
 async function findRequest(id: string) {
   const { data, error } = await getDatabaseClient()

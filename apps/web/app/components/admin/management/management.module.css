@@ -6,23 +6,16 @@
   overflow: hidden;
 }
 
-.debug,
 .error {
-  background: #fff8e6;
-  border: 1px solid #f1c95a;
+  background: #fff0f1;
+  border: 1px solid #f4a3ab;
   border-radius: 12px;
-  color: #5f4300;
+  color: #9f1020;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 12px;
   padding: 10px 12px;
-}
-
-.error {
-  background: #fff0f1;
-  border-color: #f4a3ab;
-  color: #9f1020;
   font-weight: 800;
 }
 

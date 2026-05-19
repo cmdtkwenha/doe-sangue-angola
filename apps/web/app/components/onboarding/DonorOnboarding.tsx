@@ -13,6 +13,7 @@ export function DonorOnboarding() {
   const [form, setForm] = useState({
     birthDate: "",
     bloodType: "O+" as BloodType,
+    gender: "",
     municipality: "",
     phone: "",
     province: "Luanda"
@@ -24,7 +25,13 @@ export function DonorOnboarding() {
     const response = await fetch("/api/donors", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, userId: session.user.id })
+      body: JSON.stringify({
+        ...form,
+        authUserId: session.user.authUserId ?? session.user.id,
+        email: session.user.email,
+        fullName: session.user.name,
+        userId: session.user.id
+      })
     });
     setMessage(response.ok ? "Perfil de dador guardado no Supabase." : "Não foi possível guardar o perfil.");
   }
@@ -48,6 +55,7 @@ export function DonorOnboarding() {
         <Field label="Província" value={form.province} onChange={(province) => setForm({ ...form, province })} />
         <Field label="Município" value={form.municipality} onChange={(municipality) => setForm({ ...form, municipality })} />
         <Field label="Telefone" value={form.phone} onChange={(phone) => setForm({ ...form, phone })} />
+        <Field label="Género" value={form.gender} onChange={(gender) => setForm({ ...form, gender })} />
         <label className="eyebrow">Data de nascimento</label>
         <input className={styles.input} type="date" value={form.birthDate} onChange={(event) =>
           setForm({ ...form, birthDate: event.target.value })} />

@@ -34,7 +34,11 @@ export type Donor = {
   available: boolean;
   lastDonation: string;
   points: number;
+  totalDonations?: number;
+  eligibilityStatus?: string;
   birthDate?: string;
+  email?: string;
+  gender?: string;
   phone?: string;
   preferredHospitalId?: string;
 };
@@ -60,7 +64,11 @@ export type BloodRequest = {
   bloodType: BloodType;
   units: number;
   urgency: Urgency;
+  province?: string;
+  municipality?: string;
+  notes?: string;
   status: RequestStatus;
+  createdBy?: string;
   createdAt: string;
 };
 

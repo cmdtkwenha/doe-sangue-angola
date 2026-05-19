@@ -1,14 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { listRequests } from "@doe-sangue-angola/shared-services";
+import { getDataMode, listRequests } from "@doe-sangue-angola/shared-services";
+import type { BloodRequest } from "@doe-sangue-angola/shared-types";
+import { useApiData } from "@hooks/useApiData";
 import styles from "./adminAdvanced.module.css";
 
 export function EmergencyTicker() {
   const [active, setActive] = useState(0);
-  const requests = useMemo(() => listRequests(), []);
+  const fallback = useMemo(() => getDataMode() === "mock" ? listRequests() : [], []);
+  const { data } = useApiData<BloodRequest[]>("/api/blood-requests", fallback, 0);
+  const requests = data.filter((request) => request.urgency === "Critica");
 
   useEffect(() => {
+    if (requests.length === 0) return;
     const id = window.setInterval(() => {
       setActive((current) => (current + 1) % requests.length);
     }, 2200);
@@ -29,6 +34,7 @@ export function EmergencyTicker() {
           {request.bloodType} · {request.units} bolsas · {request.urgency}
         </span>
       ))}
+      {ordered.length === 0 ? <span className={styles.tickerItem}>Sem emergências ativas</span> : null}
     </section>
   );
 }

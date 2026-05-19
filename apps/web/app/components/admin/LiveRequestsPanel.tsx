@@ -1,6 +1,6 @@
 "use client";
 
-import { listLiveRequests } from "@doe-sangue-angola/shared-services";
+import { getDataMode, listLiveRequests } from "@doe-sangue-angola/shared-services";
 import type { BloodRequest, Hospital } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
@@ -11,7 +11,8 @@ type LiveRequest = BloodRequest & { hospital?: Hospital };
 
 export function LiveRequestsPanel() {
   const version = useRealtimeVersion();
-  const fallback = useMemo(() => listLiveRequests(), [version]);
+  const fallback = useMemo(() =>
+    getDataMode() === "mock" ? listLiveRequests() : [], [version]);
   const { data: requests, error, loading } = useApiData<LiveRequest[]>(
     "/api/blood-requests",
     fallback,

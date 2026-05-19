@@ -1,12 +1,21 @@
-import { donors, getHospitalDashboard } from "@doe-sangue-angola/shared-services";
+"use client";
+
+import type { Appointment, Donor } from "@doe-sangue-angola/shared-types";
+import { useApiData } from "@hooks/useApiData";
 import { EmptyState } from "../ui/EmptyState";
 import styles from "./hospitalPortal.module.css";
-import { currentHospitalId } from "./hospitalPortalData";
-
-const donorById = new Map(donors.map((donor) => [donor.id, donor]));
+import { useCurrentHospital } from "./useCurrentHospital";
 
 export function AppointmentSchedule() {
-  const appointments = getHospitalDashboard(currentHospitalId).appointments;
+  const { data: hospital } = useCurrentHospital();
+  const hospitalId = hospital?.id ?? "";
+  const { data: appointments, loading, error } = useApiData<Appointment[]>(
+    hospitalId ? `/api/appointments?hospitalId=${hospitalId}` : "/api/appointments?hospitalId=missing",
+    [],
+    hospitalId.length
+  );
+  const { data: donors } = useApiData<Donor[]>("/api/donors", [], 0);
+  const donorById = new Map(donors.map((donor) => [donor.id, donor]));
 
   return (
     <section className={styles.panel}>
@@ -14,6 +23,8 @@ export function AppointmentSchedule() {
         <strong>Agendamentos de Hoje</strong>
         <a className="muted" href="/hospital/schedule">Ver calendário</a>
       </div>
+      {loading ? <p className={styles.rowMuted}>A carregar agendamentos reais...</p> : null}
+      {error ? <p className={styles.rowMuted}>{error}</p> : null}
       {appointments.length === 0 ? (
         <EmptyState
           message="Os agendamentos confirmados pelos dadores aparecerão aqui."

@@ -1,4 +1,3 @@
-import { AuthModeDebug } from "../../components/auth/AuthModeDebug";
 import { RegisterForm } from "../../components/auth/RegisterForm";
 import styles from "../../components/auth/auth.module.css";
 
@@ -19,7 +18,6 @@ export default function RegisterPage() {
           <div className="eyebrow">Registar</div>
           <h2>Escolha o perfil da conta</h2>
           <p className="muted">Admin, hospital ou dador serão redirecionados para a área correta.</p>
-          <AuthModeDebug />
           <RegisterForm />
         </div>
       </section>

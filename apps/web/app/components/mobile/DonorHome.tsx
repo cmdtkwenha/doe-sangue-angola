@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
+import { useApiData } from "@hooks/useApiData";
+import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { EmptyState } from "../ui/EmptyState";
 import styles from "./mobileApp.module.css";
 import { shortcuts } from "./mobileMock";
@@ -11,8 +13,14 @@ import { isDonorProfileComplete, useCurrentDonor } from "./useCurrentDonor";
 
 export function DonorHome() {
   const [message, setMessage] = useState("Atalhos prontos.");
-  useRealtimeVersion();
+  const version = useRealtimeVersion();
   const { data: donor, loading } = useCurrentDonor();
+  const donorId = donor?.id ?? "";
+  const { data: nearbyRequests } = useApiData<BloodRequest[]>(
+    donorId ? `/api/blood-requests?donorId=${donorId}` : "/api/blood-requests?donorId=missing",
+    [],
+    version
+  );
   if (!isDonorProfileComplete(donor)) {
     return (
       <MobileShell active="home">
@@ -46,7 +54,7 @@ export function DonorHome() {
             aria-label={badge ? `${label}, ${badge} novidades` : label}
             className={styles.shortcut}
             key={label}
-            onClick={() => setMessage(`${label} aberto em modo mock.`)}
+            onClick={() => setMessage(`${label} aberto.`)}
             type="button"
           >
             <span aria-hidden="true">{label === "Pedidos" ? "◆" : "▣"}</span>
@@ -57,15 +65,21 @@ export function DonorHome() {
       </section>
       <p className="muted" role="status">{message}</p>
       <article className={styles.card}>
-        <strong>Próxima conquista</strong>
-        <p className="muted">Continue a doar para subir de nível.</p>
+        <strong>Elegibilidade</strong>
+        <p className="muted">{donor.eligibilityStatus ?? "Pendente"} · {donor.totalDonations ?? 0} doações registadas</p>
         <progress className={styles.progress} max="2000" value={donor.points} />
       </article>
       <article className={styles.card}>
         <strong>Necessidades urgentes na sua área</strong>
         <div className={styles.requestTop}>
-          <span className={`${styles.blood} ${styles.criticalText}`}>O-</span>
-          <span><strong>MUITA FALTA</strong><br /><small>Luanda</small></span>
+          <span className={`${styles.blood} ${styles.criticalText}`}>
+            {nearbyRequests[0]?.bloodType ?? donor.bloodType}
+          </span>
+          <span>
+            <strong>{nearbyRequests[0] ? nearbyRequests[0].urgency : "SEM PEDIDOS"}</strong>
+            <br />
+            <small>{donor.province}</small>
+          </span>
           <span>›</span>
         </div>
       </article>

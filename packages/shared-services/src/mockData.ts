@@ -10,36 +10,8 @@ import type {
   Metric
 } from "@doe-sangue-angola/shared-types";
 
-// TODO(production): replace this file with Supabase seed data and read-only fixtures for tests.
-export const hospitals: Hospital[] = [
-  {
-    id: "h1",
-    name: "Hospital Geral de Luanda",
-    province: "Luanda",
-    municipality: "Kilamba Kiaxi",
-    verified: true,
-    capacity: 84,
-    contact: "+244 923 000 118"
-  },
-  {
-    id: "h2",
-    name: "Clinica Sagrada Esperanca",
-    province: "Luanda",
-    municipality: "Ingombota",
-    verified: true,
-    capacity: 42,
-    contact: "+244 923 000 219"
-  },
-  {
-    id: "h3",
-    name: "Hospital Central do Huambo",
-    province: "Huambo",
-    municipality: "Huambo",
-    verified: true,
-    capacity: 56,
-    contact: "+244 923 000 331"
-  }
-];
+// Production hospitals now come from Supabase/imported CSV datasets.
+export const hospitals: Hospital[] = [];
 
 export const donors: Donor[] = [
   {

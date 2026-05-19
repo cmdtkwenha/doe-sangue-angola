@@ -1,10 +1,9 @@
 "use client";
 
 import { hospitalActions } from "@constants/adminActions";
-import { getDataMode } from "@doe-sangue-angola/shared-services";
 import type { Hospital } from "@doe-sangue-angola/shared-types";
 import { useEffect, useState } from "react";
-import { supabase, supabaseUrl } from "../../../../lib/supabaseClient";
+import { supabase } from "../../../../lib/supabaseClient";
 import { ManagementTable } from "./ManagementTable";
 import styles from "./management.module.css";
 
@@ -25,37 +24,27 @@ type HospitalRow = {
 };
 
 export function HospitalsTable() {
-  const dataMode = getDataMode();
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (!supabase) {
       setHospitals([]);
-      setLoading(false);
       setError("Supabase não configurado no frontend.");
       return;
     }
 
     let active = true;
-    setLoading(true);
     setError("");
     void loadSupabaseHospitals().then((data) => {
       if (!active) return;
-      console.info("[admin-hospitals] supabase.from('hospitals') result", {
-        count: data.length
-      });
       setHospitals(data);
       setError("");
-      setLoading(false);
     }).catch((queryError: unknown) => {
       if (!active) return;
       const message = queryError instanceof Error ? queryError.message : String(queryError);
-      console.error("[admin-hospitals] query error", queryError);
       setHospitals([]);
       setError(message);
-      setLoading(false);
     });
 
     return () => {
@@ -65,17 +54,6 @@ export function HospitalsTable() {
 
   return (
     <>
-      <div className={styles.debug}>
-        <strong>Debug temporário</strong>
-        <span>NEXT_PUBLIC_SUPABASE_URL: {supabaseUrl ?? "em falta"}</span>
-        <span>DATA_MODE: {dataMode}</span>
-        <span>Supabase configurado: {supabase ? "sim" : "não"}</span>
-        <span>Tabela: hospitals</span>
-        <span>Query: supabase.from("hospitals").select("*")</span>
-        <span>Hospitais carregados: {hospitals.length}</span>
-        <span>Estado: {loading ? "A carregar" : "Pronto"}</span>
-        {error ? <span>Erro Supabase: {error}</span> : <span>Erro Supabase: nenhum</span>}
-      </div>
       {error ? <p className={styles.error}>Falha ao carregar hospitais: {error}</p> : null}
       <ManagementTable
         disableFilters
@@ -106,7 +84,6 @@ async function loadSupabaseHospitals() {
     .select("*");
 
   if (response.error) {
-    console.error("[admin-hospitals] query error", response.error);
     throw new Error(formatSupabaseError(response.error));
   }
 

@@ -20,11 +20,11 @@ export const protectedRouteRules: Array<{
   roles: UserRole[];
 }> = [
   { label: "Admin nacional", path: "/admin", roles: ["admin"] },
-  { label: "Hospital ou clínica", path: "/hospital", roles: ["hospital"] },
-  { label: "Dador mobile", path: "/mobile", roles: ["donor"] },
+  { label: "Hospital ou clínica", path: "/hospital", roles: ["admin", "hospital"] },
+  { label: "Dador mobile", path: "/mobile", roles: ["admin", "donor"] },
   { label: "Onboarding admin", path: "/onboarding/admin", roles: ["admin"] },
-  { label: "Onboarding hospital", path: "/onboarding/hospital", roles: ["hospital"] },
-  { label: "Onboarding dador", path: "/onboarding/donor", roles: ["donor"] }
+  { label: "Onboarding hospital", path: "/onboarding/hospital", roles: ["admin", "hospital"] },
+  { label: "Onboarding dador", path: "/onboarding/donor", roles: ["admin", "donor"] }
 ];
 
 export const permissionMatrix: Record<PermissionArea, UserRole[]> = {
@@ -40,6 +40,7 @@ export function getAllowedRolesForPath(pathname: string) {
 }
 
 export function canAccessPath(role: UserRole, pathname: string) {
+  if (role === "admin") return true;
   const allowed = getAllowedRolesForPath(pathname);
   return allowed ? allowed.includes(role) : true;
 }

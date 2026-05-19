@@ -1,14 +1,16 @@
 "use client";
 
 import { requestActions } from "@constants/adminActions";
-import { getDataMode, hospitals as mockHospitals, requests } from "@doe-sangue-angola/shared-services";
-import type { Hospital } from "@doe-sangue-angola/shared-types";
+import { getDataMode, hospitals as mockHospitals, requests as mockRequests } from "@doe-sangue-angola/shared-services";
+import type { BloodRequest, Hospital } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "../../../hooks/useApiData";
 import { ManagementTable } from "./ManagementTable";
 
 export function RequestsTable() {
   const fallback = getDataMode() === "mock" ? mockHospitals : [];
   const { data: hospitals } = useApiData<Hospital[]>("/api/hospitals", fallback, 0);
+  const requestFallback = getDataMode() === "mock" ? mockRequests : [];
+  const { data: requests } = useApiData<BloodRequest[]>("/api/blood-requests", requestFallback, 0);
 
   return (
     <ManagementTable

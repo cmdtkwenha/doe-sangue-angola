@@ -90,15 +90,19 @@ export const mockProvider: DataProvider = {
   findDonorByUserId: () => donors[0] ?? null,
   upsertDonorProfile: (input) => ({
     id: "d1",
-    name: "Dador Demo",
+    name: input.fullName,
     bloodType: input.bloodType,
     province: input.province,
     municipality: input.municipality,
     available: true,
     birthDate: input.birthDate,
+    email: input.email,
+    eligibilityStatus: input.eligibilityStatus ?? "Elegível",
+    gender: input.gender,
     lastDonation: "",
     phone: input.phone,
-    points: 0
+    points: 0,
+    totalDonations: input.totalDonations ?? 0
   }),
   listHospitals: mockRepositories.hospital.listHospitals,
   listNotifications: mockRepositories.notification.listNotifications,

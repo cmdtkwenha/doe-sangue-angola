@@ -5,11 +5,9 @@ import { supabaseProvider } from "./supabaseProvider";
 
 export function getDataProvider() {
   const mode = getDataMode();
-  const production = process.env.NODE_ENV === "production";
+  const development = process.env.NODE_ENV !== "production";
 
-  return (mode === "supabase" || production) && isDatabaseConfigured()
-    ? supabaseProvider
-    : mockProvider;
+  return mode === "mock" && development ? mockProvider : supabaseProvider;
 }
 
 export const dataProvider = getDataProvider();

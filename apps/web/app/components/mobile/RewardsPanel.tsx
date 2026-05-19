@@ -1,23 +1,19 @@
 "use client";
 
 import { rewardAgent } from "@doe-sangue-angola/agents";
-import { listDonors } from "@doe-sangue-angola/shared-services";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
-import { useMemo } from "react";
 import { EmptyState } from "../ui/EmptyState";
 import styles from "./mobileGamification.module.css";
 import { RewardBadge } from "./RewardBadge";
 import {
-  canUseDevelopmentMock,
   isDonorProfileComplete,
   useCurrentDonor
 } from "./useCurrentDonor";
 
 export function RewardsPanel() {
-  const version = useRealtimeVersion();
-  const fallback = useMemo(() => canUseDevelopmentMock() ? listDonors()[0] : null, [version]);
+  useRealtimeVersion();
   const { data: donor } = useCurrentDonor();
-  const current = isDonorProfileComplete(donor) ? donor : fallback;
+  const current = isDonorProfileComplete(donor) ? donor : null;
   if (!current) {
     return <EmptyState title="Sem recompensas" message="Complete o perfil para acumular pontos reais." />;
   }

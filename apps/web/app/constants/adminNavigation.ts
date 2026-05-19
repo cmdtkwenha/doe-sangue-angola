@@ -2,6 +2,7 @@ export const adminNavigation = [
   { label: "Visão Geral", href: "/admin" },
   { label: "Pedidos de Sangue", href: "/admin/requests" },
   { label: "Hospitais & Clínicas", href: "/admin/hospitals" },
+  { label: "Importar Dados", href: "/admin/imports" },
   { label: "Dadores", href: "/admin/donors" },
   { label: "Notificações", href: "/admin/notifications" },
   { label: "Fraude & Verificação", href: "/admin/fraud" },

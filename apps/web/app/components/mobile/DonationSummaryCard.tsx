@@ -4,9 +4,9 @@ import styles from "./mobileProfile.module.css";
 export function DonationSummaryCard({ donor }: { donor: Donor }) {
   const summary = [
     ["Pontos", donor.points.toLocaleString("pt-AO")],
+    ["Doações", String(donor.totalDonations ?? 0)],
     ["Tipo sanguíneo", donor.bloodType],
-    ["Província", donor.province],
-    ["Município", donor.municipality]
+    ["Elegibilidade", donor.eligibilityStatus ?? "Pendente"]
   ];
 
   return (
