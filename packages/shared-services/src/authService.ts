@@ -6,6 +6,7 @@ export type AuthUser = {
   name: string;
   email: string;
   linkedEntityId?: string;
+  profileMissing?: boolean;
   role: UserRole;
 };
 

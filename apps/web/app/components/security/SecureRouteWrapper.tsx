@@ -27,10 +27,13 @@ export function SecureRouteWrapper({
   useEffect(() => {
     if (loading) return;
     if (!session) router.replace(`/auth?next=${pathname}`);
-    else if (!isAuthorized(session.user.role, allowedRoles)) router.replace("/unauthorized");
+    else if (!session.user.profileMissing && !isAuthorized(session.user.role, allowedRoles)) {
+      router.replace("/unauthorized");
+    }
   }, [allowedRoles, loading, pathname, router, session]);
 
   if (loading || !session) return <SecureLoadingState />;
+  if (session.user.profileMissing) return <MissingProfileState />;
   if (!isAuthorized(session.user.role, allowedRoles)) return <SecureLoadingState />;
 
   return (
@@ -38,6 +41,22 @@ export function SecureRouteWrapper({
       {showLogout ? <div className={styles.topRight}><LogoutButton /></div> : null}
       {children}
     </>
+  );
+}
+
+function MissingProfileState() {
+  return (
+    <main className={styles.loading}>
+      <div className="panel">
+        <div className="eyebrow">Perfil em falta</div>
+        <h1 className="title">Perfil não encontrado</h1>
+        <p className="muted">
+          A conta existe no Supabase Auth, mas ainda não tem perfil de acesso.
+          Termine o registo ou peça ao administrador para criar o perfil.
+        </p>
+        <LogoutButton />
+      </div>
+    </main>
   );
 }
 

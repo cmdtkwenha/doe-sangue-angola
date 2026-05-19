@@ -3,6 +3,7 @@ import styles from "./hospitalPortal.module.css";
 import { ActiveRequestsTable } from "./ActiveRequestsTable";
 import { AppointmentSchedule } from "./AppointmentSchedule";
 import advanced from "./hospitalAdvanced.module.css";
+import { HospitalEntityGate } from "./HospitalEntityGate";
 import { HospitalHeader } from "./HospitalHeader";
 import { HospitalSidebar } from "./HospitalSidebar";
 import { HospitalSummaryCards } from "./HospitalSummaryCards";
@@ -81,6 +82,7 @@ export function HospitalPortal() {
       <HospitalSidebar />
       <section className={styles.content}>
         <HospitalHeader />
+        <HospitalEntityGate>
         <div className={styles.workspace}>
           <section className={styles.topGrid}>
             <UrgentRequestCard />
@@ -125,6 +127,7 @@ export function HospitalPortal() {
           <AuditTrailPanel />
           <PolishStatesPanel />
         </div>
+        </HospitalEntityGate>
       </section>
     </main>
   );
