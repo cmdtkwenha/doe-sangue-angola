@@ -13,7 +13,7 @@ export function acceptRequest(donorId: string, requestId: string) {
 
   if (!request || !donor || !hospital) {
     trackFailedAction("Falha ao aceitar pedido", { donorId, requestId });
-    return { ok: false, message: "Pedido nao encontrado." };
+    return { ok: false, message: "Perfil ainda não configurado." };
   }
 
   const existing = appointments.find((item) => item.id === `a-${donorId}-${requestId}`);

@@ -15,7 +15,11 @@ export class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("Erro recuperável na interface", { error, info });
+    console.error("[ErrorBoundary] React render crash", {
+      componentStack: info.componentStack,
+      message: error.message,
+      pathname: typeof window === "undefined" ? "server" : window.location.pathname
+    });
   }
 
   render() {
@@ -23,7 +27,7 @@ export class ErrorBoundary extends Component<
       return (
         <main style={{ padding: 24 }}>
           <ErrorState
-            message="A interface encontrou um problema inesperado. Os dados estão protegidos."
+            message="Perfil ainda não configurado."
             onRetry={() => this.setState({ error: null })}
             title="Não foi possível carregar esta área"
           />

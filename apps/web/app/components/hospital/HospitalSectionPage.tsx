@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { RouteGuard } from "../auth/RouteGuard";
 import { EmptyState } from "../ui/EmptyState";
+import { HospitalEntityGate } from "./HospitalEntityGate";
 import { HospitalHeader } from "./HospitalHeader";
 import { HospitalSidebar } from "./HospitalSidebar";
 import styles from "./hospitalPortal.module.css";
@@ -20,6 +21,7 @@ export function HospitalSectionPage({
         <HospitalSidebar />
         <section className={styles.content}>
           <HospitalHeader />
+          <HospitalEntityGate>
           <div className={styles.workspace}>
             <div>
               <p className="eyebrow">{kicker}</p>
@@ -32,6 +34,7 @@ export function HospitalSectionPage({
               />
             )}
           </div>
+          </HospitalEntityGate>
         </section>
       </main>
     </RouteGuard>

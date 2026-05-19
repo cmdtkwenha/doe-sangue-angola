@@ -16,7 +16,7 @@ export function DemoScenarioGenerator() {
       </div>
       <button
         className={styles.toggleOn}
-        onClick={() => setMessage(generateInvestorDemoScenario().message)}
+        onClick={() => setMessage(generateInvestorDemoScenario().message ?? "Perfil ainda não configurado.")}
         type="button"
       >
         Criar pedido O-

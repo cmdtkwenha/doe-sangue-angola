@@ -4,7 +4,7 @@ const path = require("path");
 const nextConfig = {
   compress: true,
   poweredByHeader: false,
-  productionBrowserSourceMaps: false,
+  productionBrowserSourceMaps: true,
   turbopack: {
     root: path.join(__dirname, "../..")
   },

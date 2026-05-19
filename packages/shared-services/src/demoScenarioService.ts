@@ -4,6 +4,7 @@ import {
   rewardAgent,
   schedulingAgent
 } from "@doe-sangue-angola/agents";
+import type { BloodRequest, Donor, Hospital } from "@doe-sangue-angola/shared-types";
 import { donors, hospitals, requests } from "./mockStore";
 import { acceptWorkflowRequest, completeWorkflowDonation, createWorkflowRequest, markDonorOnWay, validateWorkflowPin } from "./requestWorkflowService";
 import { publishRealtimeEvent } from "./realtimeService";
@@ -43,10 +44,10 @@ export const demoAccounts = [
 ] as const;
 
 export function getInvestorDemoScenario() {
-  const hospital = hospitals[0];
-  const request = requests[0];
+  const hospital = hospitals[0] ?? fallbackHospital;
+  const request = requests[0] ?? fallbackRequest;
   const matches = matchingAgent(request, donors);
-  const donor = matches[0].donor;
+  const donor = matches[0]?.donor ?? donors[0] ?? fallbackDonor;
   const appointment = schedulingAgent(donor, hospital);
   const reward = rewardAgent(donor, true);
   const audit = auditAgent("auditAgent", `Registou fluxo completo ${request.id}`);
@@ -120,6 +121,38 @@ export function runInvestorDemoStep(stepIndex: number) {
 
   return scenario.steps[Math.min(stepIndex, scenario.steps.length - 1)];
 }
+
+const fallbackHospital: Hospital = {
+  capacity: 0,
+  contact: "",
+  id: "hospital-pendente",
+  municipality: "Luanda",
+  name: "Hospital ainda não configurado",
+  province: "Luanda",
+  verified: false
+};
+
+const fallbackDonor: Donor = {
+  available: false,
+  bloodType: "O-",
+  id: "dador-pendente",
+  lastDonation: "",
+  municipality: "Luanda",
+  name: "Dador ainda não configurado",
+  points: 0,
+  province: "Luanda"
+};
+
+const fallbackRequest: BloodRequest = {
+  bloodType: "O-",
+  createdAt: new Date(0).toISOString(),
+  hospitalId: fallbackHospital.id,
+  id: "pedido-pendente",
+  patientCode: "SEM-PERFIL",
+  status: "Aberto",
+  units: 1,
+  urgency: "Normal"
+};
 
 function buildSteps(
   hospitalName: string,
