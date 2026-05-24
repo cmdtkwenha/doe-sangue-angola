@@ -6,6 +6,7 @@ import {
   createWorkflowRequest,
   isSupabaseMode,
   markDonorOnWay,
+  publishRealtimeEvent,
   validateWorkflowPin
 } from "@doe-sangue-angola/shared-services";
 import type {
@@ -38,7 +39,7 @@ async function post<T>(path: string, body: unknown) {
 export async function createRequestAction(input?: RequestDraft) {
   if (!isSupabaseMode()) return createWorkflowRequest(input);
 
-  return post<CreateRequestResult>("/api/blood-requests", {
+  const result = await post<CreateRequestResult>("/api/blood-requests", {
     hospitalId: input?.hospitalId ?? "h1",
     patientCode: input?.patientCode ?? `PAC-${Date.now().toString().slice(-4)}`,
     bloodType: input?.bloodType ?? "O-",
@@ -49,6 +50,10 @@ export async function createRequestAction(input?: RequestDraft) {
     units: input?.units ?? 4,
     urgency: input?.urgency ?? "Critica"
   });
+  if (result.ok) {
+    publishRealtimeEvent("REQUEST_CREATED", { request: result.data.request });
+  }
+  return result;
 }
 
 export async function acceptRequestAction(donorId: string, requestId: string) {

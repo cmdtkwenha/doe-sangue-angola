@@ -1,8 +1,19 @@
-import { dataProvider, requestRepository, type CreateRequestInput } from "@doe-sangue-angola/shared-services";
+import {
+  dataProvider,
+  mapRequest,
+  requestRepository,
+  type RequestRow,
+  type CreateRequestInput
+} from "@doe-sangue-angola/shared-services";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { auditApiAction } from "../_utils/audit";
 import { ApiError, apiResponse, readJson } from "../_utils/apiResponse";
-import { requireApiSession, requireEntityAccess, requireSameOrigin } from "../_utils/security";
+import {
+  createRouteSupabase,
+  requireApiSession,
+  requireEntityAccess,
+  requireSameOrigin
+} from "../_utils/security";
 import {
   assertBloodType,
   assertStatus,
@@ -40,23 +51,78 @@ export async function POST(request: Request) {
   const body = await readJson<CreateRequestInput>(request);
   return apiResponse(async () => {
     const principal = await requireApiSession(["hospital", "admin"]);
-    const hospitalId = assertString(body.hospitalId, "Hospital");
+    const hospitalId = assertString(body.hospitalId ?? principal.hospitalId, "Hospital");
     requireEntityAccess(principal, "hospital", hospitalId);
-    const created = await dataProvider.createRequest({
+    const db = await createRouteSupabase();
+    const { data: hospital, error: hospitalError } = await db
+      .from("hospitals")
+      .select("id,province,municipality")
+      .eq("id", hospitalId)
+      .single();
+    if (hospitalError) throw new Error(formatSupabaseError(hospitalError));
+
+    const input = {
       bloodType: assertBloodType(body.bloodType),
       createdBy: principal.authUserId,
       hospitalId,
-      municipality: optionalString(body.municipality, 120),
+      municipality: optionalString(body.municipality, 120) ?? hospital.municipality,
       notes: optionalString(body.notes, 500),
       patientCode: optionalString(body.patientCode, 80) ?? `REQ-${Date.now()}`,
-      province: optionalString(body.province, 120),
+      province: optionalString(body.province, 120) ?? hospital.province,
       units: assertUnits(body.units),
       urgency: assertUrgency(body.urgency)
-    }) as { request?: BloodRequest } | BloodRequest;
-    const requestRecord = ("request" in created ? created.request : created) as BloodRequest | undefined;
-    await auditApiAction(principal, `Criou pedido de sangue ${requestRecord?.bloodType} (${requestRecord?.id}).`);
-    return created;
+    };
+    const { data, error } = await db
+      .from("blood_requests")
+      .insert({
+        blood_type: input.bloodType,
+        created_by: input.createdBy,
+        hospital_id: input.hospitalId,
+        municipality: input.municipality,
+        notes: input.notes,
+        patient_code: input.patientCode,
+        province: input.province,
+        status: "Aberto",
+        units: input.units,
+        units_needed: input.units,
+        urgency: input.urgency
+      })
+      .select([
+        "id",
+        "created_by",
+        "hospital_id",
+        "patient_code",
+        "blood_type",
+        "units",
+        "units_needed",
+        "province",
+        "municipality",
+        "notes",
+        "urgency",
+        "status",
+        "created_at"
+      ].join(","))
+      .single();
+    if (error) throw new Error(formatSupabaseError(error));
+
+    const requestRecord = mapRequest(data as unknown as RequestRow);
+    await auditApiAction(principal, `Criou pedido de sangue ${requestRecord.bloodType} (${requestRecord.id}).`);
+    return { matches: [], request: requestRecord };
   });
+}
+
+function formatSupabaseError(error: {
+  code?: string;
+  details?: string;
+  hint?: string;
+  message: string;
+}) {
+  return [
+    error.message,
+    error.code ? `Código: ${error.code}` : "",
+    error.details ? `Detalhes: ${error.details}` : "",
+    error.hint ? `Sugestão: ${error.hint}` : ""
+  ].filter(Boolean).join(" | ");
 }
 
 export async function PUT(request: Request) {
