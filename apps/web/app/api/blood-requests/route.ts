@@ -1,10 +1,13 @@
 import {
   dataProvider,
+  mapDonor,
   mapRequest,
   requestRepository,
+  type DonorRow,
   type RequestRow,
   type CreateRequestInput
 } from "@doe-sangue-angola/shared-services";
+import { matchingAgent } from "@doe-sangue-angola/agents";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { auditApiAction } from "../_utils/audit";
 import { ApiError, apiResponse, readJson } from "../_utils/apiResponse";
@@ -29,20 +32,47 @@ export async function GET(request: Request) {
     const params = new URL(request.url).searchParams;
     const donorId = params.get("donorId");
     const hospitalId = params.get("hospitalId");
+    const db = await createRouteSupabase();
 
     if (donorId === "missing" || hospitalId === "missing") return [];
     if (donorId) {
       requireEntityAccess(principal, "donor", donorId);
-      return dataProvider.listRequestsForDonor(donorId);
+      const { data: donor, error: donorError } = await db
+        .from("donors")
+        .select(donorColumns)
+        .eq("id", donorId)
+        .single();
+      if (donorError) throw new Error(formatSupabaseError(donorError));
+      const { data, error } = await db
+        .from("blood_requests")
+        .select(requestColumns)
+        .order("created_at", { ascending: false });
+      if (error) throw new Error(formatSupabaseError(error));
+      const donorRecord = mapDonor(donor as unknown as DonorRow);
+      return (data as unknown as RequestRow[])
+        .map(mapRequest)
+        .filter((item) => !["Cancelado", "Concluído", "Concluido"].includes(item.status))
+        .filter((item) => matchingAgent(item, [donorRecord]).length > 0);
     }
 
     if (hospitalId) {
       requireEntityAccess(principal, "hospital", hospitalId);
-      return dataProvider.listRequestsForHospital(hospitalId);
+      const { data, error } = await db
+        .from("blood_requests")
+        .select(requestColumns)
+        .eq("hospital_id", hospitalId)
+        .order("created_at", { ascending: false });
+      if (error) throw new Error(formatSupabaseError(error));
+      return (data as unknown as RequestRow[]).map(mapRequest);
     }
 
     if (principal.role !== "admin") throw new ApiError(403, "Acesso restrito ao admin.");
-    return dataProvider.listRequests();
+    const { data, error } = await db
+      .from("blood_requests")
+      .select(requestColumns)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(formatSupabaseError(error));
+    return (data as unknown as RequestRow[]).map(mapRequest);
   });
 }
 
@@ -87,21 +117,7 @@ export async function POST(request: Request) {
         units_needed: input.units,
         urgency: input.urgency
       })
-      .select([
-        "id",
-        "created_by",
-        "hospital_id",
-        "patient_code",
-        "blood_type",
-        "units",
-        "units_needed",
-        "province",
-        "municipality",
-        "notes",
-        "urgency",
-        "status",
-        "created_at"
-      ].join(","))
+      .select(requestColumns)
       .single();
     if (error) throw new Error(formatSupabaseError(error));
 
@@ -110,6 +126,42 @@ export async function POST(request: Request) {
     return { matches: [], request: requestRecord };
   });
 }
+
+const requestColumns = [
+  "id",
+  "created_by",
+  "hospital_id",
+  "patient_code",
+  "blood_type",
+  "units",
+  "units_needed",
+  "province",
+  "municipality",
+  "notes",
+  "urgency",
+  "status",
+  "created_at"
+].join(",");
+
+const donorColumns = [
+  "id",
+  "auth_user_id",
+  "blood_type",
+  "province",
+  "municipality",
+  "available",
+  "birth_date",
+  "email",
+  "eligibility_status",
+  "full_name",
+  "gender",
+  "last_donation",
+  "last_donation_date",
+  "phone",
+  "points",
+  "preferred_hospital_id",
+  "total_donations"
+].join(",");
 
 function formatSupabaseError(error: {
   code?: string;

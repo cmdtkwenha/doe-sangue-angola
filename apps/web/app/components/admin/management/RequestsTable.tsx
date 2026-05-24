@@ -4,13 +4,15 @@ import { requestActions } from "@constants/adminActions";
 import { getDataMode, hospitals as mockHospitals, requests as mockRequests } from "@doe-sangue-angola/shared-services";
 import type { BloodRequest, Hospital } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "../../../hooks/useApiData";
+import { useRealtimeVersion } from "../../../hooks/useRealtimeVersion";
 import { ManagementTable } from "./ManagementTable";
 
 export function RequestsTable() {
+  const version = useRealtimeVersion();
   const fallback = getDataMode() === "mock" ? mockHospitals : [];
-  const { data: hospitals } = useApiData<Hospital[]>("/api/hospitals", fallback, 0);
+  const { data: hospitals } = useApiData<Hospital[]>("/api/hospitals", fallback, version);
   const requestFallback = getDataMode() === "mock" ? mockRequests : [];
-  const { data: requests } = useApiData<BloodRequest[]>("/api/blood-requests", requestFallback, 0);
+  const { data: requests } = useApiData<BloodRequest[]>("/api/blood-requests", requestFallback, version);
 
   return (
     <ManagementTable

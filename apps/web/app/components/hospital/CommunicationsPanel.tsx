@@ -4,12 +4,14 @@ import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import base from "./hospitalPortal.module.css";
 import styles from "./hospitalAdvanced.module.css";
 import { useApiData } from "../../hooks/useApiData";
+import { useRealtimeVersion } from "../../hooks/useRealtimeVersion";
 import { useCurrentHospital } from "./useCurrentHospital";
 
 export function CommunicationsPanel() {
+  const version = useRealtimeVersion();
   const { data: hospital } = useCurrentHospital();
   const path = hospital?.id ? `/api/blood-requests?hospitalId=${hospital.id}` : "/api/blood-requests?hospitalId=missing";
-  const { data: requests } = useApiData<BloodRequest[]>(path, [], hospital?.id?.length ?? 0);
+  const { data: requests, error, loading } = useApiData<BloodRequest[]>(path, [], version);
   const messages = requests.slice(0, 4).map((request) => ({
     body: `Pedido ${request.bloodType} com estado ${request.status}`,
     status: request.urgency,
@@ -22,6 +24,8 @@ export function CommunicationsPanel() {
         <strong>Comunicações Recentes</strong>
         <a className="muted" href="/hospital/reports">Ver todas</a>
       </div>
+      {loading ? <p className={base.rowMuted}>A sincronizar comunicações...</p> : null}
+      {error ? <p className={base.rowMuted}>{error}</p> : null}
       {messages.length === 0 ? <p className={base.rowMuted}>Sem comunicações recentes.</p> : null}
       {messages.map((item) => (
         <article className={styles.messageRow} key={`${item.title}-${item.target}`}>

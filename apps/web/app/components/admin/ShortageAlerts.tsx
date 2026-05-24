@@ -2,10 +2,12 @@
 
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
+import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import styles from "./adminAdvanced.module.css";
 
 export function ShortageAlerts() {
-  const { data: requests, error, loading } = useApiData<BloodRequest[]>("/api/blood-requests", [], 0);
+  const version = useRealtimeVersion();
+  const { data: requests, error, loading } = useApiData<BloodRequest[]>("/api/blood-requests", [], version);
   const alerts = requests
     .filter((request) => request.urgency === "Critica" && request.status !== "Cancelado")
     .slice(0, 5);

@@ -63,7 +63,9 @@ export async function acceptRequestAction(donorId: string, requestId: string) {
 
 export async function updateStatusAction(requestId: string, status: RequestStatus) {
   if (!isSupabaseMode()) return markDonorOnWay(requestId);
-  return post<BloodRequest>("/api/blood-requests/status", { requestId, status });
+  const result = await post<BloodRequest>("/api/blood-requests/status", { requestId, status });
+  if (result.ok) publishRealtimeEvent("REQUEST_UPDATED", { request: result.data });
+  return result;
 }
 
 export async function validatePinAction(pin: string, requestId: string) {

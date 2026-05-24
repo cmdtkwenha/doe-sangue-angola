@@ -2,11 +2,13 @@
 
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
+import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import baseStyles from "./adminCore.module.css";
 import mapStyles from "./heatmap.module.css";
 
 export function ProvinceHeatMap() {
-  const { data: requests, error, loading } = useApiData<BloodRequest[]>("/api/blood-requests", [], 0);
+  const version = useRealtimeVersion();
+  const { data: requests, error, loading } = useApiData<BloodRequest[]>("/api/blood-requests", [], version);
   const provinces = buildProvinceStats(requests);
 
   return (

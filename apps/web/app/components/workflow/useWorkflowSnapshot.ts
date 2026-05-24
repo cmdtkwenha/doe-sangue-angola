@@ -14,6 +14,7 @@ import type {
   MatchResult
 } from "@doe-sangue-angola/shared-types";
 import { useEffect, useState } from "react";
+import { useCurrentHospital } from "../hospital/useCurrentHospital";
 
 type Snapshot = {
   appointment?: Appointment;
@@ -33,6 +34,7 @@ type Snapshot = {
 type Envelope<T> = { ok: boolean; data?: T };
 
 export function useWorkflowSnapshot() {
+  const { data: hospital } = useCurrentHospital();
   const [version, setVersion] = useState(0);
   const [snapshot, setSnapshot] = useState<Snapshot>(() => getWorkflowSnapshot());
 
@@ -42,10 +44,13 @@ export function useWorkflowSnapshot() {
       return;
     }
 
+    const hospitalId = hospital?.id ?? "";
     let active = true;
     Promise.all([
-      fetch("/api/blood-requests").then((item) => item.json() as Promise<Envelope<BloodRequest[]>>),
-      fetch("/api/appointments?hospitalId=h1").then((item) => item.json() as Promise<Envelope<Appointment[]>>),
+      fetch(hospitalId ? `/api/blood-requests?hospitalId=${hospitalId}` : "/api/blood-requests")
+        .then((item) => item.json() as Promise<Envelope<BloodRequest[]>>),
+      fetch(hospitalId ? `/api/appointments?hospitalId=${hospitalId}` : "/api/appointments?hospitalId=missing")
+        .then((item) => item.json() as Promise<Envelope<Appointment[]>>),
       fetch("/api/donors").then((item) => item.json() as Promise<Envelope<Donor[]>>)
     ]).then(([requestPayload, appointmentPayload, donorPayload]) => {
       if (!active) return;
@@ -57,6 +62,7 @@ export function useWorkflowSnapshot() {
       setSnapshot({
         appointment,
         matches,
+        hospital: hospital ?? undefined,
         request,
         responses: appointment && request ? [{
           decision: "Aceite",
@@ -72,7 +78,7 @@ export function useWorkflowSnapshot() {
     return () => {
       active = false;
     };
-  }, [version]);
+  }, [hospital, version]);
 
   useEffect(() => {
     return subscribeRealtime(() => setVersion((item) => item + 1));

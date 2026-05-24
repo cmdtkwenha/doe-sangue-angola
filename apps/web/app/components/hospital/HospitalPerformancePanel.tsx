@@ -2,22 +2,24 @@
 
 import type { Appointment, BloodRequest } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
+import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import base from "./hospitalPortal.module.css";
 import styles from "./hospitalAdvanced.module.css";
 import { useCurrentHospital } from "./useCurrentHospital";
 
 export function HospitalPerformancePanel() {
+  const version = useRealtimeVersion();
   const { data: hospital } = useCurrentHospital();
   const hospitalId = hospital?.id ?? "";
   const { data: requests } = useApiData<BloodRequest[]>(
     hospitalId ? `/api/blood-requests?hospitalId=${hospitalId}` : "/api/blood-requests?hospitalId=missing",
     [],
-    hospitalId.length
+    version
   );
   const { data: appointments } = useApiData<Appointment[]>(
     hospitalId ? `/api/appointments?hospitalId=${hospitalId}` : "/api/appointments?hospitalId=missing",
     [],
-    hospitalId.length
+    version
   );
   const completed = requests.filter((request) => ["Concluído", "Concluido"].includes(request.status));
   const metrics = [

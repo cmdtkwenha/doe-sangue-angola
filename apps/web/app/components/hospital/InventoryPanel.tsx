@@ -2,17 +2,19 @@
 
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
+import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import { EmptyState } from "../ui/EmptyState";
 import styles from "./hospitalPortal.module.css";
 import { useCurrentHospital } from "./useCurrentHospital";
 
 export function InventoryPanel() {
+  const version = useRealtimeVersion();
   const { data: hospital } = useCurrentHospital();
   const hospitalId = hospital?.id ?? "";
   const { data: requests, loading, error } = useApiData<BloodRequest[]>(
     hospitalId ? `/api/blood-requests?hospitalId=${hospitalId}` : "/api/blood-requests?hospitalId=missing",
     [],
-    hospitalId.length
+    version
   );
   const inventory = buildInventorySummary(requests);
 

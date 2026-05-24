@@ -14,9 +14,11 @@ export function useApiData<T>(path: string, fallback: T, version = 0) {
   useEffect(() => {
     if (!enabled) {
       setData(fallback);
-      return;
     }
+  }, [enabled, fallback]);
 
+  useEffect(() => {
+    if (!enabled) return;
     let active = true;
     setLoading(true);
     setError("");
@@ -36,7 +38,7 @@ export function useApiData<T>(path: string, fallback: T, version = 0) {
     return () => {
       active = false;
     };
-  }, [enabled, fallback, path, version]);
+  }, [enabled, path, version]);
 
   return { data, error, loading, usingApi: enabled };
 }
