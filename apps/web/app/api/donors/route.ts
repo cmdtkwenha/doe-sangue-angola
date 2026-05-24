@@ -153,6 +153,7 @@ async function upsertPublicUser(db: DbClient, input: SaveDonorInput) {
   const { error } = await db
     .from("users")
     .upsert({
+      id: input.authUserId,
       auth_user_id: input.authUserId,
       email: input.email,
       name: input.fullName || emailName(input.email),
