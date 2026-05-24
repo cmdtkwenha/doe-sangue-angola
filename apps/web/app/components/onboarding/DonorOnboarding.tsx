@@ -2,6 +2,7 @@
 
 import type { BloodType } from "@doe-sangue-angola/shared-types";
 import { useRouter } from "next/navigation";
+import type { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
 import { useAuth } from "../auth/useAuth";
 import { OnboardingShell } from "./OnboardingShell";
@@ -9,8 +10,14 @@ import styles from "./onboarding.module.css";
 
 const bloodTypes: BloodType[] = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"];
 const genders = ["Masculino", "Feminino"];
+const months = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+];
 const maxBirthDate = eligibleBirthDate();
 const minBirthDate = "1900-01-01";
+const oldestYear = 1900;
+const youngestYear = Number(maxBirthDate.slice(0, 4));
 
 export function DonorOnboarding() {
   const { session } = useAuth();
@@ -25,8 +32,10 @@ export function DonorOnboarding() {
     phone: "",
     province: "Luanda"
   });
+  const [birthParts, setBirthParts] = useState({ day: "", month: "", year: "" });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("Preencha os dados reais do dador.");
+  const dayCount = daysInMonth(Number(birthParts.year), Number(birthParts.month));
 
   async function save() {
     if (!session?.user.id) return setMessage("Sessão inválida. Entre novamente.");
@@ -97,8 +106,25 @@ export function DonorOnboarding() {
         <Field label="Telefone de emergência" value={form.emergencyContactPhone} onChange={(emergencyContactPhone) =>
           setForm({ ...form, emergencyContactPhone })} />
         <label className="eyebrow">Data de nascimento</label>
-        <input className={styles.input} max={maxBirthDate} min={minBirthDate} type="date" value={form.birthDate} onChange={(event) =>
-          setForm({ ...form, birthDate: event.target.value })} />
+        <div className={styles.dateGrid}>
+          <select className={styles.input} value={birthParts.day} onChange={(event) =>
+            updateBirth({ ...birthParts, day: event.target.value }, setBirthParts, setForm)}>
+            <option value="">Dia</option>
+            {Array.from({ length: dayCount }, (_, index) => index + 1).map((day) =>
+              <option key={day} value={day}>{day}</option>
+            )}
+          </select>
+          <select className={styles.input} value={birthParts.month} onChange={(event) =>
+            updateBirth({ ...birthParts, month: event.target.value }, setBirthParts, setForm)}>
+            <option value="">Mês</option>
+            {months.map((month, index) => <option key={month} value={index + 1}>{month}</option>)}
+          </select>
+          <select className={styles.input} value={birthParts.year} onChange={(event) =>
+            updateBirth({ ...birthParts, year: event.target.value }, setBirthParts, setForm)}>
+            <option value="">Ano</option>
+            {yearOptions().map((year) => <option key={year}>{year}</option>)}
+          </select>
+        </div>
         <small className="muted">Escolha uma data. Dadores devem ter pelo menos 18 anos.</small>
         <button className="button" disabled={saving} onClick={save} type="button">
           {saving ? "A guardar..." : "Guardar perfil"}
@@ -119,6 +145,49 @@ function isEligibleAge(value: string) {
   if (!value) return false;
   const date = new Date(`${value}T00:00:00`);
   return !Number.isNaN(date.getTime()) && value <= maxBirthDate && value >= minBirthDate;
+}
+
+function daysInMonth(year: number, month: number) {
+  if (!year || !month) return 31;
+  return new Date(year, month, 0).getDate();
+}
+
+function toBirthDate(parts: { day: string; month: string; year: string }) {
+  const day = Number(parts.day);
+  const month = Number(parts.month);
+  const year = Number(parts.year);
+  if (!day || !month || !year) return "";
+  const maxDay = daysInMonth(year, month);
+  if (day > maxDay) return "";
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function updateBirth(
+  next: { day: string; month: string; year: string },
+  setBirthParts: (value: { day: string; month: string; year: string }) => void,
+  setForm: Dispatch<SetStateAction<{
+    birthDate: string;
+    bloodType: BloodType;
+    emergencyContactName: string;
+    emergencyContactPhone: string;
+    gender: string;
+    municipality: string;
+    phone: string;
+    province: string;
+  }>>
+) {
+  const day = Number(next.day);
+  const maxDay = daysInMonth(Number(next.year), Number(next.month));
+  const normalized = { ...next, day: day > maxDay ? "" : next.day };
+  setBirthParts(normalized);
+  setForm((current) => ({ ...current, birthDate: toBirthDate(normalized) }));
+}
+
+function yearOptions() {
+  return Array.from(
+    { length: youngestYear - oldestYear + 1 },
+    (_, index) => oldestYear + index
+  );
 }
 
 function requiredFields(form: {
