@@ -1,6 +1,7 @@
 "use client";
 
 import type { BloodType } from "@doe-sangue-angola/shared-types";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "../auth/useAuth";
 import { OnboardingShell } from "./OnboardingShell";
@@ -10,6 +11,7 @@ const bloodTypes: BloodType[] = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+
 
 export function DonorOnboarding() {
   const { session } = useAuth();
+  const router = useRouter();
   const [form, setForm] = useState({
     birthDate: "",
     bloodType: "O+" as BloodType,
@@ -18,22 +20,41 @@ export function DonorOnboarding() {
     phone: "",
     province: "Luanda"
   });
+  const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("Preencha os dados reais do dador.");
 
   async function save() {
     if (!session?.user.id) return setMessage("Sessão inválida. Entre novamente.");
-    const response = await fetch("/api/donors", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        authUserId: session.user.authUserId ?? session.user.id,
-        email: session.user.email,
-        fullName: session.user.name,
-        userId: session.user.id
-      })
-    });
-    setMessage(response.ok ? "Perfil de dador guardado no Supabase." : "Não foi possível guardar o perfil.");
+    const missing = requiredFields(form);
+    if (missing.length) {
+      setMessage(`Complete: ${missing.join(", ")}.`);
+      return;
+    }
+    setSaving(true);
+    setMessage("A guardar perfil de dador...");
+    try {
+      const response = await fetch("/api/donors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          authUserId: session.user.authUserId ?? session.user.id,
+          email: session.user.email,
+          fullName: session.user.name,
+          userId: session.user.id
+        })
+      });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || payload?.ok === false) {
+        throw new Error(payload?.message ?? "Não foi possível guardar o perfil.");
+      }
+      setMessage("Perfil guardado. A abrir app do dador...");
+      router.replace("/mobile");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Não foi possível guardar o perfil.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -59,11 +80,33 @@ export function DonorOnboarding() {
         <label className="eyebrow">Data de nascimento</label>
         <input className={styles.input} type="date" value={form.birthDate} onChange={(event) =>
           setForm({ ...form, birthDate: event.target.value })} />
-        <button className="button" onClick={save} type="button">Guardar perfil</button>
+        <button className="button" disabled={saving} onClick={save} type="button">
+          {saving ? "A guardar..." : "Guardar perfil"}
+        </button>
         <span className="muted">{message}</span>
       </aside>
     </OnboardingShell>
   );
+}
+
+function requiredFields(form: {
+  birthDate: string;
+  gender: string;
+  municipality: string;
+  phone: string;
+  province: string;
+}) {
+  const fields = [
+    ["província", form.province],
+    ["município", form.municipality],
+    ["telefone", form.phone],
+    ["género", form.gender],
+    ["data de nascimento", form.birthDate]
+  ];
+
+  return fields
+    .filter(([, value]) => !String(value).trim())
+    .map(([label]) => label);
 }
 
 function Field({ label, onChange, value }: {
