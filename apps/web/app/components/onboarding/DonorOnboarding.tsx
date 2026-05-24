@@ -15,6 +15,8 @@ export function DonorOnboarding() {
   const [form, setForm] = useState({
     birthDate: "",
     bloodType: "O+" as BloodType,
+    emergencyContactName: "",
+    emergencyContactPhone: "",
     gender: "",
     municipality: "",
     phone: "",
@@ -49,7 +51,8 @@ export function DonorOnboarding() {
         throw new Error(payload?.message ?? "Não foi possível guardar o perfil.");
       }
       setMessage("Perfil guardado. A abrir app do dador...");
-      router.replace("/mobile");
+      router.refresh();
+      window.setTimeout(() => router.replace("/mobile"), 350);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Não foi possível guardar o perfil.");
     } finally {
@@ -77,6 +80,10 @@ export function DonorOnboarding() {
         <Field label="Município" value={form.municipality} onChange={(municipality) => setForm({ ...form, municipality })} />
         <Field label="Telefone" value={form.phone} onChange={(phone) => setForm({ ...form, phone })} />
         <Field label="Género" value={form.gender} onChange={(gender) => setForm({ ...form, gender })} />
+        <Field label="Contacto de emergência" value={form.emergencyContactName} onChange={(emergencyContactName) =>
+          setForm({ ...form, emergencyContactName })} />
+        <Field label="Telefone de emergência" value={form.emergencyContactPhone} onChange={(emergencyContactPhone) =>
+          setForm({ ...form, emergencyContactPhone })} />
         <label className="eyebrow">Data de nascimento</label>
         <input className={styles.input} type="date" value={form.birthDate} onChange={(event) =>
           setForm({ ...form, birthDate: event.target.value })} />
