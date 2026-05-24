@@ -20,7 +20,7 @@ const oldestYear = 1900;
 const youngestYear = Number(maxBirthDate.slice(0, 4));
 
 export function DonorOnboarding() {
-  const { session } = useAuth();
+  const { refreshSession, session } = useAuth();
   const router = useRouter();
   const [form, setForm] = useState({
     birthDate: "",
@@ -49,7 +49,7 @@ export function DonorOnboarding() {
       return;
     }
     setSaving(true);
-    setMessage("A guardar perfil de dador...");
+    setMessage("A guardar perfil...");
     try {
       const response = await fetch("/api/donors", {
         method: "POST",
@@ -66,9 +66,18 @@ export function DonorOnboarding() {
       if (!response.ok || payload?.ok === false) {
         throw new Error(payload?.message ?? "Não foi possível guardar o perfil.");
       }
-      setMessage("Perfil guardado. A abrir app do dador...");
+      setMessage("Perfil guardado com sucesso.");
+      await refreshSession();
+      const donorOk = await verifyDonor(session.user.authUserId ?? session.user.id);
+      if (!donorOk) throw new Error("Perfil guardado, mas ainda não foi possível confirmar o dador.");
       router.refresh();
-      window.setTimeout(() => router.replace("/mobile"), 350);
+      window.setTimeout(() => {
+        try {
+          router.replace("/mobile");
+        } catch {
+          setMessage("Perfil guardado com sucesso. Abra /mobile para continuar.");
+        }
+      }, 500);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Não foi possível guardar o perfil.");
     } finally {
@@ -133,6 +142,14 @@ export function DonorOnboarding() {
       </aside>
     </OnboardingShell>
   );
+}
+
+async function verifyDonor(userId: string) {
+  const response = await fetch(`/api/donors?userId=${encodeURIComponent(userId)}`, {
+    cache: "no-store"
+  });
+  const payload = await response.json().catch(() => null);
+  return Boolean(response.ok && payload?.ok && payload.data?.id);
 }
 
 function eligibleBirthDate() {

@@ -20,6 +20,7 @@ type AuthContextValue = {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshSession: () => Promise<void>;
   register: (input: RegisterInput) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   session: { token: string; user: AuthUser } | null;
@@ -94,6 +95,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (supabase) await supabase.auth.signOut();
       setSession(null);
       router.push("/auth");
+    },
+    async refreshSession() {
+      if (!supabase || authMode !== "supabase") return;
+      const { data } = await supabase.auth.getSession();
+      setSession(await resolveSupabaseSession(supabase, data.session));
     },
     async register(input) {
       if (!supabase || getAuthMode() !== "supabase") {
