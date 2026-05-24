@@ -64,13 +64,13 @@ export async function POST(request: Request) {
     }
     const donor = await saveDonor(db, {
       authUserId,
-      birthDate: optionalString(body.birthDate, 20) ?? "",
+      birthDate: assertBirthDate(body.birthDate),
       bloodType: assertBloodType(body.bloodType),
       email: optionalString(body.email, 180) ?? authUser.email ?? profile.email,
       emergencyContactName: optionalString(body.emergencyContactName, 120),
       emergencyContactPhone: optionalString(body.emergencyContactPhone, 40),
       fullName: assertString(body.fullName, "Nome completo", 180),
-      gender: optionalString(body.gender, 40),
+      gender: assertGender(body.gender),
       municipality: assertString(body.municipality, "Município", 120),
       phone: assertString(body.phone, "Telefone", 40),
       profileId: profile.id,
@@ -191,9 +191,28 @@ function formatSupabaseError(error: {
   message: string;
 }) {
   return [
-    error.message,
+    `Erro Supabase: ${error.message}`,
     error.code ? `Código: ${error.code}` : "",
     error.details ? `Detalhes: ${error.details}` : "",
     error.hint ? `Sugestão: ${error.hint}` : ""
   ].filter(Boolean).join(" | ");
+}
+
+function assertGender(value: unknown) {
+  const gender = assertString(value, "Género", 20);
+  if (!["Masculino", "Feminino"].includes(gender)) {
+    throw new ApiError(400, "Género deve ser Masculino ou Feminino.");
+  }
+  return gender;
+}
+
+function assertBirthDate(value: unknown) {
+  const birthDate = assertString(value, "Data de nascimento", 20);
+  const date = new Date(`${birthDate}T00:00:00`);
+  const max = new Date();
+  max.setFullYear(max.getFullYear() - 18);
+  if (Number.isNaN(date.getTime()) || date > max) {
+    throw new ApiError(400, "Dador deve ter pelo menos 18 anos.");
+  }
+  return birthDate;
 }

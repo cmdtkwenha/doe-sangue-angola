@@ -8,6 +8,9 @@ import { OnboardingShell } from "./OnboardingShell";
 import styles from "./onboarding.module.css";
 
 const bloodTypes: BloodType[] = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"];
+const genders = ["Masculino", "Feminino"];
+const maxBirthDate = eligibleBirthDate();
+const minBirthDate = "1900-01-01";
 
 export function DonorOnboarding() {
   const { session } = useAuth();
@@ -30,6 +33,10 @@ export function DonorOnboarding() {
     const missing = requiredFields(form);
     if (missing.length) {
       setMessage(`Complete: ${missing.join(", ")}.`);
+      return;
+    }
+    if (!isEligibleAge(form.birthDate)) {
+      setMessage("O dador deve ter pelo menos 18 anos e uma data válida.");
       return;
     }
     setSaving(true);
@@ -79,14 +86,20 @@ export function DonorOnboarding() {
         <Field label="Província" value={form.province} onChange={(province) => setForm({ ...form, province })} />
         <Field label="Município" value={form.municipality} onChange={(municipality) => setForm({ ...form, municipality })} />
         <Field label="Telefone" value={form.phone} onChange={(phone) => setForm({ ...form, phone })} />
-        <Field label="Género" value={form.gender} onChange={(gender) => setForm({ ...form, gender })} />
+        <label className="eyebrow">Género</label>
+        <select className={styles.input} value={form.gender} onChange={(event) =>
+          setForm({ ...form, gender: event.target.value })}>
+          <option value="">Selecionar género</option>
+          {genders.map((gender) => <option key={gender}>{gender}</option>)}
+        </select>
         <Field label="Contacto de emergência" value={form.emergencyContactName} onChange={(emergencyContactName) =>
           setForm({ ...form, emergencyContactName })} />
         <Field label="Telefone de emergência" value={form.emergencyContactPhone} onChange={(emergencyContactPhone) =>
           setForm({ ...form, emergencyContactPhone })} />
         <label className="eyebrow">Data de nascimento</label>
-        <input className={styles.input} type="date" value={form.birthDate} onChange={(event) =>
+        <input className={styles.input} max={maxBirthDate} min={minBirthDate} type="date" value={form.birthDate} onChange={(event) =>
           setForm({ ...form, birthDate: event.target.value })} />
+        <small className="muted">Escolha uma data. Dadores devem ter pelo menos 18 anos.</small>
         <button className="button" disabled={saving} onClick={save} type="button">
           {saving ? "A guardar..." : "Guardar perfil"}
         </button>
@@ -94,6 +107,18 @@ export function DonorOnboarding() {
       </aside>
     </OnboardingShell>
   );
+}
+
+function eligibleBirthDate() {
+  const date = new Date();
+  date.setFullYear(date.getFullYear() - 18);
+  return date.toISOString().slice(0, 10);
+}
+
+function isEligibleAge(value: string) {
+  if (!value) return false;
+  const date = new Date(`${value}T00:00:00`);
+  return !Number.isNaN(date.getTime()) && value <= maxBirthDate && value >= minBirthDate;
 }
 
 function requiredFields(form: {
