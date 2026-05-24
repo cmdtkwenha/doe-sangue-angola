@@ -1,7 +1,7 @@
 "use client";
 
 import type { Hospital } from "@doe-sangue-angola/shared-types";
-import { useRouter } from "next/navigation";
+import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabaseClient";
 import { useAuth } from "../auth/useAuth";
@@ -26,7 +26,6 @@ type HospitalRow = {
 
 export function HospitalOnboarding() {
   const { session } = useAuth();
-  const router = useRouter();
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -69,7 +68,8 @@ export function HospitalOnboarding() {
     };
   }, []);
 
-  async function save() {
+  async function save(event?: FormEvent<HTMLFormElement>) {
+    event?.preventDefault();
     if (!session?.user.id || !hospitalId) {
       setMessage("Selecione um hospital aprovado antes de continuar.");
       return;
@@ -93,20 +93,34 @@ export function HospitalOnboarding() {
       if (hospitalError) throw new Error(formatSupabaseError(hospitalError));
       if (!hospital?.id) throw new Error("Hospital aprovado não encontrado.");
 
-      const { error: profileError } = await supabase
+      const profilePayload = {
+        auth_user_id: authUser.id,
+        email: authUser.email ?? session.user.email,
+        linked_entity_id: hospitalId,
+        name: session.user.name || authUser.email || "Hospital",
+        role: "hospital"
+      };
+      const { data: updated, error: updateError } = await supabase
         .from("profiles")
-        .upsert({
-          auth_user_id: authUser.id,
-          email: authUser.email ?? session.user.email,
-          linked_entity_id: hospitalId,
-          name: session.user.name || authUser.email || "Hospital",
-          role: "hospital"
-        }, { onConflict: "auth_user_id" });
-      if (profileError) throw new Error(formatSupabaseError(profileError));
+        .update(profilePayload)
+        .eq("auth_user_id", authUser.id)
+        .select("id")
+        .maybeSingle();
+      if (updateError) throw new Error(formatSupabaseError(updateError));
+
+      if (!updated?.id) {
+        const { error: insertError } = await supabase
+          .from("profiles")
+          .insert(profilePayload);
+        if (insertError) throw new Error(formatSupabaseError(insertError));
+      }
 
       setMessage("Conta ligada ao hospital aprovado. A abrir painel...");
-      router.replace("/hospital");
+      window.location.assign("/hospital");
     } catch (error) {
+      if (process.env.NODE_ENV !== "production") {
+        console.error("[hospital-onboarding] Falha ao ligar hospital", error);
+      }
       setMessage(error instanceof Error ? error.message : "Não foi possível ligar o hospital.");
     } finally {
       setSaving(false);
@@ -119,7 +133,7 @@ export function HospitalOnboarding() {
       subtitle="Escolha o hospital aprovado antes de criar pedidos de sangue."
       title="Configurar hospital verificado"
     >
-      <aside className={styles.summary}>
+      <form className={styles.summary} onSubmit={save}>
         <div>
           <div className="eyebrow">Lista aprovada</div>
           <h2>Hospital da conta</h2>
@@ -145,14 +159,13 @@ export function HospitalOnboarding() {
         ) : null}
         <button
           className="button"
-          disabled={saving || loading || !hospitalId}
-          onClick={save}
-          type="button"
+          disabled={saving || !hospitalId}
+          type="submit"
         >
-          {saving ? "A guardar..." : "Ligar conta"}
+          {saving ? "A ligar conta..." : "Ligar conta"}
         </button>
-        <span className="muted">{message}</span>
-      </aside>
+        <span className="muted" role="status">{message}</span>
+      </form>
     </OnboardingShell>
   );
 }
