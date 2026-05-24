@@ -1,6 +1,7 @@
 "use client";
 
 import type { Hospital } from "@doe-sangue-angola/shared-types";
+import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabaseClient";
@@ -26,6 +27,7 @@ type HospitalRow = {
 
 export function HospitalOnboarding() {
   const { session } = useAuth();
+  const router = useRouter();
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -33,6 +35,7 @@ export function HospitalOnboarding() {
   const [hospitalId, setHospitalId] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("Escolha um hospital aprovado.");
+  const [profileDebug, setProfileDebug] = useState("");
 
   useEffect(() => {
     if (!supabase) {
@@ -115,8 +118,23 @@ export function HospitalOnboarding() {
         if (insertError) throw new Error(formatSupabaseError(insertError));
       }
 
-      setMessage("Conta ligada ao hospital aprovado. A abrir painel...");
-      window.location.assign("/hospital");
+      const { data: profile, error: verifyError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("auth_user_id", authUser.id)
+        .maybeSingle();
+      if (verifyError) throw new Error(formatSupabaseError(verifyError));
+      if (profile?.role !== "hospital" || profile.linked_entity_id !== hospitalId) {
+        throw new Error("Perfil criado, mas o hospital ainda não ficou ligado.");
+      }
+      setProfileDebug(
+        `role: ${profile.role ?? "-"} · linked_entity_id: ${profile.linked_entity_id ?? "-"} · hospital_id: ${profile.hospital_id ?? "-"}`
+      );
+
+      await supabase.auth.refreshSession();
+      setMessage("Hospital ligado com sucesso.");
+      router.refresh();
+      setTimeout(() => router.replace("/hospital"), 500);
     } catch (error) {
       if (process.env.NODE_ENV !== "production") {
         console.error("[hospital-onboarding] Falha ao ligar hospital", error);
@@ -165,6 +183,7 @@ export function HospitalOnboarding() {
           {saving ? "A ligar conta..." : "Ligar conta"}
         </button>
         <span className="muted" role="status">{message}</span>
+        {profileDebug ? <span className="muted">{profileDebug}</span> : null}
       </form>
     </OnboardingShell>
   );
