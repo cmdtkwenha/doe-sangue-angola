@@ -118,6 +118,7 @@ async function ensureProfile(db: DbClient, authUser: { id: string; email?: strin
 }
 
 async function saveDonor(db: DbClient, input: SaveDonorInput): Promise<Donor> {
+  await upsertPublicUser(db, input);
   const payload = {
     auth_user_id: input.authUserId,
     birth_date: input.birthDate || null,
@@ -146,6 +147,23 @@ async function saveDonor(db: DbClient, input: SaveDonorInput): Promise<Donor> {
   const { data, error } = await query.select(donorColumns).single();
   if (error) throw new Error(formatSupabaseError(error));
   return mapDonor(data as unknown as DonorRow);
+}
+
+async function upsertPublicUser(db: DbClient, input: SaveDonorInput) {
+  const { error } = await db
+    .from("users")
+    .upsert({
+      auth_user_id: input.authUserId,
+      email: input.email,
+      name: input.fullName || emailName(input.email),
+      phone: input.phone,
+      role: "donor"
+    }, { onConflict: "email" });
+  if (error) throw new Error(formatSupabaseError(error));
+}
+
+function emailName(email: string) {
+  return email.split("@")[0] || "Utilizador";
 }
 
 type SaveDonorInput = {
