@@ -1,6 +1,10 @@
 import type { Appointment, Donor, Hospital } from "@doe-sangue-angola/shared-types";
 
 export function schedulingAgent(donor: Donor, hospital: Hospital): Appointment {
+  if (!donor?.id || !hospital?.id) {
+    throw new Error("Perfil ainda não configurado.");
+  }
+
   return {
     id: `appt-${donor.id}-${hospital.id}`,
     donorId: donor.id,

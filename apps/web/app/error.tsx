@@ -9,15 +9,41 @@ export default function AppError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  console.error("Erro de rota", error);
+  const isDevelopment = process.env.NODE_ENV !== "production";
+  const details = [
+    `Mensagem: ${error.message}`,
+    error.stack ? `Stack:\n${error.stack}` : "",
+    error.digest ? `Digest: ${error.digest}` : ""
+  ].filter(Boolean).join("\n\n");
+
+  if (isDevelopment) {
+    console.error("Erro de rota", {
+      digest: error.digest,
+      message: error.message,
+      stack: error.stack
+    });
+  }
 
   return (
     <main style={{ padding: 24 }}>
       <ErrorState
-        message="Algo falhou ao abrir esta página. Pode tentar novamente sem perder o contexto."
+        message="Perfil ainda não configurado."
         onRetry={reset}
-        title="Página temporariamente indisponível"
+        title="Não foi possível carregar esta área"
       />
+      {isDevelopment ? (
+        <pre style={{
+          background: "#111827",
+          borderRadius: 12,
+          color: "#f8fafc",
+          marginTop: 16,
+          overflow: "auto",
+          padding: 16,
+          whiteSpace: "pre-wrap"
+        }}>
+          {details || "Sem detalhes adicionais."}
+        </pre>
+      ) : null}
     </main>
   );
 }

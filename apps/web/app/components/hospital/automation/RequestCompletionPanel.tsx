@@ -10,7 +10,7 @@ export function RequestCompletionPanel() {
   const [message, setMessage] = useState("Aguardando validação do PIN.");
   const snapshot = useWorkflowSnapshot();
   const request = snapshot.request;
-  const donorId = snapshot.responses.find((item) => item.decision === "Aceite")?.donorId ?? "d1";
+  const donorId = snapshot.responses.find((item) => item.decision === "Aceite")?.donorId;
 
   if (!request) return null;
 
@@ -22,6 +22,10 @@ export function RequestCompletionPanel() {
       </div>
       <p className="muted">{message}</p>
       <button className={styles.button} onClick={async () => {
+        if (!donorId) {
+          setMessage("Perfil ainda não configurado.");
+          return;
+        }
         const result = await completeDonationAction(donorId, request.id);
         if (result.ok) {
           updateInventoryAfterDonation(request.bloodType, 1);

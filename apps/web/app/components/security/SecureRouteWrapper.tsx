@@ -19,20 +19,22 @@ export function SecureRouteWrapper({
   showLogout?: boolean;
 }) {
   const { loading, session } = useAuth();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/";
   const router = useRouter();
   const allowedKey = allowed.join(":");
   const allowedRoles = useMemo(() => allowed, [allowedKey]);
 
   useEffect(() => {
     if (loading) return;
-    if (!session) router.replace(`/auth?next=${pathname}`);
-    else if (!session.user.profileMissing && !isAuthorized(session.user.role, allowedRoles)) {
+    const user = session?.user;
+    if (!session || !user) router.replace(`/auth?next=${pathname}`);
+    else if (!user.profileMissing && !isAuthorized(user.role, allowedRoles)) {
       router.replace("/unauthorized");
     }
   }, [allowedRoles, loading, pathname, router, session]);
 
   if (loading || !session) return <SecureLoadingState />;
+  if (!session.user) return <MissingProfileState />;
   if (session.user.profileMissing) return <MissingProfileState />;
   if (!isAuthorized(session.user.role, allowedRoles)) return <SecureLoadingState />;
 

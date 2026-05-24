@@ -109,6 +109,7 @@ export const mockProvider: DataProvider = {
   listRequests: mockRepositories.request.listRequests,
   listRequestsForDonor: (donorId) => {
     const donor = donors.find((item) => item.id === donorId) ?? donors[0];
+    if (!donor?.id) return [];
     return requests.filter((request) =>
       request.bloodType === donor.bloodType || request.status === "Aberto"
     );

@@ -56,6 +56,7 @@ export function getHospitalSummary(hospitalId: string) {
 
 export function getDonorHome(donorId: string) {
   const donor = donors.find((item) => item.id === donorId) ?? donors[0];
+  if (!donor) throw new Error("Perfil ainda não configurado.");
   const appointment = appointments.find((item) => item.donorId === donor.id);
   const notifications = listNotifications(donor.id);
 
@@ -73,6 +74,7 @@ export async function getDonorHomeAsync(donorId: string): Promise<DonorHomeSnaps
   const provider = getDataProvider();
   const donorList = await provider.listDonors() as Donor[];
   const donor = donorList.find((item) => item.id === donorId) ?? donorList[0] ?? donors[0];
+  if (!donor) throw new Error("Perfil ainda não configurado.");
   const [nearbyRequests, history, notifications] = await Promise.all([
     provider.listRequestsForDonor(donor.id) as Promise<BloodRequest[]>,
     provider.listAppointmentsForDonor(donor.id) as Promise<Appointment[]>,

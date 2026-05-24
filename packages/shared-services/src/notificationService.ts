@@ -34,6 +34,14 @@ const notificationHistory: MockNotification[] = [
 
 // TODO(production): send production notifications via backend worker, never directly from UI.
 export function buildDonorAlert(donor: Donor, hospitalName: string, request?: BloodRequest) {
+  if (!donor?.id) {
+    return {
+      to: "",
+      title: "Perfil ainda não configurado.",
+      body: "Complete o perfil de dador para receber alertas."
+    };
+  }
+
   const bloodType = request?.bloodType ?? donor.bloodType;
 
   return {
@@ -44,6 +52,10 @@ export function buildDonorAlert(donor: Donor, hospitalName: string, request?: Bl
 }
 
 export function sendPushNotification(payload: PushPayload, provider: PushProvider = "mock") {
+  if (!payload.donor?.id) {
+    return { delivered: false, provider, message: "Perfil ainda não configurado." };
+  }
+
   if (provider === "expo") return sendExpoPushConnectorPreview(payload);
   if (provider === "fcm") return sendFcmConnectorPreview(payload);
 
@@ -61,6 +73,10 @@ export function sendPushNotification(payload: PushPayload, provider: PushProvide
 }
 
 export function sendMockNotification(donor: Donor, hospitalName: string, request?: BloodRequest) {
+  if (!donor?.id) {
+    return { delivered: false, provider: "mock" as const, message: "Perfil ainda não configurado." };
+  }
+
   const notification = buildDonorAlert(donor, hospitalName, request);
 
   return sendPushNotification({
@@ -123,6 +139,14 @@ export function markAllNotificationsRead(donorId: string) {
 
 export function buildReminderCards(donorId: string) {
   const donor = donors.find((item) => item.id === donorId) ?? donors[0];
+  if (!donor?.id) {
+    return [{
+      donorId,
+      title: "Perfil ainda não configurado.",
+      body: "Complete o perfil de dador para receber lembretes.",
+      action: "Completar perfil"
+    }];
+  }
   const donorAppointments = appointments.filter((item) => item.donorId === donor.id);
   const appointmentCards = donorAppointments.map((appointment) =>
     buildReminderFromAppointment(donor, appointment)

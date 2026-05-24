@@ -16,6 +16,7 @@ export const mockRepositories: AppRepositories = {
   donor: {
     addRewardPoints: (donorId, points) => {
       const donor = donors.find((item) => item.id === donorId) ?? donors[0];
+      if (!donor?.id) throw new Error("Perfil ainda não configurado.");
       const reward = rewardAgent(donor, true);
       donor.points = Math.max(donor.points + points, reward.currentPoints);
       return donor;

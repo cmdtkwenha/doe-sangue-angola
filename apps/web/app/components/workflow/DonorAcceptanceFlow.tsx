@@ -7,7 +7,7 @@ import { useWorkflowSnapshot } from "./useWorkflowSnapshot";
 
 export function DonorAcceptanceFlow() {
   const { matches, request, responses, refresh } = useWorkflowSnapshot();
-  const primaryDonor = matches[0]?.donor;
+  const primaryDonor = matches.find((match) => match.donor?.id)?.donor;
 
   if (!request || !primaryDonor) return null;
 
@@ -21,7 +21,7 @@ export function DonorAcceptanceFlow() {
         <span className="pill gold">{matches.length} matches</span>
       </div>
       <div className={styles.list}>
-        {matches.slice(0, 3).map((match) => (
+        {matches.filter((match) => match.donor?.id).slice(0, 3).map((match) => (
           <article className={styles.row} key={match.donor.id}>
             <span><strong>{match.donor.name}</strong><br /><small>{match.donor.bloodType} · score {match.score}</small></span>
             <span className="pill green">{match.recommendation}</span>

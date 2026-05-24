@@ -8,12 +8,15 @@ import { useWorkflowSnapshot } from "./useWorkflowSnapshot";
 export function CompletionFlow() {
   const { request, responses, refresh } = useWorkflowSnapshot();
   const [message, setMessage] = useState("Aguardando conclusão da doação.");
-  const donorId = responses.find((item) => item.decision === "Aceite")?.donorId ?? "d1";
+  const donorId = responses.find((item) => item.decision === "Aceite")?.donorId;
 
   if (!request) return null;
 
   async function complete() {
-    if (!request) return;
+    if (!request || !donorId) {
+      setMessage("Perfil ainda não configurado.");
+      return;
+    }
     const result = await completeDonationAction(donorId, request.id);
     if (result.ok) setMessage("Concluído: pontos e auditoria sincronizados.");
     refresh();

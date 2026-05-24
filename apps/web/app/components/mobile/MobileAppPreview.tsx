@@ -6,6 +6,7 @@ import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { useState } from "react";
 import styles from "./mobileApp.module.css";
 import { DonorHome } from "./DonorHome";
+import { DonorEntityGate } from "./DonorEntityGate";
 import { LoadingSkeleton } from "../ui/LoadingSkeleton";
 import { MobileShell } from "./MobileShell";
 import { RequestDetailsModal } from "./RequestDetailsModal";
@@ -60,6 +61,7 @@ export function MobileAppPreview() {
 
   return (
     <main className={styles.stage}>
+      <DonorEntityGate>
       <section className={styles.grid}>
         <DonorHome />
         <RequestList onAccept={accept} onOpen={setSelected} />
@@ -83,6 +85,7 @@ export function MobileAppPreview() {
         <FamilyEmergencyScreen />
         <DonationSuccessScreen />
       </section>
+      </DonorEntityGate>
     </main>
   );
 }

@@ -16,7 +16,9 @@ const compatible: Record<BloodType, BloodType[]> = {
   "AB+": ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"]
 };
 
-export function matchingAgent(request: BloodRequest, donors: Donor[]): MatchResult[] {
+export function matchingAgent(request: BloodRequest | undefined, donors: Donor[]): MatchResult[] {
+  if (!request?.id) return [];
+
   return donors
     .map((donor) => scoreDonor(request, donor))
     .sort((a, b) => b.score - a.score);

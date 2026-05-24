@@ -40,7 +40,7 @@ function DonorApp() {
   const [actionMessage, setActionMessage] = useState("");
   const [busyRequestId, setBusyRequestId] = useState("");
 
-  if (loading || !home) {
+  if (loading) {
     return (
       <SafeAreaView style={styles.safe}>
         <StatusBar barStyle="dark-content" />
@@ -57,6 +57,20 @@ function DonorApp() {
         <StatusBar barStyle="dark-content" />
         <View style={styles.content}>
           <ErrorState message={error} title="Arranque interrompido" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!home?.donor?.id) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <StatusBar barStyle="dark-content" />
+        <View style={styles.content}>
+          <EmptyState
+            message="Complete o onboarding para criar o seu perfil de dador."
+            title="Perfil ainda não configurado."
+          />
         </View>
       </SafeAreaView>
     );

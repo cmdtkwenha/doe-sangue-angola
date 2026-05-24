@@ -8,6 +8,10 @@ const tiers = [
 ];
 
 export function rewardAgent(donor: Donor, completedDonation: boolean) {
+  if (!donor?.id) {
+    throw new Error("Perfil ainda não configurado.");
+  }
+
   const earned = completedDonation ? 120 : 0;
   const currentPoints = donor.points + earned;
   const tier = tiers.reduce(

@@ -13,7 +13,7 @@ import {
   listRequests
 } from "@doe-sangue-angola/shared-services";
 import { currentHospitalId } from "./hospitalPortalData";
-import type { Donor, Hospital } from "@doe-sangue-angola/shared-types";
+import type { BloodRequest, Donor, Hospital } from "@doe-sangue-angola/shared-types";
 
 const dashboard = getHospitalDashboard(currentHospitalId);
 const fallbackHospital: Hospital = {
@@ -35,9 +35,19 @@ const fallbackDonor: Donor = {
   lastDonation: "",
   points: 0
 };
+const fallbackRequest: BloodRequest = {
+  bloodType: "O-",
+  createdAt: new Date(0).toISOString(),
+  hospitalId: fallbackHospital.id,
+  id: "pedido-pendente",
+  patientCode: "SEM-PERFIL",
+  status: "Aberto",
+  units: 1,
+  urgency: "Normal"
+};
 const hospital = dashboard.hospital ?? getHospitalById(currentHospitalId) ?? fallbackHospital;
 const hospitalRequests = dashboard.requests;
-const primaryRequest = hospitalRequests[0] ?? listRequests()[0];
+const primaryRequest = hospitalRequests[0] ?? listRequests()[0] ?? fallbackRequest;
 const matches = dashboard.incomingDonors.length
   ? dashboard.incomingDonors
   : matchingAgent(primaryRequest, listDonors());

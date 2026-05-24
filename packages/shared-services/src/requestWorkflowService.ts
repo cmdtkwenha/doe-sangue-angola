@@ -160,7 +160,7 @@ export function completeWorkflowDonation(donorId: string, requestId: string) {
 }
 
 export function getWorkflowRequestByBloodType(bloodType: BloodType) {
-  return requests.find((request) => request.bloodType === bloodType) ?? requests[0];
+  return requests.find((request) => request.bloodType === bloodType);
 }
 
 export const RequestWorkflowService = {

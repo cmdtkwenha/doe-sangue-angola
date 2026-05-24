@@ -26,7 +26,7 @@ export function SidebarNav({
   items,
   rootHref
 }: SidebarNavProps) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? rootHref;
 
   return (
     <nav aria-label={ariaLabel} className={className}>
@@ -49,6 +49,7 @@ export function SidebarNav({
 }
 
 function isActive(pathname: string, href: string, rootHref: string) {
+  if (!href) return false;
   if (href === rootHref) return pathname === href;
   return pathname === href || pathname.startsWith(`${href}/`);
 }
