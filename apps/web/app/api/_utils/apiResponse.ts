@@ -21,10 +21,13 @@ export async function apiResponse<T>(handler: Handler<T>) {
     }
     reportError(error, { feature: "api.route" });
     trackApiRequest("api.route", 500, Date.now() - started);
+    const message = error instanceof Error
+      ? error.message
+      : "Supabase indisponível. Tente novamente ou use modo mock.";
     return Response.json(
       {
         ok: false,
-        message: "Supabase indisponível. Tente novamente ou use modo mock."
+        message
       },
       { status: 500 }
     );

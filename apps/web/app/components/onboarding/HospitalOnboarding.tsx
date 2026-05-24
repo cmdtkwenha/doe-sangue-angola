@@ -74,18 +74,36 @@ export function HospitalOnboarding() {
       setMessage("Selecione um hospital aprovado antes de continuar.");
       return;
     }
+    if (!supabase) {
+      setMessage("Supabase não configurado no frontend.");
+      return;
+    }
     setSaving(true);
     setMessage("A ligar conta ao hospital selecionado...");
     try {
-      const response = await fetch("/api/hospitals", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ hospitalId, userId: session.user.id })
-      });
-      const payload = await response.json().catch(() => null);
-      if (!response.ok || payload?.ok === false) {
-        throw new Error(payload?.message ?? "Não foi possível ligar o hospital.");
-      }
+      const { data: auth } = await supabase.auth.getUser();
+      const authUser = auth.user;
+      if (!authUser?.id) throw new Error("Sessão inválida. Entre novamente.");
+      const { data: hospital, error: hospitalError } = await supabase
+        .from("hospitals")
+        .select("id,verified")
+        .eq("id", hospitalId)
+        .eq("verified", true)
+        .single();
+      if (hospitalError) throw new Error(formatSupabaseError(hospitalError));
+      if (!hospital?.id) throw new Error("Hospital aprovado não encontrado.");
+
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert({
+          auth_user_id: authUser.id,
+          email: authUser.email ?? session.user.email,
+          linked_entity_id: hospitalId,
+          name: session.user.name || authUser.email || "Hospital",
+          role: "hospital"
+        }, { onConflict: "auth_user_id" });
+      if (profileError) throw new Error(formatSupabaseError(profileError));
+
       setMessage("Conta ligada ao hospital aprovado. A abrir painel...");
       router.replace("/hospital");
     } catch (error) {

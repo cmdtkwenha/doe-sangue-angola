@@ -25,7 +25,18 @@ export const hospitalRepository = {
   },
 
   async findHospitalByUserId(userId: string) {
-    const { data, error } = await getDatabaseClient()
+    const db = getDatabaseClient();
+    const { data: profile, error: profileError } = await db
+      .from("profiles")
+      .select("linked_entity_id")
+      .or(`id.eq.${userId},auth_user_id.eq.${userId}`)
+      .maybeSingle();
+
+    if (profileError) throw profileError;
+    const linkedId = profile?.linked_entity_id;
+    if (linkedId) return this.getHospital(String(linkedId));
+
+    const { data, error } = await db
       .from("hospitals")
       .select("*")
       .eq("user_id", userId)
@@ -39,17 +50,18 @@ export const hospitalRepository = {
     const db = getDatabaseClient();
     const { data, error } = await db
       .from("hospitals")
-      .update({ user_id: userId })
+      .select("*")
       .eq("id", hospitalId)
       .eq("verified", true)
-      .select("*")
       .single();
 
     if (error) throw error;
-    await db
+    const { error: profileError } = await db
       .from("profiles")
       .update({ linked_entity_id: hospitalId })
       .eq("id", userId);
+    if (profileError) throw profileError;
+
     return mapHospital(data as unknown as HospitalRow);
   },
 

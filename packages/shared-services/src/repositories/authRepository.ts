@@ -82,7 +82,7 @@ export const authRepository = {
         phone: input.phone,
         role: input.role
       }, { onConflict: "email" })
-      .select(authUserColumns)
+      .select(legacyUserColumns)
       .single();
 
     if (userError) throw userError;

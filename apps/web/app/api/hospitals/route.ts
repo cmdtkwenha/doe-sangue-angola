@@ -1,9 +1,10 @@
 import {
+  authRepository,
   hospitalRepository
 } from "@doe-sangue-angola/shared-services";
 import { auditApiAction } from "../_utils/audit";
 import { ApiError, apiResponse, readJson } from "../_utils/apiResponse";
-import { requireApiSession, requireEntityAccess, requireSameOrigin } from "../_utils/security";
+import { requireApiSession, requireAuthUser, requireEntityAccess, requireSameOrigin } from "../_utils/security";
 import { assertString } from "../_utils/validation";
 
 export async function GET(request: Request) {
@@ -26,14 +27,35 @@ export async function PUT(request: Request) {
   requireSameOrigin(request);
   const body = await readJson<{ hospitalId: string; userId: string }>(request);
   return apiResponse(async () => {
-    const principal = await requireApiSession(["hospital", "admin"]);
+    const user = await requireAuthUser();
+    const profile = await ensureHospitalProfile(user);
+    if (profile.role !== "hospital" && profile.role !== "admin") {
+      throw new ApiError(403, "Perfil sem permissão para ligar hospital.");
+    }
     const hospitalId = assertString(body.hospitalId, "Hospital");
-    const userId = principal.role === "admin"
+    const userId = profile.role === "admin"
       ? assertString(body.userId, "Utilizador")
-      : principal.profileId;
+      : profile.id;
     const hospital = await hospitalRepository.assignHospitalUser(hospitalId, userId);
+    const principal = await requireApiSession(["hospital", "admin"]);
     requireEntityAccess({ ...principal, hospitalId }, "hospital", hospital.id);
     await auditApiAction(principal, `Associou utilizador ao hospital ${hospital.name}.`);
     return hospital;
+  });
+}
+
+async function ensureHospitalProfile(user: {
+  email?: string | null;
+  id: string;
+  user_metadata?: { name?: string; role?: string };
+}) {
+  const existing = await authRepository.findProfileByAuthUser(user.id, user.email ?? undefined);
+  if (existing) return existing;
+
+  return authRepository.upsertProfile({
+    authUserId: user.id,
+    email: user.email ?? "",
+    name: user.user_metadata?.name ?? user.email ?? "Hospital",
+    role: "hospital"
   });
 }
