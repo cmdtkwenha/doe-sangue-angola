@@ -77,6 +77,15 @@ export async function updateStatusAction(requestId: string, status: RequestStatu
   return result;
 }
 
+export async function updateAppointmentStatusAction(
+  appointmentId: string,
+  status: Appointment["status"]
+) {
+  const result = await post<Appointment>("/api/appointments/status", { appointmentId, status });
+  if (result.ok) publishRealtimeEvent("APPOINTMENT_CREATED", { appointment: result.data });
+  return result;
+}
+
 export async function validatePinAction(pin: string, requestId: string) {
   if (canUseMock()) return validateWorkflowPin(pin, requestId);
   return post<Appointment>("/api/appointments/validate-pin", { pin, requestId });

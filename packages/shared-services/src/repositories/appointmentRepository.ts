@@ -6,6 +6,7 @@ const appointmentColumns = [
   "donor_id",
   "hospital_id",
   "blood_request_id",
+  "created_at",
   "date",
   "time",
   "pin",

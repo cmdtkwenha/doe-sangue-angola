@@ -79,10 +79,12 @@ export type Appointment = {
   id: string;
   donorId: string;
   hospitalId: string;
+  bloodRequestId?: string;
+  createdAt?: string;
   date: string;
   time: string;
   pin: string;
-  status: "Confirmado" | "Pendente" | "Concluido";
+  status: "Cancelado" | "Chegou" | "Confirmado" | "Concluido" | "Pendente" | "PIN Validado";
 };
 
 export type InventoryItem = {

@@ -1,5 +1,19 @@
 -- Allow real donor acceptance while keeping hospital/admin protections.
 
+alter table public.appointments
+  drop constraint if exists appointments_status_check;
+
+alter table public.appointments
+  add constraint appointments_status_check
+  check (status in (
+    'Cancelado',
+    'Chegou',
+    'Confirmado',
+    'Concluido',
+    'Pendente',
+    'PIN Validado'
+  ));
+
 create or replace function public.current_donor_id()
 returns uuid
 language sql

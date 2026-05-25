@@ -129,7 +129,7 @@ export const requestRepository = {
         pin: appointment.pin,
         status: "Pendente"
       })
-      .select("id,donor_id,hospital_id,blood_request_id,date,time,pin,status")
+      .select("id,donor_id,hospital_id,blood_request_id,created_at,date,time,pin,status")
       .single();
 
     if (error) throw error;
@@ -143,7 +143,7 @@ export const requestRepository = {
       .from("appointments")
       .update({ status: "Confirmado" })
       .eq("pin", pin)
-      .select("id,donor_id,hospital_id,date,time,pin,status,blood_request_id");
+      .select("id,donor_id,hospital_id,date,time,pin,status,blood_request_id,created_at");
 
     if (requestId) query = query.eq("blood_request_id", requestId);
     const { data, error } = await query.single();
@@ -193,7 +193,7 @@ async function findRequest(id: string) {
 async function findAppointment(donorId: string, requestId: string) {
   const { data, error } = await getDatabaseClient()
     .from("appointments")
-    .select("id,donor_id,hospital_id,blood_request_id,date,time,pin,status")
+    .select("id,donor_id,hospital_id,blood_request_id,created_at,date,time,pin,status")
     .eq("donor_id", donorId)
     .eq("blood_request_id", requestId)
     .maybeSingle();

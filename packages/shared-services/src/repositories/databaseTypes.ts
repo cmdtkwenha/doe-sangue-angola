@@ -80,6 +80,7 @@ export type AppointmentRow = {
   donor_id: string;
   hospital_id: string;
   blood_request_id?: string | null;
+  created_at?: string | null;
   date: string;
   time: string;
   pin: string;
@@ -169,6 +170,8 @@ export function mapAppointment(row: AppointmentRow): Appointment {
     id: row.id,
     donorId: row.donor_id,
     hospitalId: row.hospital_id,
+    bloodRequestId: row.blood_request_id ?? undefined,
+    createdAt: row.created_at ?? undefined,
     date: row.date,
     time: row.time,
     pin: row.pin,

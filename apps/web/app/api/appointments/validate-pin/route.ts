@@ -1,8 +1,7 @@
-import { dataProvider } from "@doe-sangue-angola/shared-services";
-import type { Appointment, BloodRequest } from "@doe-sangue-angola/shared-types";
+import { mapAppointment, type AppointmentRow } from "@doe-sangue-angola/shared-services";
 import { ApiError, apiResponse, readJson } from "../../_utils/apiResponse";
 import { auditApiAction } from "../../_utils/audit";
-import { requireApiSession, requireSameOrigin } from "../../_utils/security";
+import { createRouteSupabase, requireApiSession, requireEntityAccess, requireSameOrigin } from "../../_utils/security";
 import { assertPin, optionalString } from "../../_utils/validation";
 
 export async function POST(request: Request) {
@@ -12,20 +11,38 @@ export async function POST(request: Request) {
   return apiResponse(async () => {
     const principal = await requireApiSession(["hospital", "admin"]);
     const requestId = optionalString(body.requestId, 80);
-    if (principal.role === "hospital") {
-      if (!requestId) throw new ApiError(400, "Pedido obrigatório para validar PIN.");
-      const ownRequests = await dataProvider.listRequestsForHospital(
-        principal.hospitalId ?? ""
-      ) as BloodRequest[];
-      if (!ownRequests.some((item) => item.id === requestId)) {
-        throw new ApiError(403, "Acesso negado a este pedido.");
-      }
+    const db = await createRouteSupabase();
+    const pin = assertPin(body.pin);
+    let query = db
+      .from("appointments")
+      .update({ status: "PIN Validado" })
+      .eq("pin", pin)
+      .select(appointmentColumns);
+    if (requestId) query = query.eq("blood_request_id", requestId);
+    const { data, error } = await query.single();
+    if (error) throw error;
+    const appointment = mapAppointment(data as unknown as AppointmentRow);
+    requireEntityAccess(principal, "hospital", appointment.hospitalId);
+    if (appointment.bloodRequestId) {
+      const { error: requestError } = await db
+        .from("blood_requests")
+        .update({ status: "PIN Validado" })
+        .eq("id", appointment.bloodRequestId);
+      if (requestError) throw requestError;
     }
-    const appointment = await dataProvider.validatePin(
-      assertPin(body.pin),
-      requestId
-    ) as Appointment;
     await auditApiAction(principal, `Validou PIN do pedido ${body.requestId ?? appointment.id}.`);
     return appointment;
   });
 }
+
+const appointmentColumns = [
+  "id",
+  "donor_id",
+  "hospital_id",
+  "blood_request_id",
+  "created_at",
+  "date",
+  "time",
+  "pin",
+  "status"
+].join(",");

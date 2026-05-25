@@ -58,7 +58,7 @@ async function createAppointment(
 ): Promise<Appointment> {
   const { data: existing, error: existingError } = await db
     .from("appointments")
-    .select("id,donor_id,hospital_id,blood_request_id,date,time,pin,status")
+    .select("id,donor_id,hospital_id,blood_request_id,created_at,date,time,pin,status")
     .eq("donor_id", donorId)
     .eq("blood_request_id", requestId)
     .maybeSingle();
@@ -77,7 +77,7 @@ async function createAppointment(
       status: "Pendente",
       time: when.time
     })
-    .select("id,donor_id,hospital_id,blood_request_id,date,time,pin,status")
+    .select("id,donor_id,hospital_id,blood_request_id,created_at,date,time,pin,status")
     .single();
   if (error) throw error;
   return mapAppointment(data);
@@ -91,8 +91,12 @@ function mapAppointment(row: {
   pin: string;
   status: Appointment["status"];
   time: string;
+  blood_request_id?: string | null;
+  created_at?: string | null;
 }): Appointment {
   return {
+    bloodRequestId: row.blood_request_id ?? undefined,
+    createdAt: row.created_at ?? undefined,
     date: row.date,
     donorId: row.donor_id,
     hospitalId: row.hospital_id,
