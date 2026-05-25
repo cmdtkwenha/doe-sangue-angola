@@ -111,23 +111,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error: authError } = await supabase.auth.signUp({
         email: input.email,
         password: input.password,
-        options: { data: { name: input.name, role: input.role } }
+        options: { data: { full_name: input.name, name: input.name, role: input.role } }
       });
       setLoading(false);
       if (authError) {
-        setError("Não foi possível criar a conta.");
+        setError(formatAuthError(authError));
         return;
       }
       if (data.user) {
         try {
-          await createSupabaseProfile({
-            authUserId: data.user.id,
-            email: input.email,
-            name: input.name,
-            role: input.role
-          });
-        } catch {
-          setError("Conta criada, mas o perfil ainda não foi guardado.");
+          if (data.session) {
+            await createSupabaseProfile({
+              authUserId: data.user.id,
+              email: input.email,
+              name: input.name,
+              role: input.role
+            });
+          }
+        } catch (profileError) {
+          setError(profileError instanceof Error
+            ? profileError.message
+            : "Conta criada, mas o perfil ainda não foi guardado.");
         }
       }
       const next = await resolveSupabaseSession(supabase, data.session);
@@ -162,5 +166,16 @@ async function createSupabaseProfile(input: {
     body: JSON.stringify(input)
   });
 
-  if (!response.ok) throw new Error("Falha ao guardar perfil.");
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null);
+    throw new Error(payload?.message ?? "Falha ao guardar perfil.");
+  }
+}
+
+function formatAuthError(error: { code?: string; message: string; status?: number }) {
+  return [
+    `Erro Supabase Auth: ${error.message}`,
+    error.code ? `Código: ${error.code}` : "",
+    error.status ? `Estado: ${error.status}` : ""
+  ].filter(Boolean).join(" | ");
 }
