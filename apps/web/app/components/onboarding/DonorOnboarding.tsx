@@ -1,11 +1,9 @@
 "use client";
 
-import type { BloodType, Donor } from "@doe-sangue-angola/shared-types";
+import type { BloodType } from "@doe-sangue-angola/shared-types";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "../auth/useAuth";
-import { getMissingDonorFields, isDonorProfileComplete } from "../mobile/useCurrentDonor";
-import { supabase } from "../../../lib/supabaseClient";
 import { DonorBirthDateSelect, isEligibleBirthDate } from "./DonorBirthDateSelect";
 import { OnboardingShell } from "./OnboardingShell";
 import styles from "./onboarding.module.css";
@@ -61,19 +59,9 @@ export function DonorOnboarding() {
         throw new Error(payload?.message ?? "Não foi possível guardar o perfil.");
       }
       setMessage("Perfil guardado com sucesso. A abrir a aplicação...");
-      await refreshSession();
-      const donor = await fetchDonor(userId);
-      if (!isDonorProfileComplete(donor, userId)) {
-        const missing = getMissingDonorFields(donor, userId).join(", ");
-        throw new Error(`Perfil guardado, mas faltam campos: ${missing}.`);
-      }
-      router.refresh();
+      void refreshSession();
       router.replace("/mobile");
-      window.setTimeout(() => {
-        if (window.location.pathname.includes("/onboarding/donor")) {
-          window.location.href = "/mobile";
-        }
-      }, 1400);
+      window.location.assign("/mobile");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Não foi possível guardar o perfil.");
     } finally {
@@ -122,42 +110,6 @@ export function DonorOnboarding() {
       </aside>
     </OnboardingShell>
   );
-}
-
-async function fetchDonor(userId: string) {
-  if (supabase) {
-    const { data, error } = await supabase
-      .from("donors")
-      .select("*")
-      .eq("user_id", userId)
-      .single();
-    if (error) throw new Error(error.message);
-    return data ? toDonor(data, userId) : null;
-  }
-  const response = await fetch(`/api/donors?userId=${encodeURIComponent(userId)}`, {
-    cache: "no-store"
-  });
-  const payload = await response.json().catch(() => null);
-  if (!response.ok || !payload?.ok) {
-    throw new Error(payload?.message ?? "Não foi possível confirmar o perfil do dador.");
-  }
-  return payload.data as Donor | null;
-}
-
-function toDonor(row: Record<string, unknown>, userId: string): Donor {
-  return {
-    id: String(row.id ?? ""),
-    userId: String(row.user_id ?? userId),
-    name: String(row.full_name ?? "Dador"),
-    bloodType: row.blood_type as BloodType,
-    province: String(row.province ?? ""),
-    municipality: String(row.municipality ?? ""),
-    available: Boolean(row.available ?? true),
-    points: Number(row.points ?? 0),
-    lastDonation: String(row.last_donation_date ?? row.last_donation ?? ""),
-    phone: typeof row.phone === "string" ? row.phone : undefined,
-    totalDonations: Number(row.total_donations ?? 0)
-  };
 }
 
 function requiredFields(form: {
