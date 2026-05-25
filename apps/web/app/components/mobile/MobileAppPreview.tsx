@@ -41,6 +41,7 @@ const FamilyEmergencyScreen = dynamic(() =>
 { loading: load("A carregar pedido familiar") });
 
 export function MobileAppPreview() {
+  const [accepting, setAccepting] = useState(false);
   const [selected, setSelected] = useState<BloodRequest | null>(null);
   const [message, setMessage] = useState("Toque num pedido para ver detalhes.");
   const { data: donor } = useCurrentDonor();
@@ -49,9 +50,15 @@ export function MobileAppPreview() {
       setMessage("Complete o perfil de dador antes de aceitar pedidos.");
       return;
     }
-    const result = await acceptRequestAction(donor.id, request.id);
-    setMessage(result.ok ? "Pedido aceite. PIN gerado para o hospital." : result.message);
-    setSelected(null);
+    setAccepting(true);
+    setMessage("A aceitar pedido...");
+    try {
+      const result = await acceptRequestAction(donor.id, request.id);
+      setMessage(result.ok ? "Pedido aceite com sucesso." : result.message);
+      setSelected(null);
+    } finally {
+      setAccepting(false);
+    }
   };
   const reject = (request: BloodRequest) => {
     if (donor) rejectWorkflowRequest(donor.id, request.id);
@@ -68,6 +75,7 @@ export function MobileAppPreview() {
         <MobileShell active="requests">
           <RequestListContent />
           <p className="muted">{message}</p>
+          {accepting ? <p className="muted">A criar compromisso no Supabase...</p> : null}
           <RequestDetailsModal
             onAccept={() => selected && accept(selected)}
             onClose={() => setSelected(null)}

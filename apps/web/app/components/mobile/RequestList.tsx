@@ -31,7 +31,9 @@ export function RequestList({
   const donorReady = isDonorProfileComplete(donor, userId);
   const donorId = donorReady ? donor.id : "";
   const fallback = useMemo(() =>
-    getDataMode() === "mock" && donorId ? listAvailableRequestsForDonor(donorId) : [],
+    process.env.NODE_ENV !== "production" && getDataMode() === "mock" && donorId
+      ? listAvailableRequestsForDonor(donorId)
+      : [],
   [donorId, version]);
   const { data: requests, error, loading } = useApiData<BloodRequest[]>(
     donorId ? `/api/blood-requests?donorId=${donorId}` : "/api/blood-requests?donorId=missing",

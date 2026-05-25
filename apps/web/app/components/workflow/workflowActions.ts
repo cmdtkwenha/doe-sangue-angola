@@ -4,7 +4,6 @@ import {
   acceptWorkflowRequest,
   completeWorkflowDonation,
   createWorkflowRequest,
-  isSupabaseMode,
   markDonorOnWay,
   publishRealtimeEvent,
   validateWorkflowPin
@@ -23,6 +22,11 @@ type CreateRequestResult = {
   request: BloodRequest;
 };
 
+function canUseMock() {
+  return process.env.NODE_ENV !== "production" &&
+    process.env.NEXT_PUBLIC_DATA_MODE !== "supabase";
+}
+
 async function post<T>(path: string, body: unknown) {
   const response = await fetch(path, {
     method: "POST",
@@ -37,7 +41,7 @@ async function post<T>(path: string, body: unknown) {
 }
 
 export async function createRequestAction(input?: RequestDraft) {
-  if (!isSupabaseMode()) return createWorkflowRequest(input);
+  if (canUseMock()) return createWorkflowRequest(input);
 
   const result = await post<CreateRequestResult>("/api/blood-requests", {
     hospitalId: input?.hospitalId ?? "h1",
@@ -57,7 +61,7 @@ export async function createRequestAction(input?: RequestDraft) {
 }
 
 export async function acceptRequestAction(donorId: string, requestId: string) {
-  if (!isSupabaseMode()) return acceptWorkflowRequest(donorId, requestId);
+  if (canUseMock()) return acceptWorkflowRequest(donorId, requestId);
   const result = await post<Appointment>("/api/appointments/accept", { donorId, requestId });
   if (result.ok) {
     publishRealtimeEvent("DONOR_ACCEPTED", { donorId, requestId });
@@ -67,18 +71,18 @@ export async function acceptRequestAction(donorId: string, requestId: string) {
 }
 
 export async function updateStatusAction(requestId: string, status: RequestStatus) {
-  if (!isSupabaseMode()) return markDonorOnWay(requestId);
+  if (canUseMock()) return markDonorOnWay(requestId);
   const result = await post<BloodRequest>("/api/blood-requests/status", { requestId, status });
   if (result.ok) publishRealtimeEvent("REQUEST_UPDATED", { request: result.data });
   return result;
 }
 
 export async function validatePinAction(pin: string, requestId: string) {
-  if (!isSupabaseMode()) return validateWorkflowPin(pin, requestId);
+  if (canUseMock()) return validateWorkflowPin(pin, requestId);
   return post<Appointment>("/api/appointments/validate-pin", { pin, requestId });
 }
 
 export async function completeDonationAction(donorId: string, requestId: string) {
-  if (!isSupabaseMode()) return completeWorkflowDonation(donorId, requestId);
+  if (canUseMock()) return completeWorkflowDonation(donorId, requestId);
   return post<BloodRequest>("/api/appointments/complete", { donorId, requestId });
 }
