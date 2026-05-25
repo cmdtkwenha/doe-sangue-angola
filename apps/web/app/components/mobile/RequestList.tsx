@@ -15,6 +15,7 @@ import {
   isDonorProfileComplete,
   useCurrentDonor
 } from "./useCurrentDonor";
+import { useAuth } from "../auth/useAuth";
 
 export function RequestList({
   onAccept,
@@ -24,8 +25,10 @@ export function RequestList({
   onOpen?: (request: BloodRequest) => void;
 }) {
   const version = useRealtimeVersion();
+  const { session } = useAuth();
   const { data: donor } = useCurrentDonor();
-  const donorReady = isDonorProfileComplete(donor);
+  const authUserId = session?.user.authUserId ?? session?.user.id;
+  const donorReady = isDonorProfileComplete(donor, authUserId);
   const donorId = donorReady ? donor.id : "";
   const fallback = useMemo(() =>
     getDataMode() === "mock" && donorId ? listAvailableRequestsForDonor(donorId) : [],

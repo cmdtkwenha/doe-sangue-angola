@@ -28,13 +28,17 @@ export function useCurrentDonor() {
   return result;
 }
 
-export function isDonorProfileComplete(donor: Donor | null): donor is Donor {
-  return getMissingDonorFields(donor).length === 0;
+export function isDonorProfileComplete(
+  donor: Donor | null,
+  authUserId?: string
+): donor is Donor {
+  return getMissingDonorFields(donor, authUserId).length === 0;
 }
 
-export function getMissingDonorFields(donor: Donor | null) {
+export function getMissingDonorFields(donor: Donor | null, authUserId?: string) {
   if (!donor?.id) return ["linha do dador"];
   const fields: Array<[string, unknown]> = [
+    ["auth_user_id", donor.authUserId === authUserId ? donor.authUserId : ""],
     ["blood_type", donor.bloodType],
     ["province", donor.province],
     ["municipality", donor.municipality],

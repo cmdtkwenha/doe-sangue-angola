@@ -13,6 +13,7 @@ const bloodTypes: BloodType[] = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+
 const genders = ["Masculino", "Feminino"];
 
 type DebugState = {
+  authUserId: string;
   bloodType: string;
   exists: boolean;
   missingFields: string[];
@@ -72,8 +73,9 @@ export function DonorOnboarding() {
       }
       setMessage("Perfil guardado com sucesso. A abrir a aplicação...");
       await refreshSession();
-      const donor = await fetchDonor(session.user.authUserId ?? session.user.id);
-      const nextDebug = toDebug(donor, false);
+      const authUserId = session.user.authUserId ?? session.user.id;
+      const donor = await fetchDonor(authUserId);
+      const nextDebug = toDebug(donor, authUserId, false);
       setDebug(nextDebug);
       if (!nextDebug.profileComplete) {
         throw new Error(`Perfil guardado, mas faltam campos: ${nextDebug.missingFields.join(", ")}.`);
@@ -165,14 +167,15 @@ function requiredFields(form: {
     .map(([label]) => label);
 }
 
-function toDebug(donor: Donor | null, redirectAttempted: boolean): DebugState {
+function toDebug(donor: Donor | null, authUserId: string, redirectAttempted: boolean): DebugState {
   return {
+    authUserId: donor?.authUserId ?? "-",
     bloodType: donor?.bloodType ?? "-",
     exists: Boolean(donor?.id),
-    missingFields: getMissingDonorFields(donor),
+    missingFields: getMissingDonorFields(donor, authUserId),
     municipality: donor?.municipality ?? "-",
     phone: donor?.phone ?? "-",
-    profileComplete: isDonorProfileComplete(donor),
+    profileComplete: isDonorProfileComplete(donor, authUserId),
     province: donor?.province ?? "-",
     redirectAttempted
   };
@@ -183,6 +186,7 @@ function DebugPanel({ debug }: { debug: DebugState }) {
     <div className={styles.field}>
       <div className="eyebrow">Debug temporário</div>
       <p className="muted">donor row exists: {debug.exists ? "yes" : "no"}</p>
+      <p className="muted">auth_user_id: {debug.authUserId}</p>
       <p className="muted">missing fields: {debug.missingFields.join(", ") || "none"}</p>
       <p className="muted">blood_type: {debug.bloodType}</p>
       <p className="muted">province: {debug.province}</p>

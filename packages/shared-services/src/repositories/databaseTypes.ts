@@ -110,6 +110,7 @@ export function mapUser(row: UserRow) {
 export function mapDonor(row: DonorRow): Donor {
   return {
     id: row.id,
+    authUserId: row.auth_user_id ?? undefined,
     name: row.full_name ?? row.users?.name ?? "Dador verificado",
     bloodType: row.blood_type,
     province: row.province,

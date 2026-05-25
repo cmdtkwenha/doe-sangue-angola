@@ -10,15 +10,18 @@ import { EmptyState } from "../ui/EmptyState";
 import { LoadingSkeleton } from "../ui/LoadingSkeleton";
 import { isDonorProfileComplete, useCurrentDonor } from "./useCurrentDonor";
 import { VerificationBadge } from "./VerificationBadge";
+import { useAuth } from "../auth/useAuth";
 
 export function DonorProfile() {
+  const { session } = useAuth();
   const { data: donor, loading } = useCurrentDonor();
+  const authUserId = session?.user.authUserId ?? session?.user.id;
 
   if (loading) {
     return <MobileShell active="profile"><LoadingSkeleton label="A carregar perfil real" /></MobileShell>;
   }
 
-  if (!isDonorProfileComplete(donor)) {
+  if (!isDonorProfileComplete(donor, authUserId)) {
     return (
       <MobileShell active="profile">
         <EmptyState

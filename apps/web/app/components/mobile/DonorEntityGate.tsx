@@ -7,14 +7,17 @@ import { EmptyState } from "../ui/EmptyState";
 import { LoadingSkeleton } from "../ui/LoadingSkeleton";
 import { MobileShell } from "./MobileShell";
 import { isDonorProfileComplete, useCurrentDonor } from "./useCurrentDonor";
+import { useAuth } from "../auth/useAuth";
 
 export function DonorEntityGate({ children }: { children: ReactNode }) {
   const { data: donor, loading } = useCurrentDonor();
+  const { session } = useAuth();
+  const authUserId = session?.user.authUserId ?? session?.user.id;
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !isDonorProfileComplete(donor)) router.replace("/onboarding/donor");
-  }, [donor, loading, router]);
+    if (!loading && !isDonorProfileComplete(donor, authUserId)) router.replace("/onboarding/donor");
+  }, [authUserId, donor, loading, router]);
 
   if (loading) {
     return (
@@ -24,7 +27,7 @@ export function DonorEntityGate({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!isDonorProfileComplete(donor)) {
+  if (!isDonorProfileComplete(donor, authUserId)) {
     return (
       <MobileShell active="profile">
         <EmptyState

@@ -10,18 +10,21 @@ import { shortcuts } from "./mobileMock";
 import { MobileHeader } from "./MobileHeader";
 import { MobileShell } from "./MobileShell";
 import { isDonorProfileComplete, useCurrentDonor } from "./useCurrentDonor";
+import { useAuth } from "../auth/useAuth";
 
 export function DonorHome() {
   const [message, setMessage] = useState("Atalhos prontos.");
   const version = useRealtimeVersion();
+  const { session } = useAuth();
   const { data: donor, loading } = useCurrentDonor();
+  const authUserId = session?.user.authUserId ?? session?.user.id;
   const donorId = donor?.id ?? "";
   const { data: nearbyRequests } = useApiData<BloodRequest[]>(
     donorId ? `/api/blood-requests?donorId=${donorId}` : "/api/blood-requests?donorId=missing",
     [],
     version
   );
-  if (!isDonorProfileComplete(donor)) {
+  if (!isDonorProfileComplete(donor, authUserId)) {
     return (
       <MobileShell active="home">
         <MobileHeader title="Sangue Angola" subtitle="Doe sangue, salve vidas" />
