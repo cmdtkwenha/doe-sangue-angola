@@ -29,6 +29,8 @@ export type DonorRow = {
   available: boolean;
   birth_date?: string | null;
   email?: string | null;
+  emergency_contact_name?: string | null;
+  emergency_contact_phone?: string | null;
   eligibility_status?: string | null;
   full_name?: string | null;
   gender?: string | null;
@@ -118,6 +120,8 @@ export function mapDonor(row: DonorRow): Donor {
     available: row.available,
     birthDate: row.birth_date ?? undefined,
     email: row.email ?? undefined,
+    emergencyContactName: row.emergency_contact_name ?? undefined,
+    emergencyContactPhone: row.emergency_contact_phone ?? undefined,
     eligibilityStatus: row.eligibility_status ?? "Pendente",
     gender: row.gender ?? undefined,
     lastDonation: row.last_donation_date ?? row.last_donation ?? "",

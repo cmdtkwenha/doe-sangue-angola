@@ -40,6 +40,8 @@ export function DonorOnboarding() {
   const [debug, setDebug] = useState<DebugState | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("Preencha os dados reais do dador.");
+  const missingFormFields = requiredFields(form);
+  const formReady = missingFormFields.length === 0 && isEligibleBirthDate(form.birthDate);
 
   async function save() {
     if (!session?.user.id) return setMessage("Sessão inválida. Entre novamente.");
@@ -112,21 +114,24 @@ export function DonorOnboarding() {
           {bloodTypes.map((type) => <option key={type}>{type}</option>)}
         </select>
         <Field label="Província" value={form.province} onChange={(province) => setForm({ ...form, province })} />
-        <Field label="Município" value={form.municipality} onChange={(municipality) => setForm({ ...form, municipality })} />
-        <Field label="Telefone" value={form.phone} onChange={(phone) => setForm({ ...form, phone })} />
-        <label className="eyebrow">Género</label>
+        <Field required label="Município" value={form.municipality} onChange={(municipality) => setForm({ ...form, municipality })} />
+        <Field required label="Telefone" value={form.phone} onChange={(phone) => setForm({ ...form, phone })} />
+        <label className="eyebrow">Género *</label>
         <select className={styles.input} value={form.gender} onChange={(event) =>
           setForm({ ...form, gender: event.target.value })}>
           <option value="">Selecionar género</option>
           {genders.map((gender) => <option key={gender}>{gender}</option>)}
         </select>
-        <Field label="Contacto de emergência" value={form.emergencyContactName} onChange={(emergencyContactName) =>
+        <Field required label="Contacto de emergência" value={form.emergencyContactName} onChange={(emergencyContactName) =>
           setForm({ ...form, emergencyContactName })} />
-        <Field label="Telefone de emergência" value={form.emergencyContactPhone} onChange={(emergencyContactPhone) =>
+        <Field required label="Telefone de emergência" value={form.emergencyContactPhone} onChange={(emergencyContactPhone) =>
           setForm({ ...form, emergencyContactPhone })} />
-        <label className="eyebrow">Data de nascimento</label>
+        <label className="eyebrow">Data de nascimento *</label>
         <DonorBirthDateSelect onChange={(birthDate) => setForm({ ...form, birthDate })} />
-        <button className="button" disabled={saving} onClick={save} type="button">
+        {missingFormFields.length ? (
+          <small className="muted">Campos em falta: {missingFormFields.join(", ")}.</small>
+        ) : null}
+        <button className="button" disabled={saving || !formReady} onClick={save} type="button">
           {saving ? "A guardar..." : "Guardar perfil"}
         </button>
         <span className="muted">{message}</span>
@@ -153,12 +158,16 @@ function requiredFields(form: {
   municipality: string;
   phone: string;
   province: string;
+  emergencyContactName: string;
+  emergencyContactPhone: string;
 }) {
   const fields = [
     ["província", form.province],
     ["município", form.municipality],
     ["telefone", form.phone],
     ["género", form.gender],
+    ["contacto de emergência", form.emergencyContactName],
+    ["telefone de emergência", form.emergencyContactPhone],
     ["data de nascimento", form.birthDate]
   ];
 
@@ -198,14 +207,15 @@ function DebugPanel({ debug }: { debug: DebugState }) {
   );
 }
 
-function Field({ label, onChange, value }: {
+function Field({ label, onChange, required, value }: {
   label: string;
   onChange: (value: string) => void;
+  required?: boolean;
   value: string;
 }) {
   return (
     <>
-      <label className="eyebrow">{label}</label>
+      <label className="eyebrow">{label}{required ? " *" : ""}</label>
       <input className={styles.input} value={value} onChange={(event) => onChange(event.target.value)} />
     </>
   );

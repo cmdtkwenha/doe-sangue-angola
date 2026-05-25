@@ -187,6 +187,8 @@ const donorColumns = [
   "auth_user_id",
   "full_name",
   "email",
+  "emergency_contact_name",
+  "emergency_contact_phone",
   "phone",
   "blood_type",
   "province",

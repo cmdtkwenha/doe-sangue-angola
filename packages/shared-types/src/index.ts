@@ -39,6 +39,8 @@ export type Donor = {
   eligibilityStatus?: string;
   birthDate?: string;
   email?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
   gender?: string;
   phone?: string;
   preferredHospitalId?: string;

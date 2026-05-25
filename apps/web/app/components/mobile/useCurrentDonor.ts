@@ -42,7 +42,11 @@ export function getMissingDonorFields(donor: Donor | null, authUserId?: string) 
     ["blood_type", donor.bloodType],
     ["province", donor.province],
     ["municipality", donor.municipality],
-    ["phone", donor.phone]
+    ["phone", donor.phone],
+    ["gender", donor.gender],
+    ["birth_date", donor.birthDate],
+    ["emergency_contact_name", donor.emergencyContactName],
+    ["emergency_contact_phone", donor.emergencyContactPhone]
   ];
 
   return fields
