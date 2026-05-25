@@ -4,7 +4,7 @@ import type { BloodType, Donor } from "@doe-sangue-angola/shared-types";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "../auth/useAuth";
-import { isDonorProfileComplete } from "../mobile/useCurrentDonor";
+import { getMissingDonorFields, isDonorProfileComplete } from "../mobile/useCurrentDonor";
 import { DonorBirthDateSelect, isEligibleBirthDate } from "./DonorBirthDateSelect";
 import { OnboardingShell } from "./OnboardingShell";
 import styles from "./onboarding.module.css";
@@ -15,6 +15,7 @@ const genders = ["Masculino", "Feminino"];
 type DebugState = {
   bloodType: string;
   exists: boolean;
+  missingFields: string[];
   municipality: string;
   phone: string;
   profileComplete: boolean;
@@ -75,14 +76,14 @@ export function DonorOnboarding() {
       const nextDebug = toDebug(donor, false);
       setDebug(nextDebug);
       if (!nextDebug.profileComplete) {
-        throw new Error("Perfil guardado, mas ainda está incompleto para abrir a aplicação.");
+        throw new Error(`Perfil guardado, mas faltam campos: ${nextDebug.missingFields.join(", ")}.`);
       }
       router.refresh();
       setDebug({ ...nextDebug, redirectAttempted: true });
       router.replace("/mobile");
       window.setTimeout(() => {
         if (window.location.pathname.includes("/onboarding/donor")) {
-          setMessage("Redirecionamento bloqueado: o guard ainda não reconheceu o perfil completo.");
+          window.location.assign("/mobile");
         }
       }, 1400);
     } catch (error) {
@@ -168,6 +169,7 @@ function toDebug(donor: Donor | null, redirectAttempted: boolean): DebugState {
   return {
     bloodType: donor?.bloodType ?? "-",
     exists: Boolean(donor?.id),
+    missingFields: getMissingDonorFields(donor),
     municipality: donor?.municipality ?? "-",
     phone: donor?.phone ?? "-",
     profileComplete: isDonorProfileComplete(donor),
@@ -181,6 +183,7 @@ function DebugPanel({ debug }: { debug: DebugState }) {
     <div className={styles.field}>
       <div className="eyebrow">Debug temporário</div>
       <p className="muted">donor row exists: {debug.exists ? "yes" : "no"}</p>
+      <p className="muted">missing fields: {debug.missingFields.join(", ") || "none"}</p>
       <p className="muted">blood_type: {debug.bloodType}</p>
       <p className="muted">province: {debug.province}</p>
       <p className="muted">municipality: {debug.municipality}</p>

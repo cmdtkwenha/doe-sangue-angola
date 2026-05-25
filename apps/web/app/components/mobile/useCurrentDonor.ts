@@ -29,10 +29,19 @@ export function useCurrentDonor() {
 }
 
 export function isDonorProfileComplete(donor: Donor | null): donor is Donor {
-  return Boolean(
-    donor?.bloodType &&
-    donor.province &&
-    donor.municipality &&
-    donor.phone
-  );
+  return getMissingDonorFields(donor).length === 0;
+}
+
+export function getMissingDonorFields(donor: Donor | null) {
+  if (!donor?.id) return ["linha do dador"];
+  const fields: Array<[string, unknown]> = [
+    ["blood_type", donor.bloodType],
+    ["province", donor.province],
+    ["municipality", donor.municipality],
+    ["phone", donor.phone]
+  ];
+
+  return fields
+    .filter(([, value]) => !String(value ?? "").trim())
+    .map(([label]) => label);
 }
