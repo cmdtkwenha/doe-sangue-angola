@@ -33,7 +33,6 @@ export function isDonorProfileComplete(donor: Donor | null): donor is Donor {
     donor?.bloodType &&
     donor.province &&
     donor.municipality &&
-    donor.phone &&
-    donor.birthDate
+    donor.phone
   );
 }

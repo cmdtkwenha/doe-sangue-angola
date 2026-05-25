@@ -6,15 +6,15 @@ import { useEffect } from "react";
 import { EmptyState } from "../ui/EmptyState";
 import { LoadingSkeleton } from "../ui/LoadingSkeleton";
 import { MobileShell } from "./MobileShell";
-import { useCurrentDonor } from "./useCurrentDonor";
+import { isDonorProfileComplete, useCurrentDonor } from "./useCurrentDonor";
 
 export function DonorEntityGate({ children }: { children: ReactNode }) {
   const { data: donor, loading } = useCurrentDonor();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !donor?.id) router.replace("/onboarding/donor");
-  }, [donor?.id, loading, router]);
+    if (!loading && !isDonorProfileComplete(donor)) router.replace("/onboarding/donor");
+  }, [donor, loading, router]);
 
   if (loading) {
     return (
@@ -24,7 +24,7 @@ export function DonorEntityGate({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!donor?.id) {
+  if (!isDonorProfileComplete(donor)) {
     return (
       <MobileShell active="profile">
         <EmptyState

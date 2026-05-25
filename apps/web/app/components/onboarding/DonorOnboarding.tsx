@@ -1,23 +1,26 @@
 "use client";
 
-import type { BloodType } from "@doe-sangue-angola/shared-types";
+import type { BloodType, Donor } from "@doe-sangue-angola/shared-types";
 import { useRouter } from "next/navigation";
-import type { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
 import { useAuth } from "../auth/useAuth";
+import { isDonorProfileComplete } from "../mobile/useCurrentDonor";
+import { DonorBirthDateSelect, isEligibleBirthDate } from "./DonorBirthDateSelect";
 import { OnboardingShell } from "./OnboardingShell";
 import styles from "./onboarding.module.css";
 
 const bloodTypes: BloodType[] = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"];
 const genders = ["Masculino", "Feminino"];
-const months = [
-  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-];
-const maxBirthDate = eligibleBirthDate();
-const minBirthDate = "1900-01-01";
-const oldestYear = 1900;
-const youngestYear = Number(maxBirthDate.slice(0, 4));
+
+type DebugState = {
+  bloodType: string;
+  exists: boolean;
+  municipality: string;
+  phone: string;
+  profileComplete: boolean;
+  province: string;
+  redirectAttempted: boolean;
+};
 
 export function DonorOnboarding() {
   const { refreshSession, session } = useAuth();
@@ -32,10 +35,9 @@ export function DonorOnboarding() {
     phone: "",
     province: "Luanda"
   });
-  const [birthParts, setBirthParts] = useState({ day: "", month: "", year: "" });
+  const [debug, setDebug] = useState<DebugState | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("Preencha os dados reais do dador.");
-  const dayCount = daysInMonth(Number(birthParts.year), Number(birthParts.month));
 
   async function save() {
     if (!session?.user.id) return setMessage("Sessão inválida. Entre novamente.");
@@ -44,11 +46,12 @@ export function DonorOnboarding() {
       setMessage(`Complete: ${missing.join(", ")}.`);
       return;
     }
-    if (!isEligibleAge(form.birthDate)) {
+    if (!isEligibleBirthDate(form.birthDate)) {
       setMessage("O dador deve ter pelo menos 18 anos e uma data válida.");
       return;
     }
     setSaving(true);
+    setDebug(null);
     setMessage("A guardar perfil...");
     try {
       const response = await fetch("/api/donors", {
@@ -66,18 +69,22 @@ export function DonorOnboarding() {
       if (!response.ok || payload?.ok === false) {
         throw new Error(payload?.message ?? "Não foi possível guardar o perfil.");
       }
-      setMessage("Perfil guardado com sucesso.");
+      setMessage("Perfil guardado com sucesso. A abrir a aplicação...");
       await refreshSession();
-      const donorOk = await verifyDonor(session.user.authUserId ?? session.user.id);
-      if (!donorOk) throw new Error("Perfil guardado, mas ainda não foi possível confirmar o dador.");
+      const donor = await fetchDonor(session.user.authUserId ?? session.user.id);
+      const nextDebug = toDebug(donor, false);
+      setDebug(nextDebug);
+      if (!nextDebug.profileComplete) {
+        throw new Error("Perfil guardado, mas ainda está incompleto para abrir a aplicação.");
+      }
       router.refresh();
+      setDebug({ ...nextDebug, redirectAttempted: true });
+      router.replace("/mobile");
       window.setTimeout(() => {
-        try {
-          router.replace("/mobile");
-        } catch {
-          setMessage("Perfil guardado com sucesso. Abra /mobile para continuar.");
+        if (window.location.pathname.includes("/onboarding/donor")) {
+          setMessage("Redirecionamento bloqueado: o guard ainda não reconheceu o perfil completo.");
         }
-      }, 500);
+      }, 1400);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Não foi possível guardar o perfil.");
     } finally {
@@ -115,96 +122,26 @@ export function DonorOnboarding() {
         <Field label="Telefone de emergência" value={form.emergencyContactPhone} onChange={(emergencyContactPhone) =>
           setForm({ ...form, emergencyContactPhone })} />
         <label className="eyebrow">Data de nascimento</label>
-        <div className={styles.dateGrid}>
-          <select className={styles.input} value={birthParts.day} onChange={(event) =>
-            updateBirth({ ...birthParts, day: event.target.value }, setBirthParts, setForm)}>
-            <option value="">Dia</option>
-            {Array.from({ length: dayCount }, (_, index) => index + 1).map((day) =>
-              <option key={day} value={day}>{day}</option>
-            )}
-          </select>
-          <select className={styles.input} value={birthParts.month} onChange={(event) =>
-            updateBirth({ ...birthParts, month: event.target.value }, setBirthParts, setForm)}>
-            <option value="">Mês</option>
-            {months.map((month, index) => <option key={month} value={index + 1}>{month}</option>)}
-          </select>
-          <select className={styles.input} value={birthParts.year} onChange={(event) =>
-            updateBirth({ ...birthParts, year: event.target.value }, setBirthParts, setForm)}>
-            <option value="">Ano</option>
-            {yearOptions().map((year) => <option key={year}>{year}</option>)}
-          </select>
-        </div>
-        <small className="muted">Escolha uma data. Dadores devem ter pelo menos 18 anos.</small>
+        <DonorBirthDateSelect onChange={(birthDate) => setForm({ ...form, birthDate })} />
         <button className="button" disabled={saving} onClick={save} type="button">
           {saving ? "A guardar..." : "Guardar perfil"}
         </button>
         <span className="muted">{message}</span>
+        {debug ? <DebugPanel debug={debug} /> : null}
       </aside>
     </OnboardingShell>
   );
 }
 
-async function verifyDonor(userId: string) {
+async function fetchDonor(userId: string) {
   const response = await fetch(`/api/donors?userId=${encodeURIComponent(userId)}`, {
     cache: "no-store"
   });
   const payload = await response.json().catch(() => null);
-  return Boolean(response.ok && payload?.ok && payload.data?.id);
-}
-
-function eligibleBirthDate() {
-  const date = new Date();
-  date.setFullYear(date.getFullYear() - 18);
-  return date.toISOString().slice(0, 10);
-}
-
-function isEligibleAge(value: string) {
-  if (!value) return false;
-  const date = new Date(`${value}T00:00:00`);
-  return !Number.isNaN(date.getTime()) && value <= maxBirthDate && value >= minBirthDate;
-}
-
-function daysInMonth(year: number, month: number) {
-  if (!year || !month) return 31;
-  return new Date(year, month, 0).getDate();
-}
-
-function toBirthDate(parts: { day: string; month: string; year: string }) {
-  const day = Number(parts.day);
-  const month = Number(parts.month);
-  const year = Number(parts.year);
-  if (!day || !month || !year) return "";
-  const maxDay = daysInMonth(year, month);
-  if (day > maxDay) return "";
-  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-}
-
-function updateBirth(
-  next: { day: string; month: string; year: string },
-  setBirthParts: (value: { day: string; month: string; year: string }) => void,
-  setForm: Dispatch<SetStateAction<{
-    birthDate: string;
-    bloodType: BloodType;
-    emergencyContactName: string;
-    emergencyContactPhone: string;
-    gender: string;
-    municipality: string;
-    phone: string;
-    province: string;
-  }>>
-) {
-  const day = Number(next.day);
-  const maxDay = daysInMonth(Number(next.year), Number(next.month));
-  const normalized = { ...next, day: day > maxDay ? "" : next.day };
-  setBirthParts(normalized);
-  setForm((current) => ({ ...current, birthDate: toBirthDate(normalized) }));
-}
-
-function yearOptions() {
-  return Array.from(
-    { length: youngestYear - oldestYear + 1 },
-    (_, index) => oldestYear + index
-  );
+  if (!response.ok || !payload?.ok) {
+    throw new Error(payload?.message ?? "Não foi possível confirmar o perfil do dador.");
+  }
+  return payload.data as Donor | null;
 }
 
 function requiredFields(form: {
@@ -225,6 +162,33 @@ function requiredFields(form: {
   return fields
     .filter(([, value]) => !String(value).trim())
     .map(([label]) => label);
+}
+
+function toDebug(donor: Donor | null, redirectAttempted: boolean): DebugState {
+  return {
+    bloodType: donor?.bloodType ?? "-",
+    exists: Boolean(donor?.id),
+    municipality: donor?.municipality ?? "-",
+    phone: donor?.phone ?? "-",
+    profileComplete: isDonorProfileComplete(donor),
+    province: donor?.province ?? "-",
+    redirectAttempted
+  };
+}
+
+function DebugPanel({ debug }: { debug: DebugState }) {
+  return (
+    <div className={styles.field}>
+      <div className="eyebrow">Debug temporário</div>
+      <p className="muted">donor row exists: {debug.exists ? "yes" : "no"}</p>
+      <p className="muted">blood_type: {debug.bloodType}</p>
+      <p className="muted">province: {debug.province}</p>
+      <p className="muted">municipality: {debug.municipality}</p>
+      <p className="muted">phone: {debug.phone}</p>
+      <p className="muted">profile complete: {debug.profileComplete ? "yes" : "no"}</p>
+      <p className="muted">redirect attempted: {debug.redirectAttempted ? "yes" : "no"}</p>
+    </div>
+  );
 }
 
 function Field({ label, onChange, value }: {
