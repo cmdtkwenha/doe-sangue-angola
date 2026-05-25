@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     });
 
     if (profile.role === "donor") {
-      const existing = await donorRepository.findDonorByUserId(profile.id);
+      const existing = await donorRepository.findDonorByUserId(user.id);
       if (!existing) {
         await donorRepository.upsertDonorProfile({
           authUserId: body.authUserId ?? "",
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
           municipality: "",
           phone: body.phone ?? "",
           province: "",
-          userId: profile.id
+          userId: user.id
         });
       }
     }

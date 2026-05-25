@@ -27,7 +27,7 @@ export type RequestStatus =
 
 export type Donor = {
   id: string;
-  authUserId?: string;
+  userId?: string;
   name: string;
   bloodType: BloodType;
   province: string;

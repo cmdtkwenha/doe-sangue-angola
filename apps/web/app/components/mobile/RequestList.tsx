@@ -27,8 +27,8 @@ export function RequestList({
   const version = useRealtimeVersion();
   const { session } = useAuth();
   const { data: donor } = useCurrentDonor();
-  const authUserId = session?.user.authUserId ?? session?.user.id;
-  const donorReady = isDonorProfileComplete(donor, authUserId);
+  const userId = session?.user.authUserId ?? session?.user.id;
+  const donorReady = isDonorProfileComplete(donor, userId);
   const donorId = donorReady ? donor.id : "";
   const fallback = useMemo(() =>
     getDataMode() === "mock" && donorId ? listAvailableRequestsForDonor(donorId) : [],

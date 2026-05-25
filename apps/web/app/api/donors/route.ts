@@ -8,7 +8,6 @@ import { assertBloodType, assertString, optionalString } from "../_utils/validat
 type DonorBody = {
   birthDate: string;
   bloodType: BloodType;
-  authUserId?: string;
   email?: string;
   emergencyContactName?: string;
   emergencyContactPhone?: string;
@@ -33,7 +32,7 @@ export async function GET(request: Request) {
       const { data, error } = await db
         .from("donors")
         .select(donorColumns)
-        .or(`auth_user_id.eq.${userId},user_id.eq.${userId}`)
+        .eq("user_id", userId)
         .maybeSingle();
       if (error) throw new Error(formatSupabaseError(error));
       return data ? mapDonor(data as unknown as DonorRow) : null;
@@ -58,12 +57,7 @@ export async function POST(request: Request) {
     if (!["donor", "admin"].includes(profile.role)) {
       throw new ApiError(403, "Perfil sem permissão para guardar dador.");
     }
-    const authUserId = body.authUserId || authUser.id;
-    if (profile.role !== "admin" && authUserId !== authUser.id) {
-      throw new ApiError(403, "Só pode atualizar o seu perfil de dador.");
-    }
     const donor = await saveDonor(db, {
-      authUserId,
       birthDate: assertBirthDate(body.birthDate),
       bloodType: assertBloodType(body.bloodType),
       email: optionalString(body.email, 180) ?? authUser.email ?? profile.email,
@@ -73,13 +67,13 @@ export async function POST(request: Request) {
       gender: assertGender(body.gender),
       municipality: assertString(body.municipality, "Município", 120),
       phone: assertString(body.phone, "Telefone", 40),
-      profileId: profile.id,
+      userId: authUser.id,
       province: assertString(body.province, "Província", 120)
     });
     const { error: linkError } = await db
       .from("profiles")
       .update({ linked_entity_id: donor.id, role: "donor" })
-      .eq("auth_user_id", authUserId);
+      .eq("auth_user_id", authUser.id);
     if (linkError) throw new Error(formatSupabaseError(linkError));
     await auditApiAction({
       authUserId: authUser.id,
@@ -120,7 +114,6 @@ async function ensureProfile(db: DbClient, authUser: { id: string; email?: strin
 async function saveDonor(db: DbClient, input: SaveDonorInput): Promise<Donor> {
   await upsertPublicUser(db, input);
   const payload = {
-    auth_user_id: input.authUserId,
     birth_date: input.birthDate || null,
     blood_type: input.bloodType,
     eligibility_status: "Elegível",
@@ -132,13 +125,13 @@ async function saveDonor(db: DbClient, input: SaveDonorInput): Promise<Donor> {
     municipality: input.municipality,
     phone: input.phone,
     province: input.province,
-    user_id: input.profileId,
+    user_id: input.userId,
     available: true
   };
   const { data: existing, error: findError } = await db
     .from("donors")
     .select("id")
-    .eq("auth_user_id", input.authUserId)
+    .eq("user_id", input.userId)
     .maybeSingle();
   if (findError) throw new Error(formatSupabaseError(findError));
   const query = existing?.id
@@ -153,8 +146,8 @@ async function upsertPublicUser(db: DbClient, input: SaveDonorInput) {
   const { error } = await db
     .from("users")
     .upsert({
-      id: input.authUserId,
-      auth_user_id: input.authUserId,
+      id: input.userId,
+      auth_user_id: input.userId,
       email: input.email,
       name: input.fullName || emailName(input.email),
       phone: input.phone,
@@ -168,7 +161,6 @@ function emailName(email: string) {
 }
 
 type SaveDonorInput = {
-  authUserId: string;
   birthDate: string;
   bloodType: BloodType;
   email: string;
@@ -178,13 +170,12 @@ type SaveDonorInput = {
   gender?: string;
   municipality: string;
   phone: string;
-  profileId: string;
   province: string;
+  userId: string;
 };
 
 const donorColumns = [
   "id",
-  "auth_user_id",
   "full_name",
   "email",
   "emergency_contact_name",

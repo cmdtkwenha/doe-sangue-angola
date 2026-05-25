@@ -15,8 +15,8 @@ export function RewardsPanel() {
   useRealtimeVersion();
   const { session } = useAuth();
   const { data: donor } = useCurrentDonor();
-  const authUserId = session?.user.authUserId ?? session?.user.id;
-  const current = isDonorProfileComplete(donor, authUserId) ? donor : null;
+  const userId = session?.user.authUserId ?? session?.user.id;
+  const current = isDonorProfileComplete(donor, userId) ? donor : null;
   if (!current) {
     return <EmptyState title="Sem recompensas" message="Complete o perfil para acumular pontos reais." />;
   }

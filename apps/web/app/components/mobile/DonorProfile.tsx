@@ -15,13 +15,13 @@ import { useAuth } from "../auth/useAuth";
 export function DonorProfile() {
   const { session } = useAuth();
   const { data: donor, loading } = useCurrentDonor();
-  const authUserId = session?.user.authUserId ?? session?.user.id;
+  const userId = session?.user.authUserId ?? session?.user.id;
 
   if (loading) {
     return <MobileShell active="profile"><LoadingSkeleton label="A carregar perfil real" /></MobileShell>;
   }
 
-  if (!isDonorProfileComplete(donor, authUserId)) {
+  if (!isDonorProfileComplete(donor, userId)) {
     return (
       <MobileShell active="profile">
         <EmptyState

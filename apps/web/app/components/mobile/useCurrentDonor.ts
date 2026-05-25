@@ -30,23 +30,18 @@ export function useCurrentDonor() {
 
 export function isDonorProfileComplete(
   donor: Donor | null,
-  authUserId?: string
+  userId?: string
 ): donor is Donor {
-  return getMissingDonorFields(donor, authUserId).length === 0;
+  return getMissingDonorFields(donor, userId).length === 0;
 }
 
-export function getMissingDonorFields(donor: Donor | null, authUserId?: string) {
+export function getMissingDonorFields(donor: Donor | null, userId?: string) {
   if (!donor?.id) return ["linha do dador"];
   const fields: Array<[string, unknown]> = [
-    ["auth_user_id", donor.authUserId === authUserId ? donor.authUserId : ""],
+    ["user_id", donor.userId === userId ? donor.userId : ""],
     ["blood_type", donor.bloodType],
     ["province", donor.province],
-    ["municipality", donor.municipality],
-    ["phone", donor.phone],
-    ["gender", donor.gender],
-    ["birth_date", donor.birthDate],
-    ["emergency_contact_name", donor.emergencyContactName],
-    ["emergency_contact_phone", donor.emergencyContactPhone]
+    ["municipality", donor.municipality]
   ];
 
   return fields

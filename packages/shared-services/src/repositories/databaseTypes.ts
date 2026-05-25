@@ -22,7 +22,6 @@ export type UserRow = {
 
 export type DonorRow = {
   id: string;
-  auth_user_id?: string | null;
   blood_type: BloodType;
   province: string;
   municipality: string;
@@ -112,7 +111,7 @@ export function mapUser(row: UserRow) {
 export function mapDonor(row: DonorRow): Donor {
   return {
     id: row.id,
-    authUserId: row.auth_user_id ?? undefined,
+    userId: row.user_id ?? undefined,
     name: row.full_name ?? row.users?.name ?? "Dador verificado",
     bloodType: row.blood_type,
     province: row.province,

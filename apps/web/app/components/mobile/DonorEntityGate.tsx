@@ -12,12 +12,12 @@ import { useAuth } from "../auth/useAuth";
 export function DonorEntityGate({ children }: { children: ReactNode }) {
   const { data: donor, loading } = useCurrentDonor();
   const { session } = useAuth();
-  const authUserId = session?.user.authUserId ?? session?.user.id;
+  const userId = session?.user.authUserId ?? session?.user.id;
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !isDonorProfileComplete(donor, authUserId)) router.replace("/onboarding/donor");
-  }, [authUserId, donor, loading, router]);
+    if (!loading && !isDonorProfileComplete(donor, userId)) router.replace("/onboarding/donor");
+  }, [donor, loading, router, userId]);
 
   if (loading) {
     return (
@@ -27,7 +27,7 @@ export function DonorEntityGate({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!isDonorProfileComplete(donor, authUserId)) {
+  if (!isDonorProfileComplete(donor, userId)) {
     return (
       <MobileShell active="profile">
         <EmptyState

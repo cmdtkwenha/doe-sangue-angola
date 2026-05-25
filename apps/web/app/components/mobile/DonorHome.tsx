@@ -17,14 +17,14 @@ export function DonorHome() {
   const version = useRealtimeVersion();
   const { session } = useAuth();
   const { data: donor, loading } = useCurrentDonor();
-  const authUserId = session?.user.authUserId ?? session?.user.id;
+  const userId = session?.user.authUserId ?? session?.user.id;
   const donorId = donor?.id ?? "";
   const { data: nearbyRequests } = useApiData<BloodRequest[]>(
     donorId ? `/api/blood-requests?donorId=${donorId}` : "/api/blood-requests?donorId=missing",
     [],
     version
   );
-  if (!isDonorProfileComplete(donor, authUserId)) {
+  if (!isDonorProfileComplete(donor, userId)) {
     return (
       <MobileShell active="home">
         <MobileHeader title="Sangue Angola" subtitle="Doe sangue, salve vidas" />

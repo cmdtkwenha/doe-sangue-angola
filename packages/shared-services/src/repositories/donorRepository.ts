@@ -5,7 +5,6 @@ import { rewardRepository } from "./rewardRepository";
 
 const donorColumns = [
   "id",
-  "auth_user_id",
   "full_name",
   "email",
   "emergency_contact_name",
@@ -53,7 +52,7 @@ export const donorRepository = {
     const { data, error } = await getDatabaseClient()
       .from("donors")
       .select(donorColumns)
-      .or(`auth_user_id.eq.${userId},user_id.eq.${userId}`)
+      .eq("user_id", userId)
       .maybeSingle();
 
     if (error) throw error;
@@ -71,7 +70,6 @@ export const donorRepository = {
     const { data, error } = await db
       .from("donors")
       .upsert({
-        auth_user_id: input.authUserId,
         email: input.email,
         full_name: input.fullName,
         phone: input.phone,
@@ -84,7 +82,7 @@ export const donorRepository = {
         eligibility_status: input.eligibilityStatus ?? "Elegível",
         total_donations: input.totalDonations ?? 0,
         available: true
-      }, { onConflict: input.authUserId ? "auth_user_id" : "user_id" })
+      }, { onConflict: "user_id" })
       .select(donorColumns)
       .single();
 
