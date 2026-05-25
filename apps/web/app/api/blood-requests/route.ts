@@ -36,23 +36,36 @@ export async function GET(request: Request) {
 
     if (donorId === "missing" || hospitalId === "missing") return [];
     if (donorId) {
-      requireEntityAccess(principal, "donor", donorId);
       const { data: donor, error: donorError } = await db
         .from("donors")
         .select(donorColumns)
         .eq("id", donorId)
-        .single();
+        .maybeSingle();
       if (donorError) throw new Error(formatSupabaseError(donorError));
+      const donorRow = donor as unknown as DonorRow | null;
+      if (!donorRow?.id) throw new ApiError(404, "Perfil de dador não encontrado.");
+      if (
+        principal.role !== "admin" &&
+        donorRow.user_id !== principal.authUserId &&
+        principal.donorId !== donorId
+      ) {
+        throw new ApiError(403, "Acesso negado ao perfil do dador.");
+      }
       const { data, error } = await db
         .from("blood_requests")
         .select(requestColumns)
         .order("created_at", { ascending: false });
       if (error) throw new Error(formatSupabaseError(error));
-      const donorRecord = mapDonor(donor as unknown as DonorRow);
+      const donorRecord = mapDonor(donorRow);
       return (data as unknown as RequestRow[])
         .map(mapRequest)
-        .filter((item) => !["Cancelado", "Concluído", "Concluido"].includes(item.status))
-        .filter((item) => matchingAgent(item, [donorRecord]).length > 0);
+        .filter((item) => !closedStatuses.includes(item.status))
+        .filter((item) => item.province === donorRecord.province)
+        .filter((item) =>
+          matchingAgent(item, [donorRecord]).some((match) =>
+            match.donor.id === donorRecord.id && match.score >= 55
+          )
+        );
     }
 
     if (hospitalId) {
@@ -145,7 +158,7 @@ const requestColumns = [
 
 const donorColumns = [
   "id",
-  "auth_user_id",
+  "user_id",
   "blood_type",
   "province",
   "municipality",
@@ -162,6 +175,8 @@ const donorColumns = [
   "preferred_hospital_id",
   "total_donations"
 ].join(",");
+
+const closedStatuses = ["Agendado", "Cancelado", "Concluído", "Concluido", "Doador a Caminho", "PIN Validado"];
 
 function formatSupabaseError(error: {
   code?: string;

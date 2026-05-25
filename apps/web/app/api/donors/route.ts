@@ -37,6 +37,22 @@ export async function GET(request: Request) {
       if (error) throw new Error(formatSupabaseError(error));
       return data ? mapDonor(data as unknown as DonorRow) : null;
     }
+    if (principal.role === "hospital" && principal.hospitalId) {
+      const { data: appointments, error: appointmentError } = await db
+        .from("appointments")
+        .select("donor_id")
+        .eq("hospital_id", principal.hospitalId);
+      if (appointmentError) throw new Error(formatSupabaseError(appointmentError));
+      const donorIds = [...new Set((appointments ?? []).map((item) => item.donor_id).filter(Boolean))];
+      if (!donorIds.length) return [];
+      const { data, error } = await db
+        .from("donors")
+        .select(donorColumns)
+        .in("id", donorIds)
+        .order("full_name", { ascending: true });
+      if (error) throw new Error(formatSupabaseError(error));
+      return (data as unknown as DonorRow[]).map(mapDonor);
+    }
     if (principal.role !== "admin") throw new ApiError(403, "Lista restrita ao admin.");
     const { data, error } = await db
       .from("donors")

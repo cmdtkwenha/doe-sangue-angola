@@ -58,7 +58,12 @@ export async function createRequestAction(input?: RequestDraft) {
 
 export async function acceptRequestAction(donorId: string, requestId: string) {
   if (!isSupabaseMode()) return acceptWorkflowRequest(donorId, requestId);
-  return post<Appointment>("/api/appointments/accept", { donorId, requestId });
+  const result = await post<Appointment>("/api/appointments/accept", { donorId, requestId });
+  if (result.ok) {
+    publishRealtimeEvent("DONOR_ACCEPTED", { donorId, requestId });
+    publishRealtimeEvent("APPOINTMENT_CREATED", { appointment: result.data });
+  }
+  return result;
 }
 
 export async function updateStatusAction(requestId: string, status: RequestStatus) {
