@@ -2,7 +2,6 @@ import { ApiError, apiResponse } from "../../_utils/apiResponse";
 import { createRouteSupabase, requireApiSession } from "../../_utils/security";
 
 export type AcceptedDonorRow = {
-  appointmentId: string;
   bloodRequestId?: string;
   createdAt?: string;
   donorBloodType: string;
@@ -13,6 +12,7 @@ export type AcceptedDonorRow = {
   hospitalId: string;
   hospitalName: string;
   pin: string;
+  responseId: string;
   requestBloodType: string;
   requestStatus: string;
   status: string;
@@ -26,16 +26,16 @@ export async function GET() {
       throw new ApiError(403, "Hospital ainda não ligado ao perfil.");
     }
     const db = await createRouteSupabase();
-    const { data: appointments, error } = await db
-      .from("appointments")
-      .select("id,donor_id,hospital_id,blood_request_id,created_at,time,pin,status")
+    const { data: responses, error } = await db
+      .from("donor_responses")
+      .select("id,donor_id,hospital_id,blood_request_id,created_at,eta_minutes,confirmation_pin,status")
       .eq("hospital_id", hospitalId)
       .order("created_at", { ascending: false });
     if (error) throw error;
-    if (!appointments?.length) return [];
+    if (!responses?.length) return [];
 
-    const donorIds = unique(appointments.map((item) => item.donor_id));
-    const requestIds = unique(appointments.map((item) => item.blood_request_id));
+    const donorIds = unique(responses.map((item) => item.donor_id));
+    const requestIds = unique(responses.map((item) => item.blood_request_id));
     const [{ data: donors, error: donorError }, { data: requests, error: requestError }, hospital] =
       await Promise.all([
         db.from("donors").select("id,full_name,blood_type,phone").in("id", donorIds),
@@ -45,21 +45,21 @@ export async function GET() {
     if (donorError) throw donorError;
     if (requestError) throw requestError;
 
-    return appointments.map((item) => {
+    return responses.map((item) => {
       const donor = donors?.find((row) => row.id === item.donor_id);
       const request = requests?.find((row) => row.id === item.blood_request_id);
       return {
-        appointmentId: item.id,
         bloodRequestId: item.blood_request_id ?? undefined,
         createdAt: item.created_at ?? undefined,
         donorBloodType: donor?.blood_type ?? "-",
         donorId: item.donor_id,
         donorName: donor?.full_name ?? "Dador aceite",
         donorPhone: donor?.phone ?? "por completar",
-        eta: item.time ?? "ETA pendente",
+        eta: `${item.eta_minutes ?? 30} min`,
         hospitalId: item.hospital_id,
         hospitalName: hospital,
-        pin: item.pin ?? "----",
+        pin: item.confirmation_pin ?? "----",
+        responseId: item.id,
         requestBloodType: request?.blood_type ?? "-",
         requestStatus: request?.status ?? "-",
         status: item.status ?? "Pendente"

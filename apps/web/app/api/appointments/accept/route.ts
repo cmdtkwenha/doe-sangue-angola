@@ -39,7 +39,9 @@ export async function POST(request: Request) {
     if (["Agendado", "Cancelado", "Concluído", "Concluido", "Doador a Caminho"].includes(requestRow.status)) {
       throw new ApiError(409, "Este pedido já não está disponível.");
     }
-    const appointment = await createAppointment(db, donorId, requestRow.id, requestRow.hospital_id);
+    const pin = createPin();
+    const response = await createDonorResponse(db, donorId, requestRow.id, requestRow.hospital_id, pin);
+    const appointment = await createAppointment(db, donorId, requestRow.id, requestRow.hospital_id, response.confirmation_pin);
     const { error: statusError } = await db
       .from("blood_requests")
       .update({ status: "Doador a Caminho" })
@@ -50,11 +52,43 @@ export async function POST(request: Request) {
   });
 }
 
+async function createDonorResponse(
+  db: Awaited<ReturnType<typeof createRouteSupabase>>,
+  donorId: string,
+  requestId: string,
+  hospitalId: string,
+  pin: string
+) {
+  const { data: existing, error: findError } = await db
+    .from("donor_responses")
+    .select("id,confirmation_pin")
+    .eq("donor_id", donorId)
+    .eq("blood_request_id", requestId)
+    .maybeSingle();
+  if (findError) throw findError;
+  if (existing?.id) return existing;
+  const { data, error } = await db
+    .from("donor_responses")
+    .insert({
+      blood_request_id: requestId,
+      confirmation_pin: pin,
+      donor_id: donorId,
+      eta_minutes: 30,
+      hospital_id: hospitalId,
+      status: "Aceite"
+    })
+    .select("id,confirmation_pin")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 async function createAppointment(
   db: Awaited<ReturnType<typeof createRouteSupabase>>,
   donorId: string,
   requestId: string,
-  hospitalId: string
+  hospitalId: string,
+  pin: string
 ): Promise<Appointment> {
   const { data: existing, error: existingError } = await db
     .from("appointments")
@@ -73,7 +107,7 @@ async function createAppointment(
       date: when.date,
       donor_id: donorId,
       hospital_id: hospitalId,
-      pin: createPin(),
+      pin,
       status: "Pendente",
       time: when.time
     })

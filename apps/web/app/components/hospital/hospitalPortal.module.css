@@ -203,6 +203,13 @@
   font-weight: 800;
   padding: 6px 8px;
 }
+.actions input {
+  width: 58px;
+  min-height: 32px;
+  border: 1px solid #d8dee6;
+  border-radius: 8px;
+  padding: 6px;
+}
 .footerLink {
   display: block;
   margin-top: 14px;

@@ -1,16 +1,14 @@
 "use client";
 
-import type { Appointment } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
+import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
 import { useState } from "react";
 import { EmptyState } from "../ui/EmptyState";
 import styles from "./hospitalPortal.module.css";
 import { useCurrentHospital } from "./useCurrentHospital";
-import { completeDonationAction, updateAppointmentStatusAction } from "../workflow/workflowActions";
 
 type AcceptedDonor = {
-  appointmentId: string;
   bloodRequestId?: string;
   createdAt?: string;
   donorBloodType: string;
@@ -19,28 +17,38 @@ type AcceptedDonor = {
   donorPhone: string;
   eta: string;
   pin: string;
+  responseId: string;
   requestBloodType: string;
   requestStatus: string;
-  status: Appointment["status"];
+  status: string;
 };
 
 export function IncomingDonorsList() {
   const version = useRealtimeVersion();
+  const liveVersion = useSupabaseRealtimeVersion(["donor_responses", "blood_requests"]);
   const [message, setMessage] = useState("Aguardando dadores aceites.");
+  const [pins, setPins] = useState<Record<string, string>>({});
   const { data: hospital } = useCurrentHospital();
   const hospitalId = hospital?.id ?? "";
   const { data: rows, loading, error } = useApiData<AcceptedDonor[]>(
     hospitalId ? "/api/hospital/accepted-donors" : "/api/appointments?hospitalId=missing",
     [],
-    version
+    version + liveVersion
   );
 
-  async function update(row: AcceptedDonor, status: Appointment["status"]) {
+  async function update(row: AcceptedDonor, status: "Cancelado" | "Chegou" | "Concluído" | "PIN Validado") {
     setMessage("A atualizar estado do dador...");
-    const result = status === "Concluido" && row.bloodRequestId
-      ? await completeDonationAction(row.donorId, row.bloodRequestId)
-      : await updateAppointmentStatusAction(row.appointmentId, status);
-    setMessage(result.ok ? "Estado atualizado com sucesso." : result.message);
+    const response = await fetch("/api/donor-responses/status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        confirmationPin: pins[row.responseId],
+        responseId: row.responseId,
+        status
+      })
+    });
+    const payload = await response.json().catch(() => null);
+    setMessage(payload?.ok ? "Estado atualizado com sucesso." : payload?.message ?? "Falha ao atualizar.");
   }
 
   return (
@@ -60,7 +68,7 @@ export function IncomingDonorsList() {
       ) : (
         <div className={styles.table}>
           {rows.map((row) => (
-          <article className={styles.donorRow} key={row.appointmentId}>
+          <article className={styles.donorRow} key={row.responseId}>
             <span>
               <strong>{row.donorName}</strong><br />
               <span className={styles.rowMuted}>
@@ -75,8 +83,16 @@ export function IncomingDonorsList() {
             <span className="pill red">{row.pin}<br /><span className={styles.rowMuted}>{row.status}</span></span>
             <span className={styles.actions}>
               <button onClick={() => update(row, "Chegou")} type="button">Chegou</button>
+              <input
+                aria-label="PIN do dador"
+                inputMode="numeric"
+                maxLength={4}
+                onChange={(event) => setPins({ ...pins, [row.responseId]: event.target.value })}
+                placeholder="PIN"
+                value={pins[row.responseId] ?? ""}
+              />
               <button onClick={() => update(row, "PIN Validado")} type="button">PIN validado</button>
-              <button onClick={() => update(row, "Concluido")} type="button">Doação concluída</button>
+              <button onClick={() => update(row, "Concluído")} type="button">Doação concluída</button>
               <button onClick={() => update(row, "Cancelado")} type="button">Cancelado</button>
             </span>
           </article>

@@ -9,6 +9,7 @@ import styles from "./mobileApp.module.css";
 import { shortcuts } from "./mobileMock";
 import { MobileHeader } from "./MobileHeader";
 import { MobileShell } from "./MobileShell";
+import { DonorPinCard } from "./DonorPinCard";
 import { isDonorProfileComplete, useCurrentDonor } from "./useCurrentDonor";
 import { useAuth } from "../auth/useAuth";
 
@@ -72,6 +73,7 @@ export function DonorHome() {
         <p className="muted">{donor.eligibilityStatus ?? "Pendente"} · {donor.totalDonations ?? 0} doações registadas</p>
         <progress className={styles.progress} max="2000" value={donor.points} />
       </article>
+      <DonorPinCard />
       <article className={styles.card}>
         <strong>Necessidades urgentes na sua área</strong>
         <div className={styles.requestTop}>
