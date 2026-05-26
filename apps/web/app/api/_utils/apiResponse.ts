@@ -23,7 +23,7 @@ export async function apiResponse<T>(handler: Handler<T>) {
     trackApiRequest("api.route", 500, Date.now() - started);
     const message = error instanceof Error
       ? error.message
-      : "Supabase indisponível. Tente novamente ou use modo mock.";
+      : "Falha ao sincronizar Supabase.";
     return Response.json(
       {
         ok: false,

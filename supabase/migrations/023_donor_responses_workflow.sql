@@ -5,7 +5,7 @@ create table if not exists public.donor_responses (
   donor_id uuid not null references public.donors(id) on delete cascade,
   blood_request_id uuid not null references public.blood_requests(id) on delete cascade,
   hospital_id uuid not null references public.hospitals(id) on delete cascade,
-  status text not null default 'Aceite',
+  status text not null default 'accepted',
   eta_minutes integer not null default 30,
   confirmation_pin text not null,
   arrived_at timestamptz,
@@ -13,8 +13,15 @@ create table if not exists public.donor_responses (
   created_at timestamptz not null default now(),
   unique (donor_id, blood_request_id),
   check (confirmation_pin ~ '^[0-9]{4}$'),
-  check (status in ('Aceite', 'Chegou', 'PIN Validado', 'Concluído', 'Cancelado'))
+  check (status in ('accepted', 'Chegou', 'PIN Validado', 'Concluído', 'Cancelado'))
 );
+
+alter table public.donor_responses
+  drop constraint if exists donor_responses_status_check;
+
+alter table public.donor_responses
+  add constraint donor_responses_status_check
+  check (status in ('accepted', 'Chegou', 'PIN Validado', 'Concluído', 'Cancelado'));
 
 create index if not exists donor_responses_donor_idx on public.donor_responses(donor_id, created_at desc);
 create index if not exists donor_responses_hospital_idx on public.donor_responses(hospital_id, created_at desc);

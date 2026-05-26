@@ -2,10 +2,12 @@ import styles from "./mobileApp.module.css";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 
 export function RequestCard({
+  accepted,
   onAccept,
   onOpen,
   request
 }: {
+  accepted?: boolean;
   onAccept?: (request: BloodRequest) => void;
   onOpen?: (request: BloodRequest) => void;
   request: BloodRequest;
@@ -48,10 +50,11 @@ export function RequestCard({
         <button
           aria-label={`Aceitar pedido ${request.bloodType} para ${request.units} bolsas`}
           className={styles.accept}
-          onClick={() => onAccept?.(request)}
+          disabled={accepted}
+          onClick={() => !accepted && onAccept?.(request)}
           type="button"
         >
-          ACEITAR
+          {accepted ? "ACEITE" : "ACEITAR"}
         </button>
       </div>
     </article>

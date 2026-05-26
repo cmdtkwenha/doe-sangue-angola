@@ -40,7 +40,7 @@ export async function GET() {
     if (hospitalError) throw hospitalError;
     if (requestError) throw requestError;
 
-    return responses.map((item) => {
+  return responses.map((item) => {
       const hospital = hospitals?.find((row) => row.id === item.hospital_id);
       const request = requests?.find((row) => row.id === item.blood_request_id);
       return {
@@ -49,7 +49,7 @@ export async function GET() {
         hospitalName: hospital?.name ?? "Hospital",
         pin: item.confirmation_pin ?? "----",
         requestBloodType: request?.blood_type ?? "-",
-        status: item.status ?? "Aceite"
+        status: item.status ?? "accepted"
       } satisfies DonorPinResponse;
     });
   });

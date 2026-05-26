@@ -11,6 +11,7 @@ export async function POST(request: Request) {
   return apiResponse(async () => {
     const principal = await requireApiSession(["donor", "admin"]);
     const donorId = assertString(body.donorId, "Dador");
+    console.info("[accept] start", { donorId, requestId: body.requestId, role: principal.role });
     const db = await createRouteSupabase();
     const { data: donor, error } = await db
       .from("donors")
@@ -41,6 +42,12 @@ export async function POST(request: Request) {
     }
     const pin = createPin();
     const response = await createDonorResponse(db, donorId, requestRow.id, requestRow.hospital_id, pin);
+    console.info("[accept] donor_response ready", {
+      donorResponseId: response.id,
+      donorId,
+      hospitalId: requestRow.hospital_id,
+      requestId: requestRow.id
+    });
     const appointment = await createAppointment(db, donorId, requestRow.id, requestRow.hospital_id, response.confirmation_pin);
     const { error: statusError } = await db
       .from("blood_requests")
@@ -75,11 +82,21 @@ async function createDonorResponse(
       donor_id: donorId,
       eta_minutes: 30,
       hospital_id: hospitalId,
-      status: "Aceite"
+      status: "accepted"
     })
     .select("id,confirmation_pin")
     .single();
-  if (error) throw error;
+  if (error) {
+    console.error("[accept] donor_response insert failed", {
+      code: error.code,
+      details: error.details,
+      donorId,
+      hospitalId,
+      message: error.message,
+      requestId
+    });
+    throw error;
+  }
   return data;
 }
 

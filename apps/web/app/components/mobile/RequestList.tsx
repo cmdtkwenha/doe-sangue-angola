@@ -18,9 +18,11 @@ import {
 import { useAuth } from "../auth/useAuth";
 
 export function RequestList({
+  acceptedRequestIds = [],
   onAccept,
   onOpen
 }: {
+  acceptedRequestIds?: string[];
   onAccept?: (request: BloodRequest) => void;
   onOpen?: (request: BloodRequest) => void;
 }) {
@@ -56,6 +58,7 @@ export function RequestList({
         .filter((request) => !donorReady || request.bloodType === donor.bloodType)
         .map((request) => (
         <RequestCard
+          accepted={acceptedRequestIds.includes(request.id)}
           key={request.id}
           onAccept={onAccept}
           onOpen={onOpen}

@@ -4,6 +4,9 @@ import dynamic from "next/dynamic";
 import { rejectWorkflowRequest } from "@doe-sangue-angola/shared-services";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { useState } from "react";
+import { useApiData } from "@hooks/useApiData";
+import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
+import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
 import styles from "./mobileApp.module.css";
 import { DonorHome } from "./DonorHome";
 import { DonorEntityGate } from "./DonorEntityGate";
@@ -45,9 +48,21 @@ export function MobileAppPreview() {
   const [selected, setSelected] = useState<BloodRequest | null>(null);
   const [message, setMessage] = useState("Toque num pedido para ver detalhes.");
   const { data: donor } = useCurrentDonor();
+  const version = useRealtimeVersion();
+  const liveVersion = useSupabaseRealtimeVersion(["donor_responses"]);
+  const { data: responses } = useApiData<Array<{ bloodRequestId: string }>>(
+    "/api/donor/responses",
+    [],
+    version + liveVersion
+  );
+  const acceptedIds = responses.map((item) => item.bloodRequestId);
   const accept = async (request: BloodRequest) => {
     if (!donor) {
       setMessage("Complete o perfil de dador antes de aceitar pedidos.");
+      return;
+    }
+    if (acceptedIds.includes(request.id)) {
+      setMessage("Este pedido já foi aceite. Veja o seu PIN no painel inicial.");
       return;
     }
     setAccepting(true);
@@ -71,7 +86,7 @@ export function MobileAppPreview() {
       <DonorEntityGate>
       <section className={styles.grid}>
         <DonorHome />
-        <RequestList onAccept={accept} onOpen={setSelected} />
+        <RequestList acceptedRequestIds={acceptedIds} onAccept={accept} onOpen={setSelected} />
         <MobileShell active="requests">
           <RequestListContent />
           <p className="muted">{message}</p>

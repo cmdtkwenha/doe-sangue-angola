@@ -61,8 +61,9 @@ export async function createRequestAction(input?: RequestDraft) {
 }
 
 export async function acceptRequestAction(donorId: string, requestId: string) {
-  if (canUseMock()) return acceptWorkflowRequest(donorId, requestId);
+  console.info("[donor-accept] calling real API", { donorId, requestId });
   const result = await post<Appointment>("/api/appointments/accept", { donorId, requestId });
+  if (!result.ok) console.error("[donor-accept] API failed", result.message);
   if (result.ok) {
     publishRealtimeEvent("DONOR_ACCEPTED", { donorId, requestId });
     publishRealtimeEvent("APPOINTMENT_CREATED", { appointment: result.data });

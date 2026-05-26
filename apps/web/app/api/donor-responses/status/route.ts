@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 
 function statusPayload(status: ResponseStatus) {
   return {
-    arrived_at: status === "Chegou" ? new Date().toISOString() : undefined,
+    arrived_at: status === "Chegou" || status === "PIN Validado" ? new Date().toISOString() : undefined,
     donation_completed_at: status === "Concluído" ? new Date().toISOString() : undefined,
     status
   };
