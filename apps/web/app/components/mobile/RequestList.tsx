@@ -50,6 +50,7 @@ export function RequestList({
         <span>⌯</span>
       </header>
       <p className="muted">Próximo de você · <strong>Luanda</strong></p>
+      <p className="muted">Debug: blood_requests select · donor_responses insert ao aceitar</p>
       {loading ? <p className="muted">A procurar pedidos compatíveis...</p> : null}
       {error ? <p className="muted">{error}</p> : null}
       {requests.length === 0 ? (

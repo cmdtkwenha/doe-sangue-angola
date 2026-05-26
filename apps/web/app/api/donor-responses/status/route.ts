@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       .select("id,blood_request_id,hospital_id,confirmation_pin")
       .eq("id", responseId)
       .single();
-    if (error) throw error;
+    if (error) throw supabaseError("donor_responses select", "donor_responses", error);
     requireEntityAccess(principal, "hospital", existing.hospital_id);
     if (body.status === "PIN Validado") {
       const pin = assertPin(optionalString(body.confirmationPin, 4));
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       .eq("id", responseId)
       .select("id,status")
       .single();
-    if (updateError) throw updateError;
+    if (updateError) throw supabaseError("donor_responses update", "donor_responses", updateError);
     await syncRequest(db, existing.blood_request_id, status);
     await auditApiAction(principal, `Atualizou resposta do dador para ${status}.`);
     return data;
@@ -63,5 +63,19 @@ async function syncRequest(
         ? "PIN Validado"
         : "Doador a Caminho";
   const { error } = await db.from("blood_requests").update({ status: next }).eq("id", requestId);
-  if (error) throw error;
+  if (error) throw supabaseError("blood_requests update", "blood_requests", error);
+}
+
+function supabaseError(action: string, table: string, error: {
+  code?: string;
+  details?: string;
+  message: string;
+}) {
+  return new Error([
+    `Supabase ${action}`,
+    `table=${table}`,
+    `message=${error.message}`,
+    error.code ? `code=${error.code}` : "",
+    error.details ? `details=${error.details}` : ""
+  ].filter(Boolean).join(" | "));
 }

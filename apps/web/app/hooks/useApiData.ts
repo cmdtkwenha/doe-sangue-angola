@@ -30,8 +30,8 @@ export function useApiData<T>(path: string, fallback: T, version = 0) {
         if (payload.ok && "data" in payload) setData(payload.data as T);
         else setError(payload.message ?? "Não foi possível carregar dados reais.");
       })
-      .catch(() =>
-        active && setError("Falha ao sincronizar Supabase. Tente novamente.")
+      .catch((error: unknown) =>
+        active && setError(formatFetchError(path, error))
       )
       .finally(() => active && setLoading(false));
 
@@ -41,4 +41,9 @@ export function useApiData<T>(path: string, fallback: T, version = 0) {
   }, [enabled, path, version]);
 
   return { data, error, loading, usingApi: enabled };
+}
+
+function formatFetchError(path: string, error: unknown) {
+  const message = error instanceof Error ? error.message : "Erro de rede desconhecido.";
+  return `Falha ao sincronizar Supabase | ação: fetch ${path} | erro: ${message}`;
 }

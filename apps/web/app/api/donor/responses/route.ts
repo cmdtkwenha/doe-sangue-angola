@@ -19,7 +19,7 @@ export async function GET() {
       .select("id")
       .eq("user_id", principal.authUserId)
       .maybeSingle();
-    if (donorError) throw donorError;
+    if (donorError) throw supabaseError("donors select", "donors", donorError);
     if (!donor?.id) return [];
 
     const { data: responses, error } = await db
@@ -27,7 +27,7 @@ export async function GET() {
       .select("blood_request_id,hospital_id,status,eta_minutes,confirmation_pin")
       .eq("donor_id", donor.id)
       .order("created_at", { ascending: false });
-    if (error) throw error;
+    if (error) throw supabaseError("donor_responses select", "donor_responses", error);
     if (!responses?.length) return [];
 
     const hospitalIds = unique(responses.map((item) => item.hospital_id));
@@ -37,8 +37,8 @@ export async function GET() {
         db.from("hospitals").select("id,name").in("id", hospitalIds),
         db.from("blood_requests").select("id,blood_type").in("id", requestIds)
       ]);
-    if (hospitalError) throw hospitalError;
-    if (requestError) throw requestError;
+    if (hospitalError) throw supabaseError("hospitals select", "hospitals", hospitalError);
+    if (requestError) throw supabaseError("blood_requests select", "blood_requests", requestError);
 
   return responses.map((item) => {
       const hospital = hospitals?.find((row) => row.id === item.hospital_id);
@@ -57,4 +57,18 @@ export async function GET() {
 
 function unique(values: Array<string | null | undefined>) {
   return [...new Set(values.filter((value): value is string => Boolean(value)))];
+}
+
+function supabaseError(action: string, table: string, error: {
+  code?: string;
+  details?: string;
+  message: string;
+}) {
+  return new Error([
+    `Supabase ${action}`,
+    `table=${table}`,
+    `message=${error.message}`,
+    error.code ? `code=${error.code}` : "",
+    error.details ? `details=${error.details}` : ""
+  ].filter(Boolean).join(" | "));
 }

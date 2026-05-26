@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       .select("id,user_id")
       .eq("id", donorId)
       .maybeSingle();
-    if (error) throw error;
+    if (error) throw supabaseError("donors select", "donors", error);
     const donorRow = donor as unknown as { id: string; user_id?: string } | null;
     if (!donorRow?.id) throw new ApiError(404, "Perfil de dador não encontrado.");
     if (
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       .select("id,hospital_id,status")
       .eq("id", requestId)
       .maybeSingle();
-    if (requestError) throw requestError;
+    if (requestError) throw supabaseError("blood_requests select", "blood_requests", requestError);
     const requestRow = bloodRequest as { hospital_id: string; id: string; status: string } | null;
     if (!requestRow?.id) throw new ApiError(404, "Pedido de sangue não encontrado.");
     if (["Agendado", "Cancelado", "Concluído", "Concluido", "Doador a Caminho"].includes(requestRow.status)) {
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
       .from("blood_requests")
       .update({ status: "Doador a Caminho" })
       .eq("id", requestRow.id);
-    if (statusError) throw statusError;
+    if (statusError) throw supabaseError("blood_requests update", "blood_requests", statusError);
     await auditApiAction(principal, `Aceitou pedido de sangue ${body.requestId}.`);
     return appointment;
   });
@@ -72,7 +72,7 @@ async function createDonorResponse(
     .eq("donor_id", donorId)
     .eq("blood_request_id", requestId)
     .maybeSingle();
-  if (findError) throw findError;
+  if (findError) throw supabaseError("donor_responses select", "donor_responses", findError);
   if (existing?.id) return existing;
   const { data, error } = await db
     .from("donor_responses")
@@ -95,7 +95,7 @@ async function createDonorResponse(
       message: error.message,
       requestId
     });
-    throw error;
+    throw supabaseError("donor_responses insert", "donor_responses", error);
   }
   return data;
 }
@@ -113,7 +113,7 @@ async function createAppointment(
     .eq("donor_id", donorId)
     .eq("blood_request_id", requestId)
     .maybeSingle();
-  if (existingError) throw existingError;
+  if (existingError) throw supabaseError("appointments select", "appointments", existingError);
   if (existing?.id) return mapAppointment(existing);
 
   const when = nextAppointmentSlot();
@@ -130,7 +130,7 @@ async function createAppointment(
     })
     .select("id,donor_id,hospital_id,blood_request_id,created_at,date,time,pin,status")
     .single();
-  if (error) throw error;
+  if (error) throw supabaseError("appointments insert", "appointments", error);
   return mapAppointment(data);
 }
 
@@ -171,4 +171,18 @@ function nextAppointmentSlot() {
     date: date.toISOString().slice(0, 10),
     time: date.toTimeString().slice(0, 5)
   };
+}
+
+function supabaseError(action: string, table: string, error: {
+  code?: string;
+  details?: string;
+  message: string;
+}) {
+  return new Error([
+    `Supabase ${action}`,
+    `table=${table}`,
+    `message=${error.message}`,
+    error.code ? `code=${error.code}` : "",
+    error.details ? `details=${error.details}` : ""
+  ].filter(Boolean).join(" | "));
 }

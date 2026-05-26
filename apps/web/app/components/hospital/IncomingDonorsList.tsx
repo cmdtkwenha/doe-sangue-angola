@@ -57,6 +57,9 @@ export function IncomingDonorsList() {
         <strong>Dadores a Caminho</strong>
         <a className="muted" href="/hospital/donors">Lista ETA</a>
       </div>
+      <p className={styles.rowMuted}>
+        Debug: hospital ETA query · donor_responses select/update · donors select · blood_requests select
+      </p>
       {loading ? <p className={styles.rowMuted}>A carregar dadores aceites...</p> : null}
       {error ? <p className={styles.rowMuted}>{error}</p> : null}
       <p className={styles.rowMuted}>{message}</p>

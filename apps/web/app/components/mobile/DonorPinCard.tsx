@@ -27,6 +27,7 @@ export function DonorPinCard() {
   return (
     <article className={styles.card}>
       <strong>Meu PIN de Doação</strong>
+      <p className="muted">Debug: donor_responses select · blood_requests select</p>
       {loading ? <p className="muted">A carregar PIN real...</p> : null}
       {error ? <p className="muted">{error}</p> : null}
       {!current ? (

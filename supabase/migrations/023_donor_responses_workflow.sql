@@ -1,5 +1,31 @@
 -- Real donor PIN workflow for donor app and hospital dashboard.
 
+create or replace function public.current_donor_id()
+returns uuid
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select d.id
+  from public.donors d
+  left join public.users u on u.id = d.user_id
+  where d.user_id = auth.uid()
+     or d.auth_user_id = auth.uid()
+     or u.auth_user_id = auth.uid()
+  limit 1
+$$;
+
+create or replace function public.current_profile_entity()
+returns uuid
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select linked_entity_id from public.profiles where auth_user_id = auth.uid() limit 1
+$$;
+
 create table if not exists public.donor_responses (
   id uuid primary key default extensions.gen_random_uuid(),
   donor_id uuid not null references public.donors(id) on delete cascade,
@@ -40,6 +66,10 @@ for insert with check (donor_id = public.current_donor_id());
 drop policy if exists "Hospitals read own responses" on public.donor_responses;
 create policy "Hospitals read own responses" on public.donor_responses
 for select using (hospital_id = public.current_profile_entity() or public.is_admin());
+
+drop policy if exists "Admins read all responses" on public.donor_responses;
+create policy "Admins read all responses" on public.donor_responses
+for select using (public.is_admin());
 
 drop policy if exists "Hospitals update own responses" on public.donor_responses;
 create policy "Hospitals update own responses" on public.donor_responses
