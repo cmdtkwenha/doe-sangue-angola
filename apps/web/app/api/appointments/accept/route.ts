@@ -38,10 +38,11 @@ export async function POST(request: Request) {
     const requestRow = bloodRequest as { hospital_id: string; id: string; status: string } | null;
     if (!requestRow?.id) throw new ApiError(404, "Pedido de sangue não encontrado.");
     if (["Agendado", "Cancelado", "Concluído", "Concluido", "Doador a Caminho"].includes(requestRow.status)) {
-      throw new ApiError(409, "Este pedido já não está disponível.");
+      const existing = await findDonorResponse(db, donorId, requestRow.id);
+      if (!existing?.id) throw new ApiError(409, "Este pedido já não está disponível.");
+      return createAppointment(db, donorId, requestRow.id, requestRow.hospital_id, existing.confirmation_pin);
     }
-    const pin = createPin();
-    const response = await createDonorResponse(db, donorId, requestRow.id, requestRow.hospital_id, pin);
+    const response = await createDonorResponse(db, donorId, requestRow.id, requestRow.hospital_id);
     const appointment = await createAppointment(db, donorId, requestRow.id, requestRow.hospital_id, response.confirmation_pin);
     const { error: statusError } = await db
       .from("blood_requests")
@@ -71,17 +72,11 @@ async function createDonorResponse(
   db: Awaited<ReturnType<typeof createRouteSupabase>>,
   donorId: string,
   requestId: string,
-  hospitalId: string,
-  pin: string
+  hospitalId: string
 ) {
-  const { data: existing, error: findError } = await db
-    .from("donor_responses")
-    .select("id,confirmation_pin")
-    .eq("donor_id", donorId)
-    .eq("blood_request_id", requestId)
-    .maybeSingle();
-  if (findError) throw supabaseError("Não foi possível verificar aceitação existente", findError);
+  const existing = await findDonorResponse(db, donorId, requestId);
   if (existing?.id) return existing;
+  const pin = createPin();
   const { data, error } = await db
     .from("donor_responses")
     .insert({
@@ -95,7 +90,28 @@ async function createDonorResponse(
     })
     .select("id,confirmation_pin")
     .single();
+  if (error?.code === "23505") {
+    const current = await findDonorResponse(db, donorId, requestId);
+    if (current?.id) return current;
+  }
   if (error) throw supabaseError("Não foi possível aceitar o pedido", error);
+  return data;
+}
+
+async function findDonorResponse(
+  db: Awaited<ReturnType<typeof createRouteSupabase>>,
+  donorId: string,
+  requestId: string
+) {
+  const { data, error } = await db
+    .from("donor_responses")
+    .select("id,confirmation_pin")
+    .eq("donor_id", donorId)
+    .eq("blood_request_id", requestId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw supabaseError("Não foi possível verificar aceitação existente", error);
   return data;
 }
 
@@ -113,7 +129,19 @@ async function createAppointment(
     .eq("blood_request_id", requestId)
     .maybeSingle();
   if (existingError) throw supabaseError("Não foi possível verificar agendamento", existingError);
-  if (existing?.id) return mapAppointment(existing);
+  if (existing?.id) {
+    if (existing.pin !== pin) {
+      const { data: updated, error } = await db
+        .from("appointments")
+        .update({ pin })
+        .eq("id", existing.id)
+        .select("id,donor_id,hospital_id,blood_request_id,created_at,date,time,pin,status")
+        .single();
+      if (error) throw supabaseError("Não foi possível sincronizar o PIN", error);
+      return mapAppointment(updated);
+    }
+    return mapAppointment(existing);
+  }
 
   const when = nextAppointmentSlot();
   const { data, error } = await db

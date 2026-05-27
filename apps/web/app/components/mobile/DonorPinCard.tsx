@@ -14,6 +14,7 @@ type DonorPin = {
   hospitalName: string;
   pin: string;
   requestBloodType: string;
+  responseId: string;
   status: DonorResponseStatus;
 };
 
@@ -25,7 +26,7 @@ export function DonorPinCard() {
     [],
     version + liveVersion
   );
-  const current = data[0];
+  const current = data.find((item) => isActive(item.status));
 
   return (
     <article className={`${styles.card} ${current ? styles.pinCard : ""}`}>
@@ -58,6 +59,10 @@ export function DonorPinCard() {
       )}
     </article>
   );
+}
+
+function isActive(status: DonorResponseStatus) {
+  return status !== "completed" && status !== "cancelled";
 }
 
 function statusLabel(status: DonorResponseStatus) {

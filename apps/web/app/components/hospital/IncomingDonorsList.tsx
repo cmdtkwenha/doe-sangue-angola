@@ -60,6 +60,8 @@ export function IncomingDonorsList() {
     ...row,
     status: optimistic[row.responseId] ?? normalizeDonorResponseStatus(row.status)
   }));
+  const activeRows = displayRows.filter((row) => isActiveStatus(row.status));
+  const historyRows = displayRows.filter((row) => !isActiveStatus(row.status));
 
   function ask(row: AcceptedDonor, status: WorkflowStatus) {
     const current = normalizeDonorResponseStatus(row.status);
@@ -115,14 +117,14 @@ export function IncomingDonorsList() {
       {loading ? <LoadingSkeleton label="A sincronizar dadores em tempo real" /> : null}
       {error ? <p className={styles.rowMuted}>{error}</p> : null}
       <p className={styles.rowMuted}>{message}</p>
-      {displayRows.length === 0 ? (
+      {activeRows.length === 0 ? (
         <EmptyState
           message="Ainda não há dadores a caminho."
           title="Lista ETA vazia"
         />
       ) : (
         <div className={styles.table}>
-          {displayRows.map((row) => (
+          {activeRows.map((row) => (
           <article className={styles.donorRow} key={row.responseId}>
             <span>
               <strong>{row.donorName}</strong><br />
@@ -158,6 +160,23 @@ export function IncomingDonorsList() {
           ))}
         </div>
       )}
+      {historyRows.length > 0 ? (
+        <div className={styles.table}>
+          <strong>Histórico</strong>
+          {historyRows.map((row) => (
+            <article className={styles.donorRow} key={row.responseId}>
+              <span>
+                <strong>{row.donorName}</strong><br />
+                <span className={styles.rowMuted}>
+                  Pedido {row.requestBloodType} · {formatTime(row.createdAt)}
+                </span>
+              </span>
+              <span>{row.eta}</span>
+              <DonorResponseStatusBadge status={row.status} />
+            </article>
+          ))}
+        </div>
+      ) : null}
       <ConfirmationModal
         confirmLabel={pending ? statusLabel(pending.status) : "Confirmar"}
         loading={saving}
@@ -197,4 +216,9 @@ function formatTime(value?: string) {
 
 function statusLabel(status: string) {
   return donorResponseLabels[normalizeDonorResponseStatus(status)];
+}
+
+function isActiveStatus(status: string) {
+  const normalized = normalizeDonorResponseStatus(status);
+  return normalized !== "completed" && normalized !== "cancelled";
 }

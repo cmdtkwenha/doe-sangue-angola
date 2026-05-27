@@ -9,6 +9,7 @@ export type DonorPinResponse = {
   hospitalName: string;
   pin: string;
   requestBloodType: string;
+  responseId: string;
   status: string;
 };
 
@@ -26,7 +27,7 @@ export async function GET() {
 
     const { data: responses, error } = await db
       .from("donor_responses")
-      .select("blood_request_id,hospital_id,status,eta_minutes,confirmation_pin")
+      .select("id,blood_request_id,hospital_id,status,eta_minutes,confirmation_pin")
       .eq("donor_id", donor.id)
       .order("created_at", { ascending: false });
     if (error) throw supabaseError("Não foi possível carregar o PIN de doação", error);
@@ -42,7 +43,11 @@ export async function GET() {
     if (hospitalError) throw supabaseError("Não foi possível carregar o hospital", hospitalError);
     if (requestError) throw supabaseError("Não foi possível carregar o pedido", requestError);
 
-  return responses.map((item) => {
+    const ordered = responses.sort((left, right) =>
+      Number(isOldStatus(left.status)) - Number(isOldStatus(right.status))
+    );
+
+    return ordered.map((item) => {
       const hospital = hospitals?.find((row) => row.id === item.hospital_id);
       const request = requests?.find((row) => row.id === item.blood_request_id);
       return {
@@ -52,6 +57,7 @@ export async function GET() {
         hospitalName: hospital?.name ?? "Hospital",
         pin: item.confirmation_pin ?? "----",
         requestBloodType: request?.blood_type ?? "-",
+        responseId: item.id,
         status: normalizeStatus(item.status)
       } satisfies DonorPinResponse;
     });
@@ -72,6 +78,11 @@ function normalizeStatus(status?: string | null): DonorResponseStatus {
     "PIN Validado": "pin_validated"
   };
   return oldValues[status ?? ""] ?? "accepted";
+}
+
+function isOldStatus(status?: string | null) {
+  const normalized = normalizeStatus(status);
+  return normalized === "completed" || normalized === "cancelled";
 }
 
 function locationLabel(hospital?: { municipality?: string | null; province?: string | null } | null) {
