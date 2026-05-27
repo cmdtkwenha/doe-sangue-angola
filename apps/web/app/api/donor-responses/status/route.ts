@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     const responseId = assertString(body.responseId, "Resposta do dador");
     const { data: existing, error } = await db
       .from("donor_responses")
-      .select("id,blood_request_id,donor_id,hospital_id,confirmation_pin,status")
+      .select("id,blood_request_id,donor_id,hospital_id,confirmation_pin,pin_expires_at,status")
       .eq("id", responseId)
       .single();
     if (error) throw supabaseError("Não foi possível carregar a resposta do dador", error);
@@ -30,6 +30,9 @@ export async function POST(request: Request) {
     if (status === "pin_validated") {
       const pin = assertPin(optionalString(body.confirmationPin, 4));
       if (pin !== existing.confirmation_pin) throw new ApiError(400, "PIN inválido.");
+      if (existing.pin_expires_at && new Date(existing.pin_expires_at).getTime() < Date.now()) {
+        throw new ApiError(409, "PIN expirado. Gere um novo compromisso de doação.");
+      }
     }
 
     const payload = statusPayload(status);
@@ -40,6 +43,7 @@ export async function POST(request: Request) {
       .select("id,status")
       .single();
     if (updateError) throw supabaseError("Não foi possível atualizar o estado do dador", updateError);
+    await applyOperationalEffects(db, responseId, existing.donor_id, status);
     await syncRequest(db, existing.blood_request_id, status);
     await notifyDonor(db, existing.donor_id, status);
     if (status === "completed" || status === "cancelled") {
@@ -48,6 +52,53 @@ export async function POST(request: Request) {
     await auditApiAction(principal, `Atualizou resposta do dador para ${status}.`);
     return data;
   });
+}
+
+async function applyOperationalEffects(
+  db: Awaited<ReturnType<typeof createRouteSupabase>>,
+  responseId: string,
+  donorId: string,
+  status: ResponseStatus
+) {
+  if (status === "arrived") await rewardOnce(db, responseId, donorId, 40, "Chegada confirmada", "reward_arrived_at");
+  if (status === "completed") {
+    await rewardOnce(db, responseId, donorId, 120, "Doação concluída", "reward_completed_at");
+    await updateCooldown(db, donorId);
+  }
+}
+
+async function rewardOnce(
+  db: Awaited<ReturnType<typeof createRouteSupabase>>,
+  responseId: string,
+  donorId: string,
+  points: number,
+  reason: string,
+  flag: "reward_arrived_at" | "reward_completed_at"
+) {
+  const { data } = await db.from("donor_responses").select(flag).eq("id", responseId).maybeSingle();
+  const row = data as Record<string, string | null> | null;
+  if (row?.[flag]) return;
+  await db.from("rewards").insert({ donor_id: donorId, points, reason, tier: tierFor(points) });
+  await db.from("donor_responses").update({ [flag]: new Date().toISOString() }).eq("id", responseId);
+}
+
+async function updateCooldown(db: Awaited<ReturnType<typeof createRouteSupabase>>, donorId: string) {
+  const { data } = await db.from("donors").select("gender,total_donations").eq("id", donorId).maybeSingle();
+  const days = data?.gender === "Feminino" ? 120 : 90;
+  const next = new Date();
+  next.setDate(next.getDate() + days);
+  await db.from("donors").update({
+    available: false,
+    last_donation_date: new Date().toISOString().slice(0, 10),
+    next_eligible_donation_date: next.toISOString().slice(0, 10),
+    total_donations: (data?.total_donations ?? 0) + 1
+  }).eq("id", donorId);
+}
+
+function tierFor(points: number) {
+  if (points >= 120) return "Ouro";
+  if (points >= 40) return "Prata";
+  return "Bronze";
 }
 
 async function notifyDonor(

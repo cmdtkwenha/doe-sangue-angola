@@ -139,10 +139,10 @@ export async function POST(request: Request) {
 
     const requestRecord = mapRequest(data as unknown as RequestRow);
     await notifyMatchedDonors(db, requestRecord, donorColumns);
-    if (requestRecord.urgency === "Critica") {
+    if (requestRecord.urgency === "Critica" || requestRecord.urgency === "Desastre") {
       await notifyAdmins(
         db,
-        "Pedido crítico criado",
+        requestRecord.urgency === "Desastre" ? "Modo desastre ativado" : "Pedido crítico criado",
         `Pedido ${requestRecord.bloodType} em ${requestRecord.municipality}, ${requestRecord.province}.`,
         "critical"
       );
@@ -183,9 +183,12 @@ const donorColumns = [
   "gender",
   "last_donation",
   "last_donation_date",
+  "next_eligible_donation_date",
   "phone",
   "points",
   "preferred_hospital_id",
+  "reliability_score",
+  "response_speed_minutes",
   "total_donations"
 ].join(",");
 
@@ -199,6 +202,7 @@ function enrichRequest(row: RequestRow, donor: ReturnType<typeof mapDonor>) {
 
 function nearDonor(request: BloodRequest, donor: ReturnType<typeof mapDonor>) {
   if (request.distanceKm != null) return request.distanceKm <= 80;
+  if (request.urgency === "Desastre") return true;
   return request.province === donor.province
     && (!request.municipality || request.municipality === donor.municipality || request.urgency === "Critica");
 }

@@ -14,7 +14,7 @@ export function RequestCard({
   onOpen?: (request: BloodRequest) => void;
   request: BloodRequest;
 }) {
-  const tone = request.urgency === "Critica"
+  const tone = request.urgency === "Critica" || request.urgency === "Desastre"
     ? "critical"
     : request.urgency === "Alta"
       ? "warning"

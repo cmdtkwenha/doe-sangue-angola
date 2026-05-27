@@ -38,9 +38,12 @@ export type DonorRow = {
   latitude?: number | null;
   location_permission_status?: string | null;
   longitude?: number | null;
+  next_eligible_donation_date?: string | null;
   phone?: string | null;
   points: number;
   preferred_hospital_id: string | null;
+  reliability_score?: number | null;
+  response_speed_minutes?: number | null;
   total_donations?: number | null;
   user_id?: string | null;
   users?: { name?: string | null; phone?: string | null } | null;
@@ -140,8 +143,11 @@ export function mapDonor(row: DonorRow): Donor {
     latitude: row.latitude ?? undefined,
     locationPermissionStatus: row.location_permission_status ?? undefined,
     longitude: row.longitude ?? undefined,
+    nextEligibleDonationDate: row.next_eligible_donation_date ?? undefined,
     phone: row.phone ?? row.users?.phone ?? undefined,
     points: row.points,
+    reliabilityScore: row.reliability_score ?? undefined,
+    responseSpeedMinutes: row.response_speed_minutes ?? undefined,
     totalDonations: row.total_donations ?? 0,
     preferredHospitalId: row.preferred_hospital_id ?? undefined
   };

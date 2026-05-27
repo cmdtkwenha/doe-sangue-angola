@@ -1,6 +1,5 @@
 "use client";
 
-import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
@@ -8,17 +7,25 @@ import { EmptyState } from "../ui/EmptyState";
 import styles from "./hospitalPortal.module.css";
 import { useCurrentHospital } from "./useCurrentHospital";
 
+type InventoryRow = {
+  bloodType: string;
+  daysRemaining: number;
+  safeMinimum: number;
+  status: "Adequado" | "Baixo" | "Crítico";
+  trend: string;
+  units: number;
+};
+
 export function InventoryPanel() {
   const version = useRealtimeVersion();
-  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses", "donors"]);
+  const liveVersion = useSupabaseRealtimeVersion(["hospital_inventory", "blood_requests", "donor_responses"]);
   const { data: hospital } = useCurrentHospital();
   const hospitalId = hospital?.id ?? "";
-  const { data: requests, loading, error } = useApiData<BloodRequest[]>(
-    hospitalId ? `/api/blood-requests?hospitalId=${hospitalId}` : "/api/blood-requests?hospitalId=missing",
+  const { data: inventory, loading, error } = useApiData<InventoryRow[]>(
+    hospitalId ? `/api/hospital/inventory?hospitalId=${hospitalId}` : "/api/hospital/inventory?hospitalId=missing",
     [],
     version + liveVersion
   );
-  const inventory = buildInventorySummary(requests);
 
   return (
     <section className={styles.panel}>
@@ -36,17 +43,14 @@ export function InventoryPanel() {
       ) : (
         <div className={styles.table}>
           {inventory.map((item) => {
-          const reserve = Math.max(item.safeMinimum - item.units, 0);
-          const critical = item.units < item.safeMinimum;
+          const critical = item.status === "Crítico";
           return (
           <article className={styles.inventoryRow} key={item.bloodType}>
             <strong>{item.bloodType}</strong>
             <span>{item.units} disponível</span>
-            <span>{reserve} reserva</span>
-            <span>{item.units + reserve} total</span>
-            <span className={critical ? "pill red" : "pill gold"}>
-              {critical ? "Crítico" : "Adequado"}
-            </span>
+            <span>{item.daysRemaining} dias restantes</span>
+            <span>{item.trend}</span>
+            <span className={critical ? "pill red" : "pill gold"}>{item.status}</span>
           </article>
           );
           })}
@@ -55,16 +59,4 @@ export function InventoryPanel() {
       <a className={styles.footerLink} href="/hospital/inventory">Ver inventário completo</a>
     </section>
   );
-}
-
-function buildInventorySummary(requests: BloodRequest[]) {
-  const grouped = new Map<string, number>();
-  requests.forEach((request) => {
-    grouped.set(request.bloodType, (grouped.get(request.bloodType) ?? 0) + request.units);
-  });
-  return Array.from(grouped.entries()).map(([bloodType, units]) => ({
-    bloodType,
-    safeMinimum: Math.max(units, 1),
-    units
-  }));
 }

@@ -63,6 +63,7 @@ export async function POST(request: Request) {
       title: "Pedido aceite com sucesso",
       type: "appointment"
     });
+    await addReward(db, response.id, donorId, 25, "Pedido aceite");
     await auditApiAction(principal, `Aceitou pedido de sangue ${body.requestId}.`);
     return appointment;
   });
@@ -77,6 +78,7 @@ async function createDonorResponse(
   const existing = await findDonorResponse(db, donorId, requestId);
   if (existing?.id) return existing;
   const pin = createPin();
+  const pinExpiresAt = new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString();
   const { data, error } = await db
     .from("donor_responses")
     .insert({
@@ -86,6 +88,7 @@ async function createDonorResponse(
       eta_minutes: 15,
       hospital_id: hospitalId,
       accepted_at: new Date().toISOString(),
+      pin_expires_at: pinExpiresAt,
       status: "accepted"
     })
     .select("id,confirmation_pin")
@@ -96,6 +99,26 @@ async function createDonorResponse(
   }
   if (error) throw supabaseError("Não foi possível aceitar o pedido", error);
   return data;
+}
+
+async function addReward(
+  db: Awaited<ReturnType<typeof createRouteSupabase>>,
+  responseId: string,
+  donorId: string,
+  points: number,
+  reason: string
+) {
+  const { data } = await db
+    .from("donor_responses")
+    .select("reward_accepted_at")
+    .eq("id", responseId)
+    .maybeSingle();
+  if (data?.reward_accepted_at) return;
+  await db.from("rewards").insert({ donor_id: donorId, points, reason, tier: "Bronze" });
+  await db
+    .from("donor_responses")
+    .update({ reward_accepted_at: new Date().toISOString() })
+    .eq("id", responseId);
 }
 
 async function findDonorResponse(

@@ -1,7 +1,7 @@
 import type { BloodType, Urgency } from "@doe-sangue-angola/shared-types";
 import { bloodTypes } from "../constants";
 
-const urgencies: Urgency[] = ["Critica", "Alta", "Media", "Normal"];
+const urgencies: Urgency[] = ["Desastre", "Critica", "Alta", "Media", "Normal"];
 
 export type BloodRequestDraft = {
   bloodType: BloodType;

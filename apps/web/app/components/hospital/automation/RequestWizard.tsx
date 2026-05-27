@@ -48,7 +48,7 @@ export function RequestWizard() {
         </select>
         <input className={styles.input} min={1} onChange={(event) => setUnits(Number(event.target.value))} type="number" value={units} />
         <select className={styles.select} onChange={(event) => setUrgency(event.target.value as Urgency)} value={urgency}>
-          {["Critica", "Alta", "Media", "Normal"].map((item) => <option key={item}>{item}</option>)}
+          {["Desastre", "Critica", "Alta", "Media", "Normal"].map((item) => <option key={item}>{item}</option>)}
         </select>
         <input className={styles.input} onChange={(event) => setNotes(event.target.value)} placeholder="Notas clínicas" value={notes} />
         <button className={styles.button} type="submit">Criar e notificar dadores</button>

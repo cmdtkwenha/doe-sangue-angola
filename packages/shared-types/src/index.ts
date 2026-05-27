@@ -12,7 +12,7 @@ export type BloodType =
 
 export type UserRole = "admin" | "hospital" | "donor";
 
-export type Urgency = "Critica" | "Alta" | "Media" | "Normal";
+export type Urgency = "Desastre" | "Critica" | "Alta" | "Media" | "Normal";
 
 export type RequestStatus =
   | "Aberto"
@@ -44,7 +44,10 @@ export type Donor = {
   latitude?: number;
   locationPermissionStatus?: string;
   longitude?: number;
+  nextEligibleDonationDate?: string;
   points: number;
+  reliabilityScore?: number;
+  responseSpeedMinutes?: number;
   totalDonations?: number;
   eligibilityStatus?: string;
   birthDate?: string;

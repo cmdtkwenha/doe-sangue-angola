@@ -7,6 +7,7 @@ export async function GET(request: Request) {
     const principal = await requireApiSession();
     const donorId = new URL(request.url).searchParams.get("donorId");
 
+    if (donorId === "missing") return [];
     if (donorId) {
       requireEntityAccess(principal, "donor", donorId);
       return dataProvider.listRewardsForDonor(donorId);

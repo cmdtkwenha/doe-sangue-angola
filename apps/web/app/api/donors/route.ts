@@ -201,10 +201,13 @@ const donorColumns = [
   "birth_date",
   "last_donation",
   "last_donation_date",
+  "next_eligible_donation_date",
   "total_donations",
   "eligibility_status",
   "points",
   "preferred_hospital_id",
+  "reliability_score",
+  "response_speed_minutes",
   "user_id"
 ].join(",");
 

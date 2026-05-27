@@ -27,6 +27,7 @@ export function matchingAgent(request: BloodRequest | undefined, donors: Donor[]
 function scoreDonor(request: BloodRequest, donor: Donor): MatchResult {
   const reasons: string[] = [];
   let score = 0;
+  const critical = request.urgency === "Critica" || request.urgency === "Desastre";
 
   if (compatible[request.bloodType].includes(donor.bloodType)) {
     score += 55;
@@ -38,7 +39,29 @@ function scoreDonor(request: BloodRequest, donor: Donor): MatchResult {
     reasons.push("Disponivel para contacto");
   }
 
-  if (request.urgency === "Critica") {
+  if (request.municipality && donor.municipality === request.municipality) {
+    score += 18;
+    reasons.push("Mesmo municipio");
+  } else if (request.province && donor.province === request.province) {
+    score += 10;
+    reasons.push("Mesma provincia");
+  }
+
+  if (isPastCooldown(donor) || critical) {
+    score += critical ? 8 : 12;
+    reasons.push(critical ? "Pedido critico reduz peso do intervalo" : "Intervalo de doacao cumprido");
+  } else {
+    score -= 25;
+    reasons.push("Ainda em intervalo de seguranca");
+  }
+
+  score += Math.min(10, Math.max(0, donor.reliabilityScore ?? 7));
+  if ((donor.responseSpeedMinutes ?? 60) <= 30) {
+    score += 8;
+    reasons.push("Historico de resposta rapida");
+  }
+
+  if (critical) {
     score += 10;
     reasons.push("Prioridade nacional critica");
   }
@@ -54,6 +77,17 @@ function scoreDonor(request: BloodRequest, donor: Donor): MatchResult {
     recommendation: getRecommendation(score),
     reasons
   };
+}
+
+function isPastCooldown(donor: Donor) {
+  if (donor.nextEligibleDonationDate) {
+    return new Date(donor.nextEligibleDonationDate).getTime() <= Date.now();
+  }
+  if (!donor.lastDonation) return true;
+  const days = donor.gender === "Feminino" ? 120 : 90;
+  const next = new Date(donor.lastDonation);
+  next.setDate(next.getDate() + days);
+  return next.getTime() <= Date.now();
 }
 
 function getRecommendation(score: number): MatchResult["recommendation"] {

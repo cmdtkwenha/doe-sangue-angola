@@ -11,16 +11,20 @@ export async function notifyMatchedDonors(
   requestRecord: BloodRequest,
   donorColumns: string
 ) {
-  const { data } = await db.from("donors").select(donorColumns).eq("province", requestRecord.province);
+  const disaster = requestRecord.urgency === "Desastre";
+  const query = db.from("donors").select(donorColumns);
+  const { data } = disaster
+    ? await query
+    : await query.eq("province", requestRecord.province);
   const donors = (data as unknown as DonorRow[] | null ?? []).map(mapDonor);
-  const matches = matchingAgent(requestRecord, donors).filter((item) => item.score >= 55);
+  const matches = matchingAgent(requestRecord, donors).filter((item) => item.score >= (disaster ? 45 : 55));
   await Promise.all(matches.map((match) =>
     notifyUser(db, {
-      message: `Pedido ${requestRecord.bloodType} perto de si. ${requestRecord.units} bolsas necessárias.`,
+      message: `${disaster ? "Emergência nacional" : "Pedido"} ${requestRecord.bloodType} perto de si. ${requestRecord.units} bolsas necessárias.`,
       publicUserId: match.donor.userId,
       role: "donor",
       title: "Pedido urgente perto de si",
-      type: requestRecord.urgency === "Critica" ? "urgent" : "request"
+      type: disaster || requestRecord.urgency === "Critica" ? "urgent" : "request"
     })
   ));
   if (matches.length === 0) {
