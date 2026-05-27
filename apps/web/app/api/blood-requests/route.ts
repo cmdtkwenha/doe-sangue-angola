@@ -11,7 +11,6 @@ import { matchingAgent } from "@doe-sangue-angola/agents";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { auditApiAction } from "../_utils/audit";
 import { ApiError, apiResponse, readJson } from "../_utils/apiResponse";
-import { distanceKm, etaMinutes } from "../_utils/location";
 import { notifyAdmins } from "../_utils/notifications";
 import { notifyMatchedDonors } from "../_utils/requestNotifications";
 import {
@@ -167,7 +166,7 @@ const requestColumns = [
   "urgency",
   "status",
   "created_at",
-  "hospitals(name,municipality,province,latitude,longitude)"
+  "hospitals(name,municipality,province)"
 ].join(",");
 
 const donorColumns = [
@@ -184,9 +183,6 @@ const donorColumns = [
   "gender",
   "last_donation",
   "last_donation_date",
-  "latitude",
-  "location_permission_status",
-  "longitude",
   "phone",
   "points",
   "preferred_hospital_id",
@@ -195,11 +191,9 @@ const donorColumns = [
 
 function enrichRequest(row: RequestRow, donor: ReturnType<typeof mapDonor>) {
   const request = mapRequest(row);
-  const distance = distanceKm(donor, row.hospitals);
   return {
     ...request,
-    distanceKm: distance,
-    etaMinutes: etaMinutes(distance)
+    etaMinutes: undefined
   };
 }
 

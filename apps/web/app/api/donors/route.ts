@@ -13,9 +13,6 @@ type DonorBody = {
   emergencyContactPhone?: string;
   fullName: string;
   gender?: string;
-  latitude?: number;
-  locationPermissionStatus?: string;
-  longitude?: number;
   municipality: string;
   phone: string;
   province: string;
@@ -84,9 +81,6 @@ export async function POST(request: Request) {
       emergencyContactPhone: optionalString(body.emergencyContactPhone, 40),
       fullName: assertString(body.fullName, "Nome completo", 180),
     gender: assertGender(body.gender),
-      latitude: body.latitude,
-      locationPermissionStatus: body.locationPermissionStatus,
-      longitude: body.longitude,
       municipality: assertString(body.municipality, "Município", 120),
       phone: assertString(body.phone, "Telefone", 40),
       userId: authUser.id,
@@ -144,9 +138,6 @@ async function saveDonor(db: DbClient, input: SaveDonorInput): Promise<Donor> {
     emergency_contact_phone: input.emergencyContactPhone,
     full_name: input.fullName,
     gender: input.gender,
-    latitude: input.latitude,
-    location_permission_status: input.locationPermissionStatus ?? "unknown",
-    longitude: input.longitude,
     municipality: input.municipality,
     phone: input.phone,
     province: input.province,
@@ -189,9 +180,6 @@ type SaveDonorInput = {
   emergencyContactPhone?: string;
   fullName: string;
   gender?: string;
-  latitude?: number;
-  locationPermissionStatus?: string;
-  longitude?: number;
   municipality: string;
   phone: string;
   province: string;
@@ -213,9 +201,6 @@ const donorColumns = [
   "birth_date",
   "last_donation",
   "last_donation_date",
-  "latitude",
-  "location_permission_status",
-  "longitude",
   "total_donations",
   "eligibility_status",
   "points",

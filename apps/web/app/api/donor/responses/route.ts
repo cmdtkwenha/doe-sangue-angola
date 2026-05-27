@@ -1,6 +1,5 @@
 import type { DonorResponseStatus } from "@doe-sangue-angola/shared-types";
 import { apiResponse } from "../../_utils/apiResponse";
-import { distanceKm, etaMinutes } from "../../_utils/location";
 import { createRouteSupabase, requireApiSession } from "../../_utils/security";
 
 export type DonorPinResponse = {
@@ -19,7 +18,7 @@ export async function GET() {
     const db = await createRouteSupabase();
     const { data: donor, error: donorError } = await db
       .from("donors")
-      .select("id,latitude,longitude")
+      .select("id")
       .eq("user_id", principal.authUserId)
       .maybeSingle();
     if (donorError) throw supabaseError("Não foi possível carregar o perfil de dador", donorError);
@@ -37,7 +36,7 @@ export async function GET() {
     const requestIds = unique(responses.map((item) => item.blood_request_id));
     const [{ data: hospitals, error: hospitalError }, { data: requests, error: requestError }] =
       await Promise.all([
-        db.from("hospitals").select("id,name,municipality,province,latitude,longitude").in("id", hospitalIds),
+        db.from("hospitals").select("id,name,municipality,province").in("id", hospitalIds),
         db.from("blood_requests").select("id,blood_type").in("id", requestIds)
       ]);
     if (hospitalError) throw supabaseError("Não foi possível carregar o hospital", hospitalError);
@@ -46,10 +45,9 @@ export async function GET() {
   return responses.map((item) => {
       const hospital = hospitals?.find((row) => row.id === item.hospital_id);
       const request = requests?.find((row) => row.id === item.blood_request_id);
-      const distance = distanceKm(donor, hospital);
       return {
         bloodRequestId: item.blood_request_id,
-        etaMinutes: etaMinutes(distance) ?? item.eta_minutes ?? 30,
+        etaMinutes: item.eta_minutes ?? 30,
         hospitalLocation: locationLabel(hospital),
         hospitalName: hospital?.name ?? "Hospital",
         pin: item.confirmation_pin ?? "----",

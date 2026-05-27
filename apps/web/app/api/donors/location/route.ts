@@ -21,9 +21,14 @@ export async function PATCH(request: Request) {
         longitude: validCoordinate(body.longitude) ? body.longitude : null
       })
       .eq("user_id", principal.authUserId);
+    if (error && isMissingLocationColumn(error)) return { ok: true, stored: false };
     if (error) throw error;
-    return { ok: true };
+    return { ok: true, stored: true };
   });
+}
+
+function isMissingLocationColumn(error: { code?: string; message?: string }) {
+  return error.code === "PGRST204" || /latitude|longitude|location_permission_status/i.test(error.message ?? "");
 }
 
 function validCoordinate(value: unknown): value is number {
