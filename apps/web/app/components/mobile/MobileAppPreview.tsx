@@ -69,7 +69,7 @@ export function MobileAppPreview() {
     setMessage("A aceitar pedido...");
     try {
       const result = await acceptRequestAction(donor.id, request.id);
-      setMessage(result.ok ? "Pedido aceite com sucesso." : result.message);
+      setMessage(result.ok ? "Pedido aceite com sucesso. Veja o PIN no painel inicial." : result.message);
       setSelected(null);
     } finally {
       setAccepting(false);

@@ -27,26 +27,39 @@ export function DonorPinCard() {
   return (
     <article className={styles.card}>
       <strong>Meu PIN de Doação</strong>
-      <p className="muted">Debug: donor_responses select · blood_requests select</p>
       {loading ? <p className="muted">A carregar PIN real...</p> : null}
       {error ? <p className="muted">{error}</p> : null}
       {!current ? (
         <p className="muted">Aceite um pedido para gerar o seu PIN de doação.</p>
       ) : (
-        <div className={styles.requestTop}>
-          <span>
-            <small>Hospital</small>
-            <br />
-            <strong>{current.hospitalName}</strong>
-          </span>
-          <span>
-            <small>Pedido {current.requestBloodType} · ETA {current.etaMinutes} min</small>
-            <br />
-            <strong>{current.status}</strong>
-          </span>
-          <span className={`${styles.blood} ${styles.criticalText}`}>{current.pin}</span>
+        <div className={styles.successCard}>
+          <span className={styles.check}>✓</span>
+          <div>
+            <strong>Pedido aceite com sucesso</strong>
+            <p className="muted">{current.hospitalName}</p>
+          </div>
+          <div className={styles.pinGrid}>
+            <span><small>Tipo</small><strong>{current.requestBloodType}</strong></span>
+            <span><small>ETA</small><strong>{current.etaMinutes} min</strong></span>
+            <span><small>Estado</small><strong>{statusLabel(current.status)}</strong></span>
+          </div>
+          <div className={styles.pinBox}>
+            <small>PIN de confirmação</small>
+            <strong>{current.pin}</strong>
+          </div>
         </div>
       )}
     </article>
   );
+}
+
+function statusLabel(status: string) {
+  const labels: Record<string, string> = {
+    accepted: "Dador a Caminho",
+    arrived: "Chegou",
+    cancelled: "Cancelado",
+    completed: "Doação concluída",
+    pin_validated: "PIN Validado"
+  };
+  return labels[status] ?? status;
 }

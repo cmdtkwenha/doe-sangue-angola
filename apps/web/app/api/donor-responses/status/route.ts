@@ -3,8 +3,9 @@ import { auditApiAction } from "../../_utils/audit";
 import { createRouteSupabase, requireApiSession, requireEntityAccess, requireSameOrigin } from "../../_utils/security";
 import { assertPin, assertString, optionalString } from "../../_utils/validation";
 
-type ResponseStatus = "Cancelado" | "Chegou" | "Concluído" | "PIN Validado";
+type ResponseStatus = "arrived" | "cancelled" | "completed" | "pin_validated";
 type StatusBody = { confirmationPin?: string; responseId: string; status: ResponseStatus };
+const allowed: ResponseStatus[] = ["arrived", "cancelled", "completed", "pin_validated"];
 
 export async function POST(request: Request) {
   requireSameOrigin(request);
@@ -19,14 +20,14 @@ export async function POST(request: Request) {
       .select("id,blood_request_id,hospital_id,confirmation_pin")
       .eq("id", responseId)
       .single();
-    if (error) throw supabaseError("donor_responses select", "donor_responses", error);
+    if (error) throw supabaseError("Não foi possível carregar a resposta do dador", error);
     requireEntityAccess(principal, "hospital", existing.hospital_id);
-    if (body.status === "PIN Validado") {
+    const status = body.status;
+    if (!status || !allowed.includes(status)) throw new ApiError(400, "Estado inválido.");
+    if (status === "pin_validated") {
       const pin = assertPin(optionalString(body.confirmationPin, 4));
       if (pin !== existing.confirmation_pin) throw new ApiError(400, "PIN inválido.");
     }
-    const status = body.status;
-    if (!status) throw new ApiError(400, "Estado obrigatório.");
 
     const payload = statusPayload(status);
     const { data, error: updateError } = await db
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
       .eq("id", responseId)
       .select("id,status")
       .single();
-    if (updateError) throw supabaseError("donor_responses update", "donor_responses", updateError);
+    if (updateError) throw supabaseError("Não foi possível atualizar o estado do dador", updateError);
     await syncRequest(db, existing.blood_request_id, status);
     await auditApiAction(principal, `Atualizou resposta do dador para ${status}.`);
     return data;
@@ -44,8 +45,8 @@ export async function POST(request: Request) {
 
 function statusPayload(status: ResponseStatus) {
   return {
-    arrived_at: status === "Chegou" || status === "PIN Validado" ? new Date().toISOString() : undefined,
-    donation_completed_at: status === "Concluído" ? new Date().toISOString() : undefined,
+    arrived_at: status === "arrived" || status === "pin_validated" ? new Date().toISOString() : undefined,
+    donation_completed_at: status === "completed" ? new Date().toISOString() : undefined,
     status
   };
 }
@@ -55,26 +56,25 @@ async function syncRequest(
   requestId: string,
   status: ResponseStatus
 ) {
-  const next = status === "Concluído"
+  const next = status === "completed"
     ? "Concluído"
-    : status === "Cancelado"
+    : status === "cancelled"
       ? "Cancelado"
-      : status === "PIN Validado"
+      : status === "pin_validated"
         ? "PIN Validado"
         : "Doador a Caminho";
   const { error } = await db.from("blood_requests").update({ status: next }).eq("id", requestId);
-  if (error) throw supabaseError("blood_requests update", "blood_requests", error);
+  if (error) throw supabaseError("Não foi possível atualizar o pedido de sangue", error);
 }
 
-function supabaseError(action: string, table: string, error: {
+function supabaseError(label: string, error: {
   code?: string;
   details?: string;
   message: string;
 }) {
   return new Error([
-    `Supabase ${action}`,
-    `table=${table}`,
-    `message=${error.message}`,
+    label,
+    error.message,
     error.code ? `code=${error.code}` : "",
     error.details ? `details=${error.details}` : ""
   ].filter(Boolean).join(" | "));

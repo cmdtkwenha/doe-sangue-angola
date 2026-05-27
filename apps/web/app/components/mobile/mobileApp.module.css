@@ -115,6 +115,33 @@
   box-shadow: 0 14px 34px rgba(25, 35, 45, 0.075);
 }
 .card { padding: 14px; margin-top: 12px; }
+.successCard {
+  display: grid;
+  gap: 12px;
+  padding-top: 8px;
+}
+.pinGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.pinGrid span,
+.pinBox {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #f7f8fb;
+}
+.pinBox {
+  border: 1px solid #cfe8da;
+  background: #f1fbf5;
+}
+.pinBox strong {
+  color: #178a4f;
+  font-size: 34px;
+  letter-spacing: 0;
+}
 .request {
   display: grid;
   gap: 12px;

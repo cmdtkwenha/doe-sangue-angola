@@ -31,7 +31,7 @@ export async function GET() {
       .select("id,donor_id,hospital_id,blood_request_id,created_at,eta_minutes,confirmation_pin,status")
       .eq("hospital_id", hospitalId)
       .order("created_at", { ascending: false });
-    if (error) throw supabaseError("hospital ETA query", "donor_responses", error);
+    if (error) throw supabaseError("Não foi possível carregar dadores aceites", error);
     if (!responses?.length) return [];
 
     const donorIds = unique(responses.map((item) => item.donor_id));
@@ -42,8 +42,8 @@ export async function GET() {
         db.from("blood_requests").select("id,blood_type,status").in("id", requestIds),
         getHospitalName(db, hospitalId ?? "")
       ]);
-    if (donorError) throw supabaseError("donors select", "donors", donorError);
-    if (requestError) throw supabaseError("blood_requests select", "blood_requests", requestError);
+    if (donorError) throw supabaseError("Não foi possível carregar dados dos dadores", donorError);
+    if (requestError) throw supabaseError("Não foi possível carregar pedidos de sangue", requestError);
 
     return responses.map((item) => {
       const donor = donors?.find((row) => row.id === item.donor_id);
@@ -70,7 +70,7 @@ export async function GET() {
 
 async function getHospitalName(db: Awaited<ReturnType<typeof createRouteSupabase>>, id: string) {
   const { data, error } = await db.from("hospitals").select("name").eq("id", id).maybeSingle();
-  if (error) throw supabaseError("hospitals select", "hospitals", error);
+  if (error) throw supabaseError("Não foi possível carregar o hospital", error);
   return data?.name ?? "Hospital";
 }
 
@@ -78,15 +78,14 @@ function unique(values: Array<string | null | undefined>) {
   return [...new Set(values.filter((value): value is string => Boolean(value)))];
 }
 
-function supabaseError(action: string, table: string, error: {
+function supabaseError(label: string, error: {
   code?: string;
   details?: string;
   message: string;
 }) {
   return new Error([
-    `Supabase ${action}`,
-    `table=${table}`,
-    `message=${error.message}`,
+    label,
+    error.message,
     error.code ? `code=${error.code}` : "",
     error.details ? `details=${error.details}` : ""
   ].filter(Boolean).join(" | "));

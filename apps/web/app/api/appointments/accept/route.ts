@@ -11,14 +11,13 @@ export async function POST(request: Request) {
   return apiResponse(async () => {
     const principal = await requireApiSession(["donor", "admin"]);
     const donorId = assertString(body.donorId, "Dador");
-    console.info("[accept] start", { donorId, requestId: body.requestId, role: principal.role });
     const db = await createRouteSupabase();
     const { data: donor, error } = await db
       .from("donors")
       .select("id,user_id")
       .eq("id", donorId)
       .maybeSingle();
-    if (error) throw supabaseError("donors select", "donors", error);
+    if (error) throw supabaseError("Não foi possível carregar o dador", error);
     const donorRow = donor as unknown as { id: string; user_id?: string } | null;
     if (!donorRow?.id) throw new ApiError(404, "Perfil de dador não encontrado.");
     if (
@@ -34,7 +33,7 @@ export async function POST(request: Request) {
       .select("id,hospital_id,status")
       .eq("id", requestId)
       .maybeSingle();
-    if (requestError) throw supabaseError("blood_requests select", "blood_requests", requestError);
+    if (requestError) throw supabaseError("Não foi possível carregar o pedido de sangue", requestError);
     const requestRow = bloodRequest as { hospital_id: string; id: string; status: string } | null;
     if (!requestRow?.id) throw new ApiError(404, "Pedido de sangue não encontrado.");
     if (["Agendado", "Cancelado", "Concluído", "Concluido", "Doador a Caminho"].includes(requestRow.status)) {
@@ -42,18 +41,12 @@ export async function POST(request: Request) {
     }
     const pin = createPin();
     const response = await createDonorResponse(db, donorId, requestRow.id, requestRow.hospital_id, pin);
-    console.info("[accept] donor_response ready", {
-      donorResponseId: response.id,
-      donorId,
-      hospitalId: requestRow.hospital_id,
-      requestId: requestRow.id
-    });
     const appointment = await createAppointment(db, donorId, requestRow.id, requestRow.hospital_id, response.confirmation_pin);
     const { error: statusError } = await db
       .from("blood_requests")
       .update({ status: "Doador a Caminho" })
       .eq("id", requestRow.id);
-    if (statusError) throw supabaseError("blood_requests update", "blood_requests", statusError);
+    if (statusError) throw supabaseError("Não foi possível atualizar o pedido de sangue", statusError);
     await auditApiAction(principal, `Aceitou pedido de sangue ${body.requestId}.`);
     return appointment;
   });
@@ -72,7 +65,7 @@ async function createDonorResponse(
     .eq("donor_id", donorId)
     .eq("blood_request_id", requestId)
     .maybeSingle();
-  if (findError) throw supabaseError("donor_responses select", "donor_responses", findError);
+  if (findError) throw supabaseError("Não foi possível verificar aceitação existente", findError);
   if (existing?.id) return existing;
   const { data, error } = await db
     .from("donor_responses")
@@ -86,17 +79,7 @@ async function createDonorResponse(
     })
     .select("id,confirmation_pin")
     .single();
-  if (error) {
-    console.error("[accept] donor_response insert failed", {
-      code: error.code,
-      details: error.details,
-      donorId,
-      hospitalId,
-      message: error.message,
-      requestId
-    });
-    throw supabaseError("donor_responses insert", "donor_responses", error);
-  }
+  if (error) throw supabaseError("Não foi possível aceitar o pedido", error);
   return data;
 }
 
@@ -113,7 +96,7 @@ async function createAppointment(
     .eq("donor_id", donorId)
     .eq("blood_request_id", requestId)
     .maybeSingle();
-  if (existingError) throw supabaseError("appointments select", "appointments", existingError);
+  if (existingError) throw supabaseError("Não foi possível verificar agendamento", existingError);
   if (existing?.id) return mapAppointment(existing);
 
   const when = nextAppointmentSlot();
@@ -130,7 +113,7 @@ async function createAppointment(
     })
     .select("id,donor_id,hospital_id,blood_request_id,created_at,date,time,pin,status")
     .single();
-  if (error) throw supabaseError("appointments insert", "appointments", error);
+  if (error) throw supabaseError("Não foi possível criar agendamento", error);
   return mapAppointment(data);
 }
 
@@ -173,15 +156,14 @@ function nextAppointmentSlot() {
   };
 }
 
-function supabaseError(action: string, table: string, error: {
+function supabaseError(label: string, error: {
   code?: string;
   details?: string;
   message: string;
 }) {
   return new Error([
-    `Supabase ${action}`,
-    `table=${table}`,
-    `message=${error.message}`,
+    label,
+    error.message,
     error.code ? `code=${error.code}` : "",
     error.details ? `details=${error.details}` : ""
   ].filter(Boolean).join(" | "));

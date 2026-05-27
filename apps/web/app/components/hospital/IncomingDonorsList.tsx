@@ -22,6 +22,7 @@ type AcceptedDonor = {
   requestStatus: string;
   status: string;
 };
+type WorkflowStatus = "arrived" | "cancelled" | "completed" | "pin_validated";
 
 export function IncomingDonorsList() {
   const version = useRealtimeVersion();
@@ -36,7 +37,11 @@ export function IncomingDonorsList() {
     version + liveVersion
   );
 
-  async function update(row: AcceptedDonor, status: "Cancelado" | "Chegou" | "Concluído" | "PIN Validado") {
+  async function update(row: AcceptedDonor, status: WorkflowStatus) {
+    if (status === "pin_validated" && !/^\d{4}$/.test(pins[row.responseId] ?? "")) {
+      setMessage("Introduza o PIN de 4 dígitos informado pelo dador.");
+      return;
+    }
     setMessage("A atualizar estado do dador...");
     const response = await fetch("/api/donor-responses/status", {
       method: "POST",
@@ -57,9 +62,6 @@ export function IncomingDonorsList() {
         <strong>Dadores a Caminho</strong>
         <a className="muted" href="/hospital/donors">Lista ETA</a>
       </div>
-      <p className={styles.rowMuted}>
-        Debug: hospital ETA query · donor_responses select/update · donors select · blood_requests select
-      </p>
       {loading ? <p className={styles.rowMuted}>A carregar dadores aceites...</p> : null}
       {error ? <p className={styles.rowMuted}>{error}</p> : null}
       <p className={styles.rowMuted}>{message}</p>
@@ -83,9 +85,9 @@ export function IncomingDonorsList() {
               </span>
             </span>
             <strong style={{ color: "#008a45" }}>{row.eta}</strong>
-            <span className="pill red">{row.pin}<br /><span className={styles.rowMuted}>{row.status}</span></span>
+            <span className="pill red">{row.pin}<br /><span className={styles.rowMuted}>{statusLabel(row.status)}</span></span>
             <span className={styles.actions}>
-              <button onClick={() => update(row, "Chegou")} type="button">Chegou</button>
+              <button onClick={() => update(row, "arrived")} type="button">Chegou</button>
               <input
                 aria-label="PIN do dador"
                 inputMode="numeric"
@@ -94,9 +96,9 @@ export function IncomingDonorsList() {
                 placeholder="PIN"
                 value={pins[row.responseId] ?? ""}
               />
-              <button onClick={() => update(row, "PIN Validado")} type="button">PIN validado</button>
-              <button onClick={() => update(row, "Concluído")} type="button">Doação concluída</button>
-              <button onClick={() => update(row, "Cancelado")} type="button">Cancelado</button>
+              <button onClick={() => update(row, "pin_validated")} type="button">PIN validado</button>
+              <button onClick={() => update(row, "completed")} type="button">Doação concluída</button>
+              <button onClick={() => update(row, "cancelled")} type="button">Cancelado</button>
             </span>
           </article>
           ))}
@@ -110,4 +112,15 @@ export function IncomingDonorsList() {
 function formatTime(value?: string) {
   if (!value) return "hora pendente";
   return new Date(value).toLocaleTimeString("pt-AO", { hour: "2-digit", minute: "2-digit" });
+}
+
+function statusLabel(status: string) {
+  const labels: Record<string, string> = {
+    accepted: "Dador a Caminho",
+    arrived: "Chegou",
+    cancelled: "Cancelado",
+    completed: "Doação concluída",
+    pin_validated: "PIN Validado"
+  };
+  return labels[status] ?? status;
 }
