@@ -44,6 +44,7 @@ const FamilyEmergencyScreen = dynamic(() =>
 export function MobileAppPreview() {
   const [accepting, setAccepting] = useState(false);
   const [pendingAccept, setPendingAccept] = useState<BloodRequest | null>(null);
+  const [optimisticAccepted, setOptimisticAccepted] = useState<string[]>([]);
   const [selected, setSelected] = useState<BloodRequest | null>(null);
   const [message, setMessage] = useState("Toque num pedido para ver detalhes.");
   const [toast, setToast] = useState<{ message: string; tone: "error" | "success" }>({
@@ -58,7 +59,7 @@ export function MobileAppPreview() {
     [],
     version + liveVersion
   );
-  const acceptedIds = responses.map((item) => item.bloodRequestId);
+  const acceptedIds = [...new Set([...responses.map((item) => item.bloodRequestId), ...optimisticAccepted])];
   const askAccept = (request: BloodRequest) => {
     setSelected(null);
     setPendingAccept(request);
@@ -74,6 +75,7 @@ export function MobileAppPreview() {
       return;
     }
     setAccepting(true);
+    setOptimisticAccepted((items) => [...new Set([...items, pendingAccept.id])]);
     setMessage("A aceitar pedido...");
     try {
       const result = await acceptRequestAction(donor.id, pendingAccept.id);
@@ -81,6 +83,7 @@ export function MobileAppPreview() {
       setMessage(text);
       showToast(text, result.ok ? "success" : "error");
       if (result.ok) setPendingAccept(null);
+      else setOptimisticAccepted((items) => items.filter((id) => id !== pendingAccept.id));
     } finally {
       setAccepting(false);
     }

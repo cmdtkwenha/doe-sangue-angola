@@ -2,6 +2,7 @@
 
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
+import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import styles from "./mobileApp.module.css";
 import { MobileShell } from "./MobileShell";
@@ -24,6 +25,7 @@ export function RequestList({
   onOpen?: (request: BloodRequest) => void;
 }) {
   const version = useRealtimeVersion();
+  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses"]);
   const { session } = useAuth();
   const { data: donor } = useCurrentDonor();
   const userId = session?.user.authUserId ?? session?.user.id;
@@ -32,7 +34,7 @@ export function RequestList({
   const { data: requests, error, loading } = useApiData<BloodRequest[]>(
     donorId ? `/api/blood-requests?donorId=${donorId}` : "/api/blood-requests?donorId=missing",
     [],
-    version
+    version + liveVersion
   );
 
   return (

@@ -75,6 +75,7 @@ async function createDonorResponse(
       donor_id: donorId,
       eta_minutes: 15,
       hospital_id: hospitalId,
+      accepted_at: new Date().toISOString(),
       status: "accepted"
     })
     .select("id,confirmation_pin")

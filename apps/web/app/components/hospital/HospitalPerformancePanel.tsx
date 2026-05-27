@@ -1,30 +1,33 @@
 "use client";
 
-import type { Appointment, BloodRequest } from "@doe-sangue-angola/shared-types";
+import type { BloodRequest, DonorResponseStatus } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
+import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
 import base from "./hospitalPortal.module.css";
 import styles from "./hospitalAdvanced.module.css";
 import { useCurrentHospital } from "./useCurrentHospital";
 
 export function HospitalPerformancePanel() {
   const version = useRealtimeVersion();
+  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses"]);
   const { data: hospital } = useCurrentHospital();
   const hospitalId = hospital?.id ?? "";
   const { data: requests } = useApiData<BloodRequest[]>(
     hospitalId ? `/api/blood-requests?hospitalId=${hospitalId}` : "/api/blood-requests?hospitalId=missing",
     [],
-    version
+    version + liveVersion
   );
-  const { data: appointments } = useApiData<Appointment[]>(
-    hospitalId ? `/api/appointments?hospitalId=${hospitalId}` : "/api/appointments?hospitalId=missing",
+  const { data: responses } = useApiData<Array<{ status: DonorResponseStatus }>>(
+    hospitalId ? "/api/hospital/accepted-donors" : "/api/appointments?hospitalId=missing",
     [],
-    version
+    version + liveVersion
   );
   const completed = requests.filter((request) => ["Concluído", "Concluido"].includes(request.status));
+  const activeResponses = responses.filter((item) => item.status !== "cancelled");
   const metrics = [
     ["Pedidos ativos", String(requests.length), "Registos reais"],
-    ["Agendamentos", String(appointments.length), "Reais"],
+    ["Agendamentos", String(activeResponses.length), "Respostas reais"],
     ["Concluídos", String(completed.length), "Este ciclo"]
   ];
 

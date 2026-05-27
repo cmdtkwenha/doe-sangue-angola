@@ -18,13 +18,14 @@ export async function POST(request: Request) {
     const responseId = assertString(body.responseId, "Resposta do dador");
     const { data: existing, error } = await db
       .from("donor_responses")
-      .select("id,blood_request_id,hospital_id,confirmation_pin")
+      .select("id,blood_request_id,hospital_id,confirmation_pin,status")
       .eq("id", responseId)
       .single();
     if (error) throw supabaseError("Não foi possível carregar a resposta do dador", error);
     requireEntityAccess(principal, "hospital", existing.hospital_id);
     const status = normalizeActionStatus(body.status);
     if (!status || !allowed.includes(status)) throw new ApiError(400, "Estado inválido.");
+    assertTransition(normalizeCurrentStatus(existing.status), status);
     if (status === "pin_validated") {
       const pin = assertPin(optionalString(body.confirmationPin, 4));
       if (pin !== existing.confirmation_pin) throw new ApiError(400, "PIN inválido.");
@@ -59,10 +60,45 @@ function normalizeActionStatus(status?: string): ResponseStatus | null {
   return oldValues[status ?? ""] ?? null;
 }
 
+function normalizeCurrentStatus(status?: string): DonorResponseStatus {
+  return normalizeActionStatus(status) ?? (status === "accepted" ? "accepted" : "accepted");
+}
+
+function assertTransition(current: DonorResponseStatus, next: ResponseStatus) {
+  if (current === "completed") throw new ApiError(409, "Doação já concluída.");
+  if (current === "cancelled") throw new ApiError(409, "Resposta do dador já cancelada.");
+  if (next === "cancelled") return;
+  const validNext: Record<DonorResponseStatus, DonorResponseStatus[]> = {
+    accepted: ["arrived"],
+    arrived: ["pin_validated"],
+    cancelled: [],
+    completed: [],
+    pin_validated: ["completed"]
+  };
+  if (!validNext[current].includes(next)) {
+    throw new ApiError(409, transitionMessage(current, next));
+  }
+}
+
+function transitionMessage(current: DonorResponseStatus, next: ResponseStatus) {
+  const labels: Record<DonorResponseStatus, string> = {
+    accepted: "Dador a Caminho",
+    arrived: "Chegou",
+    cancelled: "Cancelado",
+    completed: "Doação concluída",
+    pin_validated: "PIN Validado"
+  };
+  return `Ação inválida: ${labels[current]} não pode passar diretamente para ${labels[next]}.`;
+}
+
 function statusPayload(status: ResponseStatus) {
+  const now = new Date().toISOString();
   return {
-    arrived_at: status === "arrived" || status === "pin_validated" ? new Date().toISOString() : undefined,
-    donation_completed_at: status === "completed" ? new Date().toISOString() : undefined,
+    arrived_at: status === "arrived" || status === "pin_validated" ? now : undefined,
+    cancelled_at: status === "cancelled" ? now : undefined,
+    completed_at: status === "completed" ? now : undefined,
+    donation_completed_at: status === "completed" ? now : undefined,
+    pin_validated_at: status === "pin_validated" ? now : undefined,
     status
   };
 }

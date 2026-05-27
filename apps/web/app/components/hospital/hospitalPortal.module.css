@@ -199,6 +199,10 @@
   font-weight: 800;
   padding: 6px 8px;
 }
+.actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
 .actions input {
   width: 58px;
   min-height: 32px;

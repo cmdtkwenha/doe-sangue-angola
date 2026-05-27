@@ -1,21 +1,32 @@
 "use client";
 
-import type { Appointment, Donor } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
+import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
+import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
+import { DonorResponseStatusBadge } from "../ui/DonorResponseStatusBadge";
 import { EmptyState } from "../ui/EmptyState";
 import styles from "./hospitalPortal.module.css";
 import { useCurrentHospital } from "./useCurrentHospital";
 
+type ScheduleDonor = {
+  createdAt?: string;
+  donorBloodType: string;
+  donorName: string;
+  eta: string;
+  responseId: string;
+  status: string;
+};
+
 export function AppointmentSchedule() {
+  const version = useRealtimeVersion();
+  const liveVersion = useSupabaseRealtimeVersion(["donor_responses", "blood_requests"]);
   const { data: hospital } = useCurrentHospital();
   const hospitalId = hospital?.id ?? "";
-  const { data: appointments, loading, error } = useApiData<Appointment[]>(
-    hospitalId ? `/api/appointments?hospitalId=${hospitalId}` : "/api/appointments?hospitalId=missing",
+  const { data: rows, loading, error } = useApiData<ScheduleDonor[]>(
+    hospitalId ? "/api/hospital/accepted-donors" : "/api/appointments?hospitalId=missing",
     [],
-    hospitalId.length
+    hospitalId.length + version + liveVersion
   );
-  const { data: donors } = useApiData<Donor[]>("/api/donors", [], 0);
-  const donorById = new Map(donors.map((donor) => [donor.id, donor]));
 
   return (
     <section className={styles.panel}>
@@ -25,31 +36,31 @@ export function AppointmentSchedule() {
       </div>
       {loading ? <p className={styles.rowMuted}>A carregar agendamentos reais...</p> : null}
       {error ? <p className={styles.rowMuted}>{error}</p> : null}
-      {appointments.length === 0 ? (
+      {rows.length === 0 ? (
         <EmptyState
           message="Os agendamentos confirmados pelos dadores aparecerão aqui."
           title="Sem agendamentos"
         />
       ) : (
         <div className={styles.table}>
-          {appointments.map((appointment) => {
-          const donor = donorById.get(appointment.donorId);
-          return (
-          <article className={styles.scheduleRow} key={appointment.id}>
-            <span>{appointment.time}</span>
+          {rows.map((row) => (
+          <article className={styles.scheduleRow} key={row.responseId}>
+            <span>{formatTime(row.createdAt)}</span>
             <span>
-              <strong>{donor?.name}</strong><br />
-              <span className={styles.rowMuted}>{donor?.bloodType} · Doação</span>
+              <strong>{row.donorName}</strong><br />
+              <span className={styles.rowMuted}>{row.donorBloodType} · ETA {row.eta}</span>
             </span>
-            <span className={appointment.status === "Pendente" ? "pill gold" : "pill"}>
-              {appointment.status}
-            </span>
+            <DonorResponseStatusBadge status={row.status} />
           </article>
-          );
-          })}
+          ))}
         </div>
       )}
       <a className={styles.footerLink} href="/hospital/schedule">Ver todos os agendamentos</a>
     </section>
   );
+}
+
+function formatTime(value?: string) {
+  if (!value) return "--:--";
+  return new Date(value).toLocaleTimeString("pt-AO", { hour: "2-digit", minute: "2-digit" });
 }

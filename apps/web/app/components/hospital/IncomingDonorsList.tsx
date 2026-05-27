@@ -6,6 +6,12 @@ import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
 import { useState } from "react";
 import { ActionToast } from "../ui/ActionToast";
+import {
+  canMoveDonorResponse,
+  DonorResponseStatusBadge,
+  donorResponseLabels,
+  normalizeDonorResponseStatus
+} from "../ui/DonorResponseStatusBadge";
 import { ConfirmationModal } from "../ui/ConfirmationModal";
 import { EmptyState } from "../ui/EmptyState";
 import styles from "./hospitalPortal.module.css";
@@ -35,6 +41,7 @@ export function IncomingDonorsList() {
   const [message, setMessage] = useState("Aguardando dadores aceites.");
   const [pending, setPending] = useState<PendingAction>(null);
   const [pins, setPins] = useState<Record<string, string>>({});
+  const [optimistic, setOptimistic] = useState<Record<string, DonorResponseStatus>>({});
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ message: string; tone: "error" | "success" }>({
@@ -48,8 +55,17 @@ export function IncomingDonorsList() {
     [],
     version + liveVersion
   );
+  const displayRows = rows.map((row) => ({
+    ...row,
+    status: optimistic[row.responseId] ?? normalizeDonorResponseStatus(row.status)
+  }));
 
   function ask(row: AcceptedDonor, status: WorkflowStatus) {
+    const current = normalizeDonorResponseStatus(row.status);
+    if (!canMoveDonorResponse(current, status)) {
+      showToast(`Ação indisponível para ${donorResponseLabels[current]}.`, "error");
+      return;
+    }
     if (status === "pin_validated" && !/^\d{4}$/.test(pins[row.responseId] ?? "")) {
       showToast("Introduza o PIN de 4 dígitos informado pelo dador.", "error");
       return;
@@ -62,6 +78,7 @@ export function IncomingDonorsList() {
     if (!pending) return;
     const { row, status } = pending;
     setSaving(true);
+    setOptimistic((current) => ({ ...current, [row.responseId]: status }));
     setMessage("A atualizar estado do dador...");
     const response = await fetch("/api/donor-responses/status", {
       method: "POST",
@@ -79,6 +96,7 @@ export function IncomingDonorsList() {
     setMessage(text);
     showToast(text, ok ? "success" : "error");
     if (ok) setPending(null);
+    if (!ok) setOptimistic((current) => removeOptimistic(current, row.responseId));
     setSaving(false);
   }
 
@@ -96,14 +114,14 @@ export function IncomingDonorsList() {
       {loading ? <p className={styles.rowMuted}>A carregar dadores aceites...</p> : null}
       {error ? <p className={styles.rowMuted}>{error}</p> : null}
       <p className={styles.rowMuted}>{message}</p>
-      {rows.length === 0 ? (
+      {displayRows.length === 0 ? (
         <EmptyState
           message="Ainda não há dadores a caminho."
           title="Lista ETA vazia"
         />
       ) : (
         <div className={styles.table}>
-          {rows.map((row) => (
+          {displayRows.map((row) => (
           <article className={styles.donorRow} key={row.responseId}>
             <span>
               <strong>{row.donorName}</strong><br />
@@ -116,9 +134,12 @@ export function IncomingDonorsList() {
               </span>
             </span>
             <strong style={{ color: "#008a45" }}>{row.eta}</strong>
-            <span className="pill red">{row.pin}<br /><span className={styles.rowMuted}>{statusLabel(row.status)}</span></span>
+            <span>
+              {row.pin}<br />
+              <DonorResponseStatusBadge status={row.status} />
+            </span>
             <span className={styles.actions}>
-              <button disabled={saving} onClick={() => ask(row, "arrived")} type="button">Chegou</button>
+              <button disabled={saving || !canMoveDonorResponse(row.status, "arrived")} onClick={() => ask(row, "arrived")} type="button">Chegou</button>
               <input
                 aria-label="PIN do dador"
                 disabled={saving}
@@ -128,9 +149,9 @@ export function IncomingDonorsList() {
                 placeholder="PIN"
                 value={pins[row.responseId] ?? ""}
               />
-              <button disabled={saving} onClick={() => ask(row, "pin_validated")} type="button">PIN validado</button>
-              <button disabled={saving} onClick={() => ask(row, "completed")} type="button">Doação concluída</button>
-              <button disabled={saving} onClick={() => ask(row, "cancelled")} type="button">Cancelado</button>
+              <button disabled={saving || !canMoveDonorResponse(row.status, "pin_validated")} onClick={() => ask(row, "pin_validated")} type="button">PIN validado</button>
+              <button disabled={saving || !canMoveDonorResponse(row.status, "completed")} onClick={() => ask(row, "completed")} type="button">Doação concluída</button>
+              <button disabled={saving || !canMoveDonorResponse(row.status, "cancelled")} onClick={() => ask(row, "cancelled")} type="button">Cancelado</button>
             </span>
           </article>
           ))}
@@ -159,18 +180,20 @@ function confirmMessage(action: NonNullable<PendingAction>) {
   return `Tem certeza que deseja marcar ${action.row.donorName} como "${statusLabel(action.status)}"?`;
 }
 
+function removeOptimistic(
+  current: Record<string, DonorResponseStatus>,
+  responseId: string
+) {
+  const next = { ...current };
+  delete next[responseId];
+  return next;
+}
+
 function formatTime(value?: string) {
   if (!value) return "hora pendente";
   return new Date(value).toLocaleTimeString("pt-AO", { hour: "2-digit", minute: "2-digit" });
 }
 
 function statusLabel(status: string) {
-  const labels: Record<string, string> = {
-    accepted: "Dador a Caminho",
-    arrived: "Chegou",
-    cancelled: "Cancelado",
-    completed: "Doação concluída",
-    pin_validated: "PIN Validado"
-  };
-  return labels[status] ?? status;
+  return donorResponseLabels[normalizeDonorResponseStatus(status)];
 }

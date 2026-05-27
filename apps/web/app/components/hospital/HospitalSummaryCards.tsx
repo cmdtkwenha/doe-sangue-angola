@@ -1,27 +1,29 @@
 "use client";
 
-import type { Appointment, BloodRequest } from "@doe-sangue-angola/shared-types";
+import type { BloodRequest, DonorResponseStatus } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
+import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
 import styles from "./hospitalPortal.module.css";
 import { useCurrentHospital } from "./useCurrentHospital";
 
 export function HospitalSummaryCards() {
   const version = useRealtimeVersion();
+  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses"]);
   const { data: hospital } = useCurrentHospital();
   const hospitalId = hospital?.id ?? "";
   const { data: requests, loading: loadingRequests } = useApiData<BloodRequest[]>(
     hospitalId ? `/api/blood-requests?hospitalId=${hospitalId}` : "/api/blood-requests?hospitalId=missing",
     [],
-    version
+    version + liveVersion
   );
-  const { data: appointments } = useApiData<Appointment[]>(
-    hospitalId ? `/api/appointments?hospitalId=${hospitalId}` : "/api/appointments?hospitalId=missing",
+  const { data: responses } = useApiData<Array<{ status: DonorResponseStatus }>>(
+    hospitalId ? "/api/hospital/accepted-donors" : "/api/appointments?hospitalId=missing",
     [],
-    version
+    version + liveVersion
   );
   const active = requests.filter((item) => !["Cancelado", "Concluído", "Concluido"].includes(item.status));
-  const incoming = appointments.filter((item) => item.status === "Pendente");
+  const incoming = responses.filter((item) => ["accepted", "arrived", "pin_validated"].includes(item.status));
   const completed = requests.filter((item) => ["Concluído", "Concluido"].includes(item.status));
   const responseRate = requests.length ? Math.round((completed.length / requests.length) * 100) : 0;
 
