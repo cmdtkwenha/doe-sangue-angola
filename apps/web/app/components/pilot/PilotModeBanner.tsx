@@ -8,7 +8,7 @@ export function PilotModeBanner() {
         <div className="eyebrow">Modo piloto</div>
         <strong>Teste controlado em Luanda e Benguela</strong>
         <p className="muted" style={{ margin: "6px 0 0" }}>
-          Notificações seguras, contas de teste e dados mock continuam ativos por defeito.
+          Notificações seguras, contas de teste e dados operacionais preparados para validação controlada.
         </p>
       </div>
       <span className={pilotConfig.enabled ? "pill green" : "pill gold"}>

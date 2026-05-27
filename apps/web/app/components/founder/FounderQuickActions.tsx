@@ -16,7 +16,7 @@ export function FounderQuickActions() {
 
   function approve(id: string) {
     approveVerification(id);
-    setMessage(`Hospital ${id} aprovado no modo mock.`);
+    setMessage(`Hospital ${id} aprovado para revisão operacional.`);
   }
 
   function shutdownPreview() {
@@ -41,7 +41,7 @@ export function FounderQuickActions() {
         ))}
         <button className={`${styles.action} ${styles.danger}`} onClick={shutdownPreview} type="button">
           <strong>Simular encerramento de emergência</strong>
-          <span className="muted">Apenas regista a ação. Não desliga a plataforma.</span>
+          <span className="muted">Regista a ação sem interromper a plataforma.</span>
         </button>
       </div>
       <p className="muted">{message}</p>

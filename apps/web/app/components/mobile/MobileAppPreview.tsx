@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { rejectWorkflowRequest } from "@doe-sangue-angola/shared-services";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { useState } from "react";
 import { useApiData } from "@hooks/useApiData";
@@ -21,9 +20,6 @@ const load = (label: string) => () => <LoadingSkeleton label={label} />;
 const DonationSuccessScreen = dynamic(() =>
   import("./DonationSuccessScreen").then((module) => module.DonationSuccessScreen),
 { loading: load("A carregar partilha de doação") });
-const DonorAcceptanceFlow = dynamic(() =>
-  import("../workflow/DonorAcceptanceFlow").then((module) => module.DonorAcceptanceFlow),
-{ loading: load("A preparar aceitação do pedido") });
 const DonorNotifications = dynamic(() =>
   import("./DonorNotifications").then((module) => module.DonorNotifications),
 { loading: load("A carregar notificações") });
@@ -76,7 +72,6 @@ export function MobileAppPreview() {
     }
   };
   const reject = (request: BloodRequest) => {
-    if (donor) rejectWorkflowRequest(donor.id, request.id);
     setMessage("Pedido recusado. Continuamos a procurar pedidos compatíveis.");
     setSelected(null);
   };
@@ -90,7 +85,7 @@ export function MobileAppPreview() {
         <MobileShell active="requests">
           <RequestListContent />
           <p className="muted">{message}</p>
-          {accepting ? <p className="muted">A criar compromisso no Supabase...</p> : null}
+          {accepting ? <p className="muted">A criar compromisso de doação...</p> : null}
           <RequestDetailsModal
             onAccept={() => selected && accept(selected)}
             onClose={() => setSelected(null)}
@@ -98,7 +93,6 @@ export function MobileAppPreview() {
             open={Boolean(selected)}
             request={selected}
           />
-          <DonorAcceptanceFlow />
         </MobileShell>
         <DonorProfile />
         <EligibilityChecker />

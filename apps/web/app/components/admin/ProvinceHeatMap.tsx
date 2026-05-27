@@ -32,7 +32,7 @@ export function ProvinceHeatMap() {
           <span className="pill gold">Alto</span>
           <span className="pill">Normal</span>
           <p className="muted">
-            {loading ? "A calcular províncias..." : error || "Baseado em pedidos reais Supabase."}
+            {loading ? "A calcular províncias..." : error || "Baseado em pedidos ativos."}
           </p>
         </aside>
       </div>

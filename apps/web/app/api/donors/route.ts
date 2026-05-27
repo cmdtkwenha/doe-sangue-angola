@@ -218,12 +218,7 @@ function formatSupabaseError(error: {
   hint?: string;
   message: string;
 }) {
-  return [
-    `Erro Supabase: ${error.message}`,
-    error.code ? `Código: ${error.code}` : "",
-    error.details ? `Detalhes: ${error.details}` : "",
-    error.hint ? `Sugestão: ${error.hint}` : ""
-  ].filter(Boolean).join(" | ");
+  return error.message;
 }
 
 function assertGender(value: unknown) {

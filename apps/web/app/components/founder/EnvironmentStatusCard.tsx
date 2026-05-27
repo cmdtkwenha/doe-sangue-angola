@@ -17,13 +17,13 @@ export function EnvironmentStatusCard() {
         <div className="eyebrow">Ambiente</div>
         <h3>{status}</h3>
         <p className="muted">
-          {config.label} com dados em {config.dataMode === "mock" ? "mock seguro" : "Supabase"}.
+          {config.label} com dados em {config.dataMode === "mock" ? "ambiente seguro" : "produção"}.
         </p>
       </div>
 
       <div className={styles.envGrid}>
         <Item label="Modo" value={config.label} />
-        <Item label="Dados" value={config.dataMode === "mock" ? "Mock" : "Supabase"} />
+        <Item label="Dados" value={config.dataMode === "mock" ? "Seguro" : "Produção"} />
         <Item label="Piloto" value={config.pilotMode ? "Ativo" : "Inativo"} />
         <Item label="Notificações" value={config.safeNotifications ? "Seguras" : "Reais"} />
       </div>

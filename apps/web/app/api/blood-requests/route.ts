@@ -184,12 +184,7 @@ function formatSupabaseError(error: {
   hint?: string;
   message: string;
 }) {
-  return [
-    error.message,
-    error.code ? `Código: ${error.code}` : "",
-    error.details ? `Detalhes: ${error.details}` : "",
-    error.hint ? `Sugestão: ${error.hint}` : ""
-  ].filter(Boolean).join(" | ");
+  return error.message;
 }
 
 export async function PUT(request: Request) {

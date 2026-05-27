@@ -53,7 +53,7 @@ function MissingProfileState() {
         <div className="eyebrow">Perfil em falta</div>
         <h1 className="title">Perfil não encontrado</h1>
         <p className="muted">
-          A conta existe no Supabase Auth, mas ainda não tem perfil de acesso.
+          A conta existe, mas ainda não tem perfil de acesso.
           Termine o registo ou peça ao administrador para criar o perfil.
         </p>
         <LogoutButton />

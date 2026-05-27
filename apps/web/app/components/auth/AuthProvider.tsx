@@ -44,12 +44,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (authMode !== "supabase") {
-      setError("Configure NEXT_PUBLIC_AUTH_MODE=supabase para autenticação real.");
+      setError("Autenticação real ainda não está ativa neste ambiente.");
       setLoading(false);
       return;
     }
     if (!supabase) {
-      setError("Supabase Auth não configurado. Crie .env.local com as chaves públicas.");
+      setError("Serviço de autenticação não configurado.");
       setLoading(false);
       return;
     }
@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     async login(email, password) {
       if (!supabase || authMode !== "supabase") {
-        setError("Supabase Auth não configurado. Verifique .env.local.");
+        setError("Serviço de autenticação não configurado.");
         return;
       }
       setLoading(true);
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
       setLoading(false);
       if (authError) {
-        trackFailedAction("Login Supabase falhou", { email });
+        trackFailedAction("Login falhou", { email });
         setError("Email ou palavra-passe inválidos.");
         return;
       }
@@ -103,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     async register(input) {
       if (!supabase || getAuthMode() !== "supabase") {
-        setError("Registo exige NEXT_PUBLIC_AUTH_MODE=supabase e Supabase configurado.");
+        setError("Registo real ainda não está ativo neste ambiente.");
         return;
       }
       setLoading(true);
@@ -140,7 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     async resetPassword(email) {
       if (!supabase || getAuthMode() !== "supabase") {
-        setError("Recuperação real exige Supabase Auth.");
+        setError("Recuperação de acesso ainda não está ativa neste ambiente.");
         return;
       }
       setError(null);
@@ -173,9 +173,5 @@ async function createSupabaseProfile(input: {
 }
 
 function formatAuthError(error: { code?: string; message: string; status?: number }) {
-  return [
-    `Erro Supabase Auth: ${error.message}`,
-    error.code ? `Código: ${error.code}` : "",
-    error.status ? `Estado: ${error.status}` : ""
-  ].filter(Boolean).join(" | ");
+  return `Não foi possível criar a conta. ${error.message}`;
 }

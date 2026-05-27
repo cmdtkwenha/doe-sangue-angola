@@ -10,7 +10,7 @@ export default function ForgotPasswordPage() {
           <p className="eyebrow">Recuperação</p>
           <h1>Repor palavra-passe</h1>
           <p>
-            Enviaremos um link seguro pelo Supabase para recuperar o acesso à
+            Enviaremos um link seguro para recuperar o acesso à
             plataforma.
           </p>
         </aside>

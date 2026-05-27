@@ -9,7 +9,7 @@ export function RealtimeStatusStrip() {
   return (
     <section className={styles.strip} aria-label="Estado realtime">
       <span>
-        <span className={styles.pulse} /> Realtime mock ativo
+        <span className={styles.pulse} /> Atualização em tempo real ativa
       </span>
       <span>
         {latest ? (

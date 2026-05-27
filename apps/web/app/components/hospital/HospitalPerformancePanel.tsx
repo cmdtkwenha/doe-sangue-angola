@@ -23,7 +23,7 @@ export function HospitalPerformancePanel() {
   );
   const completed = requests.filter((request) => ["Concluído", "Concluido"].includes(request.status));
   const metrics = [
-    ["Pedidos ativos", String(requests.length), "Supabase"],
+    ["Pedidos ativos", String(requests.length), "Registos reais"],
     ["Agendamentos", String(appointments.length), "Reais"],
     ["Concluídos", String(completed.length), "Este ciclo"]
   ];

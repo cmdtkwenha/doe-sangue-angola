@@ -5,6 +5,7 @@
   background: linear-gradient(135deg, #f6f8fb, #eef5f4);
   color: #151923;
 }
+
 .sidebar {
   background: linear-gradient(180deg, #111820, #0b0f14);
   color: white;
@@ -28,6 +29,7 @@
   display: grid;
   gap: 8px;
 }
+
 .navItem {
   display: flex;
   align-items: center;
@@ -59,6 +61,7 @@
 .content {
   min-width: 0;
 }
+
 .title {
   margin: 0;
   font-size: 28px;
@@ -127,9 +130,8 @@
   font-size: 28px;
   font-weight: 900;
 }
-.card {
-  padding: 20px;
-}
+.card { padding: 20px; }
+
 .kpiValue {
   margin: 18px 0 8px;
   font-size: 34px;
@@ -145,9 +147,8 @@
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
-.panel {
-  padding: 20px;
-}
+.panel { padding: 20px; }
+
 .panelHead {
   display: flex;
   flex-wrap: wrap;
@@ -175,15 +176,10 @@
 .requestRow {
   grid-template-columns: 0.65fr 1.35fr 0.8fr 0.9fr;
 }
-.donorRow {
-  grid-template-columns: 1.4fr 0.45fr 0.65fr 1fr;
-}
-.scheduleRow {
-  grid-template-columns: 0.6fr 1fr 0.8fr;
-}
-.inventoryRow {
-  grid-template-columns: 0.8fr repeat(4, 1fr);
-}
+.donorRow { grid-template-columns: 1.4fr 0.45fr 0.65fr 1fr; }
+.scheduleRow { grid-template-columns: 0.6fr 1fr 0.8fr; }
+.inventoryRow { grid-template-columns: 0.8fr repeat(4, 1fr); }
+
 .rowMuted {
   color: #667085;
   font-size: 13px;
@@ -246,12 +242,5 @@
     overflow-x: auto;
     padding-bottom: 4px;
   }
-  .navItem {
-    min-width: max-content;
-  }
-}
-@media (min-width: 1500px) {
-  .topGrid {
-    grid-template-columns: 1.8fr repeat(3, 1fr);
-  }
+  .navItem { min-width: max-content; }
 }

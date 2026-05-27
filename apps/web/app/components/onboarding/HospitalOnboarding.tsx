@@ -39,7 +39,7 @@ export function HospitalOnboarding() {
 
   useEffect(() => {
     if (!supabase) {
-      setError("Supabase não configurado no frontend.");
+      setError("Serviço de dados não configurado.");
       setLoading(false);
       return;
     }
@@ -78,7 +78,7 @@ export function HospitalOnboarding() {
       return;
     }
     if (!supabase) {
-      setMessage("Supabase não configurado no frontend.");
+      setMessage("Serviço de dados não configurado.");
       return;
     }
     setSaving(true);
@@ -211,10 +211,5 @@ function formatSupabaseError(error: {
   hint?: string;
   message: string;
 }) {
-  return [
-    error.message,
-    error.code ? `Código: ${error.code}` : "",
-    error.details ? `Detalhes: ${error.details}` : "",
-    error.hint ? `Sugestão: ${error.hint}` : ""
-  ].filter(Boolean).join(" | ");
+  return error.message;
 }

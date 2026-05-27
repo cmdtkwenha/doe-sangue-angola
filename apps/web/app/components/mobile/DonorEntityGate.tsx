@@ -20,7 +20,7 @@ export function DonorEntityGate({ children }: { children: ReactNode }) {
     let mounted = true;
     async function checkDonor() {
       if (!supabase) {
-        setState({ found: false, loading: false, reason: "Supabase não configurado." });
+        setState({ found: false, loading: false, reason: "Serviço de dados não configurado." });
         return;
       }
       const { data: authData, error: authError } = await supabase.auth.getUser();
@@ -38,7 +38,7 @@ export function DonorEntityGate({ children }: { children: ReactNode }) {
       setState({
         found: Boolean(data?.id),
         loading: false,
-        reason: error?.message ?? (data?.id ? "Perfil encontrado." : "Não existe linha em donors.user_id.")
+        reason: error?.message ?? (data?.id ? "Perfil encontrado." : "Perfil de dador ainda não criado.")
       });
     }
     void checkDonor();

@@ -1,12 +1,7 @@
 "use client";
 
 import {
-  acceptWorkflowRequest,
-  completeWorkflowDonation,
-  createWorkflowRequest,
-  markDonorOnWay,
   publishRealtimeEvent,
-  validateWorkflowPin
 } from "@doe-sangue-angola/shared-services";
 import type {
   Appointment,
@@ -22,11 +17,6 @@ type CreateRequestResult = {
   request: BloodRequest;
 };
 
-function canUseMock() {
-  return process.env.NODE_ENV !== "production" &&
-    process.env.NEXT_PUBLIC_DATA_MODE !== "supabase";
-}
-
 async function post<T>(path: string, body: unknown) {
   const response = await fetch(path, {
     method: "POST",
@@ -41,8 +31,6 @@ async function post<T>(path: string, body: unknown) {
 }
 
 export async function createRequestAction(input?: RequestDraft) {
-  if (canUseMock()) return createWorkflowRequest(input);
-
   const result = await post<CreateRequestResult>("/api/blood-requests", {
     hospitalId: input?.hospitalId ?? "h1",
     patientCode: input?.patientCode ?? `PAC-${Date.now().toString().slice(-4)}`,
@@ -61,9 +49,7 @@ export async function createRequestAction(input?: RequestDraft) {
 }
 
 export async function acceptRequestAction(donorId: string, requestId: string) {
-  console.info("[donor-accept] calling real API", { donorId, requestId });
   const result = await post<Appointment>("/api/appointments/accept", { donorId, requestId });
-  if (!result.ok) console.error("[donor-accept] API failed", result.message);
   if (result.ok) {
     publishRealtimeEvent("DONOR_ACCEPTED", { donorId, requestId });
     publishRealtimeEvent("APPOINTMENT_CREATED", { appointment: result.data });
@@ -72,7 +58,6 @@ export async function acceptRequestAction(donorId: string, requestId: string) {
 }
 
 export async function updateStatusAction(requestId: string, status: RequestStatus) {
-  if (canUseMock()) return markDonorOnWay(requestId);
   const result = await post<BloodRequest>("/api/blood-requests/status", { requestId, status });
   if (result.ok) publishRealtimeEvent("REQUEST_UPDATED", { request: result.data });
   return result;
@@ -88,11 +73,9 @@ export async function updateAppointmentStatusAction(
 }
 
 export async function validatePinAction(pin: string, requestId: string) {
-  if (canUseMock()) return validateWorkflowPin(pin, requestId);
   return post<Appointment>("/api/appointments/validate-pin", { pin, requestId });
 }
 
 export async function completeDonationAction(donorId: string, requestId: string) {
-  if (canUseMock()) return completeWorkflowDonation(donorId, requestId);
   return post<BloodRequest>("/api/appointments/complete", { donorId, requestId });
 }

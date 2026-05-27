@@ -45,5 +45,5 @@ export function useApiData<T>(path: string, fallback: T, version = 0) {
 
 function formatFetchError(path: string, error: unknown) {
   const message = error instanceof Error ? error.message : "Erro de rede desconhecido.";
-  return `Falha ao sincronizar Supabase | ação: fetch ${path} | erro: ${message}`;
+  return `Não foi possível carregar os dados desta área. ${message}`;
 }

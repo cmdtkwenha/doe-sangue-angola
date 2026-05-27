@@ -37,7 +37,7 @@ export function HealthcareImportPage() {
 
   async function submit(mode: "preview" | "import") {
     setBusy(true);
-    setStatus(mode === "preview" ? "A validar CSV..." : "A importar para Supabase...");
+    setStatus(mode === "preview" ? "A validar CSV..." : "A importar para a base de dados...");
     try {
       const response = await fetch("/api/imports/healthcare", {
         method: "POST",

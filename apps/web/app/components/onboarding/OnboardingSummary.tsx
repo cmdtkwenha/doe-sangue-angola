@@ -17,7 +17,7 @@ export function OnboardingSummary({
   return (
     <aside className={styles.summary}>
       <div>
-        <div className="eyebrow">Dados mock</div>
+        <div className="eyebrow">Resumo</div>
         <h2>{title}</h2>
       </div>
       <div className={styles.fieldGrid}>
@@ -32,7 +32,7 @@ export function OnboardingSummary({
       <button className="button" onClick={() => setDone(true)} type="button">
         {done ? "Guardado" : action}
       </button>
-      {done ? <span className="pill green">Fluxo concluído em modo mock</span> : null}
+      {done ? <span className="pill green">Fluxo concluído</span> : null}
     </aside>
   );
 }

@@ -83,10 +83,5 @@ function supabaseError(label: string, error: {
   details?: string;
   message: string;
 }) {
-  return new Error([
-    label,
-    error.message,
-    error.code ? `code=${error.code}` : "",
-    error.details ? `details=${error.details}` : ""
-  ].filter(Boolean).join(" | "));
+  return new Error(`${label}. ${error.message}`);
 }

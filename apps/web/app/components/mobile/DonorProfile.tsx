@@ -25,7 +25,7 @@ export function DonorProfile() {
     return (
       <MobileShell active="profile">
         <EmptyState
-          message="Complete o onboarding para criar o seu perfil Supabase."
+          message="Complete o onboarding para criar o seu perfil de dador."
           title="Perfil de dador em falta"
         />
       </MobileShell>

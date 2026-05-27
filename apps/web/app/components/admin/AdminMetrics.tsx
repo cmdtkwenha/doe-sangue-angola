@@ -20,7 +20,7 @@ export function AdminMetrics() {
     ["Concluído", "Concluido"].includes(request.status) && request.createdAt.startsWith(month)
   );
   const metrics: Metric[] = [
-    { label: "Dadores Registados", value: String(donors.length), change: "Supabase", tone: "green" },
+    { label: "Dadores Registados", value: String(donors.length), change: "Registos reais", tone: "green" },
     { label: "Hospitais Ativos", value: String(hospitals.filter((item) => item.verified).length), change: "Verificados", tone: "black" },
     { label: "Pedidos Ativos", value: String(active.length), change: "Em curso", tone: "red" },
     { label: "Alertas Emergência", value: String(critical.length), change: "Críticos", tone: "red" },

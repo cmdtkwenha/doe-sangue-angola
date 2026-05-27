@@ -2,14 +2,11 @@
 
 import {
   getRequestStatusLabel,
-  getDataMode,
-  isCompletedRequest,
-  listRequestsForHospital
+  isCompletedRequest
 } from "@doe-sangue-angola/shared-services";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
-import { useMemo } from "react";
 import { EmptyState } from "../ui/EmptyState";
 import styles from "./hospitalPortal.module.css";
 import { useCurrentHospital } from "./useCurrentHospital";
@@ -19,12 +16,9 @@ export function ActiveRequestsTable() {
   const version = useRealtimeVersion();
   const { data: hospital } = useCurrentHospital();
   const hospitalId = hospital?.id ?? "";
-  const fallback = useMemo(() =>
-    getDataMode() === "mock" && hospitalId ? listRequestsForHospital(hospitalId) : [],
-  [hospitalId, version]);
   const { data: requests, error, loading } = useApiData<BloodRequest[]>(
     hospitalId ? `/api/blood-requests?hospitalId=${hospitalId}` : "/api/blood-requests?hospitalId=missing",
-    fallback,
+    [],
     version
   );
 
@@ -34,7 +28,7 @@ export function ActiveRequestsTable() {
         <strong>Pedidos de Sangue Ativos</strong>
         <a className="muted" href="/hospital/requests">Ver todos</a>
       </div>
-      {loading ? <p className={styles.rowMuted}>A sincronizar pedidos reais...</p> : null}
+      {loading ? <p className={styles.rowMuted}>A sincronizar pedidos...</p> : null}
       {error ? <p className={styles.rowMuted}>{error}</p> : null}
       {requests.length === 0 ? (
         <EmptyState

@@ -30,7 +30,7 @@ export function HospitalsTable() {
   useEffect(() => {
     if (!supabase) {
       setHospitals([]);
-      setError("Supabase não configurado no frontend.");
+      setError("Serviço de dados não configurado.");
       return;
     }
 
@@ -96,12 +96,7 @@ function formatSupabaseError(error: {
   hint?: string;
   message: string;
 }) {
-  return [
-    error.message,
-    error.code ? `Código: ${error.code}` : "",
-    error.details ? `Detalhes: ${error.details}` : "",
-    error.hint ? `Sugestão: ${error.hint}` : ""
-  ].filter(Boolean).join(" | ");
+  return error.message;
 }
 
 function mapHospital(row: HospitalRow): Hospital {

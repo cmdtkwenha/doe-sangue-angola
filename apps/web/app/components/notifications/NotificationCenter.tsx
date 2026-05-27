@@ -24,14 +24,14 @@ export function NotificationCenter({ donorId = "d1" }: { donorId?: string }) {
         <span>
           <strong>Centro de Notificações</strong>
           <br />
-          <small className="muted">Alertas push em modo demo e mensagens no app.</small>
+          <small className="muted">Alertas push e mensagens no app.</small>
         </span>
         <NotificationBell donorId={donorId} />
       </div>
       <div className={styles.providerGrid}>
-        <span>Mock Push</span>
-        <span>Expo pronto</span>
-        <span>FCM pronto</span>
+        <span>Push móvel</span>
+        <span>Expo preparado</span>
+        <span>FCM preparado</span>
       </div>
       <button
         className={styles.markButton}

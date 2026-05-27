@@ -10,7 +10,7 @@ export default function AuthPage() {
           <p className="eyebrow">Doe Sangue Angola</p>
           <h1>Acesso seguro à plataforma nacional</h1>
           <p>
-            Entre com a sua conta Supabase. O perfil guardado define
+            Entre com a sua conta institucional. O perfil guardado define
             automaticamente o portal correto.
           </p>
         </aside>

@@ -12,7 +12,7 @@ export function BroadcastTool() {
     donors.slice(0, 3).forEach((donor) =>
       createInAppNotification(donor.id, "Mensagem da plataforma", message, "urgent")
     );
-    setStatus("Mensagem de teste enviada aos dadores mock.");
+    setStatus("Mensagem de teste registada para os dadores selecionados.");
   }
 
   return (

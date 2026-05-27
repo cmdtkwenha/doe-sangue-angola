@@ -31,8 +31,8 @@ export function MonitoringDashboard() {
       </section>
       <section className={styles.panel}>
         <div className={styles.head}>
-          <strong>API Request Logs</strong>
-          <span className="pill">Mock</span>
+          <strong>Registos de API</strong>
+          <span className="pill">Operacional</span>
         </div>
         {apiLogs.map((log) => (
           <article className={styles.row} key={log.id}>

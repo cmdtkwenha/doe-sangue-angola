@@ -72,7 +72,7 @@ export function requireEntityAccess(
 export async function createRouteSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) throw new ApiError(500, "Supabase Auth não está configurado.");
+  if (!url || !key) throw new ApiError(500, "Serviço de dados não está configurado.");
   const store = await cookies();
   return createServerClient(url, key, {
     cookies: {

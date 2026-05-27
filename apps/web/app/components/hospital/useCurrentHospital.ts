@@ -1,11 +1,7 @@
 "use client";
 
-import {
-  getDataMode,
-  hospitals as mockHospitals,
-} from "@doe-sangue-angola/shared-services";
 import type { Hospital } from "@doe-sangue-angola/shared-types";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabaseClient";
 import { useAuth } from "../auth/useAuth";
 
@@ -27,20 +23,11 @@ type HospitalRow = {
 
 export function useCurrentHospital() {
   const { session } = useAuth();
-  const fallback = useMemo(() =>
-    getDataMode() === "mock"
-      ? mockHospitals[0] ?? null
-      : null, []);
-  const [data, setData] = useState<Hospital | null>(fallback);
+  const [data, setData] = useState<Hospital | null>(null);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(getDataMode() !== "mock");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (getDataMode() === "mock") {
-      setData(fallback);
-      setLoading(false);
-      return;
-    }
     if (!session?.user || !supabase) {
       setData(null);
       setLoading(false);
@@ -76,7 +63,7 @@ export function useCurrentHospital() {
       } catch (loadError) {
         if (!active) return;
         setData(null);
-        setError(loadError instanceof Error ? loadError.message : "Erro Supabase");
+        setError(loadError instanceof Error ? loadError.message : "Erro ao carregar hospital.");
       } finally {
         if (active) setLoading(false);
       }
@@ -84,7 +71,7 @@ export function useCurrentHospital() {
     return () => {
       active = false;
     };
-  }, [fallback, session]);
+  }, [session]);
 
   useEffect(() => {
     if (process.env.NODE_ENV === "production" || loading || data?.id) return;
@@ -97,7 +84,7 @@ export function useCurrentHospital() {
     }
   }, [data?.id, error, loading, session]);
 
-  return { data, error, loading, usingApi: getDataMode() !== "mock" };
+  return { data, error, loading, usingApi: true };
 }
 
 function mapHospital(row: HospitalRow): Hospital {

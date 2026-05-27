@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  getWorkflowSnapshot,
-  isSupabaseMode,
   subscribeRealtime
 } from "@doe-sangue-angola/shared-services";
 import { matchingAgent } from "@doe-sangue-angola/agents";
@@ -36,14 +34,9 @@ type Envelope<T> = { ok: boolean; data?: T };
 export function useWorkflowSnapshot() {
   const { data: hospital } = useCurrentHospital();
   const [version, setVersion] = useState(0);
-  const [snapshot, setSnapshot] = useState<Snapshot>(() => getWorkflowSnapshot());
+  const [snapshot, setSnapshot] = useState<Snapshot>(emptySnapshot);
 
   useEffect(() => {
-    if (!isSupabaseMode()) {
-      setSnapshot(getWorkflowSnapshot());
-      return;
-    }
-
     const hospitalId = hospital?.id ?? "";
     let active = true;
     Promise.all([
@@ -73,7 +66,7 @@ export function useWorkflowSnapshot() {
           time: appointment.time
         }] : []
       });
-    }).catch(() => active && setSnapshot(getWorkflowSnapshot()));
+    }).catch(() => active && setSnapshot(emptySnapshot));
 
     return () => {
       active = false;
@@ -89,3 +82,8 @@ export function useWorkflowSnapshot() {
     refresh: () => setVersion(version + 1)
   };
 }
+
+const emptySnapshot: Snapshot = {
+  matches: [],
+  responses: []
+};

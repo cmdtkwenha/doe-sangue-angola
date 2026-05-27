@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { getDataMode, listRequests } from "@doe-sangue-angola/shared-services";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
@@ -10,8 +9,7 @@ import styles from "./adminAdvanced.module.css";
 export function EmergencyTicker() {
   const [active, setActive] = useState(0);
   const version = useRealtimeVersion();
-  const fallback = useMemo(() => getDataMode() === "mock" ? listRequests() : [], []);
-  const { data } = useApiData<BloodRequest[]>("/api/blood-requests", fallback, version);
+  const { data } = useApiData<BloodRequest[]>("/api/blood-requests", [], version);
   const requests = data.filter((request) => request.urgency === "Critica");
 
   useEffect(() => {

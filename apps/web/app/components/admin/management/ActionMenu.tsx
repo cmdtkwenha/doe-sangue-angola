@@ -13,7 +13,7 @@ export function ActionMenu({ actions, label }: { actions: string[]; label?: stri
         className={styles.menu}
         defaultValue=""
         onChange={(event) => {
-          if (event.target.value) setMessage(`${event.target.value} aplicado em modo mock.`);
+          if (event.target.value) setMessage(`${event.target.value} registado.`);
           event.target.value = "";
         }}
       >

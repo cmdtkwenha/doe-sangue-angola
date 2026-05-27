@@ -10,8 +10,8 @@ export default function RegisterPage() {
           <p className="eyebrow">Nova conta</p>
           <h1>Registo seguro</h1>
           <p>
-            Crie uma conta com função definida. A função fica guardada no
-            Supabase e controla o acesso ao portal.
+            Crie uma conta com função definida. O perfil controla o acesso ao
+            portal correto.
           </p>
         </aside>
         <div className={styles.form}>

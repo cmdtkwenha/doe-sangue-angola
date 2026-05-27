@@ -1,6 +1,5 @@
 "use client";
 
-import { getDataMode, hospitals as mockHospitals } from "@doe-sangue-angola/shared-services";
 import type { Hospital } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "../../hooks/useApiData";
 import styles from "./adminAdvanced.module.css";
@@ -8,8 +7,7 @@ import styles from "./adminAdvanced.module.css";
 const totals = [342, 238, 189];
 
 export function TopHospitalsPanel() {
-  const fallback = getDataMode() === "mock" ? mockHospitals : [];
-  const { data: hospitals } = useApiData<Hospital[]>("/api/hospitals", fallback, 0);
+  const { data: hospitals } = useApiData<Hospital[]>("/api/hospitals", [], 0);
 
   return (
     <section className={styles.panel}>

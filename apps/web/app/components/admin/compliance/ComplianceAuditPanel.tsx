@@ -31,7 +31,7 @@ export function ComplianceAuditPanel() {
           <p className="eyebrow">Compliance</p>
           <h2>Auditoria clínica e operacional</h2>
           <p className="muted">
-            Trilho mock para rastrear pedidos, acessos, permissões, PINs e comunicações críticas.
+            Trilho operacional para rastrear pedidos, acessos, permissões, PINs e comunicações críticas.
           </p>
         </div>
         <AuditExportTool events={filtered} />

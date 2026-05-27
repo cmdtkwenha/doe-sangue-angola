@@ -20,7 +20,7 @@ export function FamilyEmergencyForm() {
   return (
     <section className={styles.panel}>
       <strong>Pedido familiar de emergência</strong>
-      <p className="muted">Fluxo demonstrativo verificado pelo agente familiar.</p>
+      <p className="muted">Pedido verificado pelo fluxo familiar.</p>
       <div aria-label="Resumo do pedido familiar" className={styles.form} role="group">
         {labels.map(([label, key]) => (
           <label className={styles.field} key={key}>

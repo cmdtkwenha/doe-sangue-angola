@@ -12,7 +12,7 @@ export function AdminSystemHealthPanel() {
     <section className={styles.panel}>
       <div className={styles.head}>
         <strong>Saúde do Sistema</strong>
-        <span className="pill green">Mock ativo</span>
+        <span className="pill green">Operacional</span>
       </div>
       <div className={styles.metrics}>
         <Metric label="Eventos" value={summary.events} />

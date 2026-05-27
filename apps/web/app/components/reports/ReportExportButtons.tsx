@@ -21,8 +21,8 @@ export function ReportExportButtons({
       }} type="button">
         Exportar CSV
       </button>
-      <button className={styles.pdfPreview} onClick={() => setMessage("PDF demonstrativo preparado em modo mock.")} type="button">
-        Exportar PDF demonstrativo
+      <button className={styles.pdfPreview} onClick={() => setMessage("Pré-visualização PDF preparada.")} type="button">
+        Pré-visualizar PDF
       </button>
       {message ? <span className="muted">{message}</span> : null}
     </div>

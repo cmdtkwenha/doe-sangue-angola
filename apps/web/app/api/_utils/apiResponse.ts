@@ -23,7 +23,7 @@ export async function apiResponse<T>(handler: Handler<T>) {
     trackApiRequest("api.route", 500, Date.now() - started);
     const message = error instanceof Error
       ? error.message
-      : "Falha ao sincronizar Supabase.";
+      : "Não foi possível concluir esta ação.";
     return Response.json(
       {
         ok: false,

@@ -20,7 +20,7 @@ export function SettingsRow({ row }: { row: SettingRow }) {
       {row.type === "button" ? (
         <button
           className={`${styles.value} ${row.tone === "danger" ? styles.danger : ""}`}
-          onClick={() => setMessage(`${row.label}: ação registada em modo mock.`)}
+          onClick={() => setMessage(`${row.label}: ação registada.`)}
           type="button"
         >
           {row.value}

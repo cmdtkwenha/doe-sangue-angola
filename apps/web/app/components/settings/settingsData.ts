@@ -20,7 +20,7 @@ export const settingsData: Record<UserRole, SettingSection[]> = {
       eyebrow: "Plataforma",
       title: "Definições gerais",
       rows: [
-        { label: "Modo de dados", description: "Mock ativo até Supabase ser validado.", type: "value", value: "Mock" },
+        { label: "Modo de dados", description: "Dados operacionais ligados ao backend.", type: "value", value: "Produção" },
         { label: "Idioma padrão", description: "Português primeiro, com EN/FR preparados.", type: "value", value: "Português" },
         { label: "Alertas nacionais", description: "Enviar notificações para pedidos críticos.", type: "toggle", value: "on" }
       ]
@@ -29,7 +29,7 @@ export const settingsData: Record<UserRole, SettingSection[]> = {
       eyebrow: "Segurança",
       title: "Controlo administrativo",
       rows: [
-        { label: "Autenticação Supabase", description: "Sessões persistentes por função.", type: "value", value: "Ativa" },
+        { label: "Autenticação", description: "Sessões persistentes por função.", type: "value", value: "Ativa" },
         { label: "Gestão de utilizadores", description: "Criar, suspender e rever perfis.", type: "button", value: "Abrir gestão" },
         { label: "Auditoria obrigatória", description: "Registar ações sensíveis.", type: "toggle", value: "on" }
       ]

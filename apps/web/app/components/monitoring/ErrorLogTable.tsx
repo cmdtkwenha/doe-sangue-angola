@@ -23,7 +23,7 @@ export function ErrorLogTable() {
           <span className={`${styles.status} ${styles.error}`}>Erro</span>
         </article>
       )) : (
-        <p className="muted">Nenhuma falha registada no modo demonstração.</p>
+        <p className="muted">Nenhuma falha registada.</p>
       )}
     </section>
   );
