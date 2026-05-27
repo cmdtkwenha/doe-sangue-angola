@@ -3,6 +3,7 @@
 import type { BloodRequest, Donor, Hospital, Metric } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
+import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
 import { LoadingSkeleton } from "../ui/LoadingSkeleton";
 import { ErrorState } from "../ui/ErrorState";
 import styles from "./adminCore.module.css";
@@ -10,9 +11,11 @@ import { MetricCard } from "./MetricCard";
 
 export function AdminMetrics() {
   const version = useRealtimeVersion();
-  const { data: donors, error: donorError, loading: loadingDonors } = useApiData<Donor[]>("/api/donors", [], version);
-  const { data: hospitals, error: hospitalError, loading: loadingHospitals } = useApiData<Hospital[]>("/api/hospitals", [], version);
-  const { data: requests, error: requestError, loading: loadingRequests } = useApiData<BloodRequest[]>("/api/blood-requests", [], version);
+  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses"]);
+  const refresh = version + liveVersion;
+  const { data: donors, error: donorError, loading: loadingDonors } = useApiData<Donor[]>("/api/donors", [], refresh);
+  const { data: hospitals, error: hospitalError, loading: loadingHospitals } = useApiData<Hospital[]>("/api/hospitals", [], refresh);
+  const { data: requests, error: requestError, loading: loadingRequests } = useApiData<BloodRequest[]>("/api/blood-requests", [], refresh);
   const active = requests.filter((request) => !["Cancelado", "Concluído", "Concluido"].includes(request.status));
   const critical = active.filter((request) => request.urgency === "Critica");
   const month = new Date().toISOString().slice(0, 7);

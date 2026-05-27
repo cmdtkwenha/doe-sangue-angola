@@ -4,6 +4,8 @@ import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import base from "./hospitalPortal.module.css";
 import styles from "./hospitalAdvanced.module.css";
 import { useApiData } from "../../hooks/useApiData";
+import { useRealtimeVersion } from "../../hooks/useRealtimeVersion";
+import { useSupabaseRealtimeVersion } from "../../hooks/useSupabaseRealtimeVersion";
 import { useCurrentHospital } from "./useCurrentHospital";
 
 const toneMap: Record<string, string> = {
@@ -13,9 +15,11 @@ const toneMap: Record<string, string> = {
 };
 
 export function RegionAlerts() {
+  const version = useRealtimeVersion();
+  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses"]);
   const { data: hospital } = useCurrentHospital();
   const path = hospital?.id ? `/api/blood-requests?hospitalId=${hospital.id}` : "/api/blood-requests?hospitalId=missing";
-  const { data: requests } = useApiData<BloodRequest[]>(path, [], hospital?.id?.length ?? 0);
+  const { data: requests } = useApiData<BloodRequest[]>(path, [], version + liveVersion);
   const province = hospital?.province ?? "Angola";
   const alerts = requests
     .filter((request) => request.province === hospital?.province && request.status !== "Concluído")

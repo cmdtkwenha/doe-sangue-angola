@@ -5,6 +5,7 @@ import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import styles from "./mobileApp.module.css";
+import { LoadingSkeleton } from "../ui/LoadingSkeleton";
 import { MobileShell } from "./MobileShell";
 import { RequestCard } from "./RequestCard";
 import {
@@ -44,7 +45,7 @@ export function RequestList({
         <span>⌯</span>
       </header>
       <p className="muted">Próximo de você · <strong>Luanda</strong></p>
-      {loading ? <p className="muted">A procurar pedidos compatíveis...</p> : null}
+      {loading ? <LoadingSkeleton label="A sincronizar pedidos compatíveis" /> : null}
       {error ? <p className="muted">{error}</p> : null}
       {requests.length === 0 ? (
         <article className={styles.card}>

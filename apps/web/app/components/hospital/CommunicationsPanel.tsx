@@ -5,13 +5,15 @@ import base from "./hospitalPortal.module.css";
 import styles from "./hospitalAdvanced.module.css";
 import { useApiData } from "../../hooks/useApiData";
 import { useRealtimeVersion } from "../../hooks/useRealtimeVersion";
+import { useSupabaseRealtimeVersion } from "../../hooks/useSupabaseRealtimeVersion";
 import { useCurrentHospital } from "./useCurrentHospital";
 
 export function CommunicationsPanel() {
   const version = useRealtimeVersion();
+  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses"]);
   const { data: hospital } = useCurrentHospital();
   const path = hospital?.id ? `/api/blood-requests?hospitalId=${hospital.id}` : "/api/blood-requests?hospitalId=missing";
-  const { data: requests, error, loading } = useApiData<BloodRequest[]>(path, [], version);
+  const { data: requests, error, loading } = useApiData<BloodRequest[]>(path, [], version + liveVersion);
   const messages = requests.slice(0, 4).map((request) => ({
     body: `Pedido ${request.bloodType} com estado ${request.status}`,
     status: request.urgency,

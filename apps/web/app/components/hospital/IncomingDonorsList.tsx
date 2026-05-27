@@ -14,6 +14,7 @@ import {
 } from "../ui/DonorResponseStatusBadge";
 import { ConfirmationModal } from "../ui/ConfirmationModal";
 import { EmptyState } from "../ui/EmptyState";
+import { LoadingSkeleton } from "../ui/LoadingSkeleton";
 import styles from "./hospitalPortal.module.css";
 import { useCurrentHospital } from "./useCurrentHospital";
 
@@ -111,7 +112,7 @@ export function IncomingDonorsList() {
         <strong>Dadores a Caminho</strong>
         <a className="muted" href="/hospital/donors">Lista ETA</a>
       </div>
-      {loading ? <p className={styles.rowMuted}>A carregar dadores aceites...</p> : null}
+      {loading ? <LoadingSkeleton label="A sincronizar dadores em tempo real" /> : null}
       {error ? <p className={styles.rowMuted}>{error}</p> : null}
       <p className={styles.rowMuted}>{message}</p>
       {displayRows.length === 0 ? (

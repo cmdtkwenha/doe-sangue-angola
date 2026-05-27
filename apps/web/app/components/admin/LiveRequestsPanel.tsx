@@ -3,16 +3,19 @@
 import type { BloodRequest, Hospital } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
+import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
+import { LoadingSkeleton } from "../ui/LoadingSkeleton";
 import styles from "./adminCore.module.css";
 
 type LiveRequest = BloodRequest & { hospital?: Hospital };
 
 export function LiveRequestsPanel() {
   const version = useRealtimeVersion();
+  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses"]);
   const { data: requests, error, loading } = useApiData<LiveRequest[]>(
     "/api/blood-requests",
     [],
-    version
+    version + liveVersion
   );
 
   return (
@@ -22,7 +25,7 @@ export function LiveRequestsPanel() {
         <a className="muted" href="/admin/requests">Ver todos</a>
       </div>
       <div className={styles.requestList}>
-        {loading ? <p className="muted">A sincronizar pedidos...</p> : null}
+        {loading ? <LoadingSkeleton label="A sincronizar pedidos em tempo real" /> : null}
         {error ? <p className="muted">{error}</p> : null}
         {requests.map((request) => (
           <article className={styles.requestRow} key={request.id}>
@@ -38,7 +41,7 @@ export function LiveRequestsPanel() {
           </article>
         ))}
       </div>
-      <small className="muted">Atualização local #{version}</small>
+      <small className="muted">Atualização live #{version + liveVersion}</small>
     </section>
   );
 }

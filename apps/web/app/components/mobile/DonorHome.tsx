@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import { useApiData } from "@hooks/useApiData";
+import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { EmptyState } from "../ui/EmptyState";
 import styles from "./mobileApp.module.css";
@@ -16,6 +17,7 @@ import { useAuth } from "../auth/useAuth";
 export function DonorHome() {
   const [message, setMessage] = useState("Atalhos prontos.");
   const version = useRealtimeVersion();
+  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses"]);
   const { session } = useAuth();
   const { data: donor, loading } = useCurrentDonor();
   const userId = session?.user.authUserId ?? session?.user.id;
@@ -23,7 +25,7 @@ export function DonorHome() {
   const { data: nearbyRequests } = useApiData<BloodRequest[]>(
     donorId ? `/api/blood-requests?donorId=${donorId}` : "/api/blood-requests?donorId=missing",
     [],
-    version
+    version + liveVersion
   );
   if (!isDonorProfileComplete(donor, userId)) {
     return (

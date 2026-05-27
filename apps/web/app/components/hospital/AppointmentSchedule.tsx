@@ -5,6 +5,7 @@ import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
 import { DonorResponseStatusBadge } from "../ui/DonorResponseStatusBadge";
 import { EmptyState } from "../ui/EmptyState";
+import { LoadingSkeleton } from "../ui/LoadingSkeleton";
 import styles from "./hospitalPortal.module.css";
 import { useCurrentHospital } from "./useCurrentHospital";
 
@@ -34,7 +35,7 @@ export function AppointmentSchedule() {
         <strong>Agendamentos de Hoje</strong>
         <a className="muted" href="/hospital/schedule">Ver calendário</a>
       </div>
-      {loading ? <p className={styles.rowMuted}>A carregar agendamentos reais...</p> : null}
+      {loading ? <LoadingSkeleton label="A sincronizar agendamentos vivos" /> : null}
       {error ? <p className={styles.rowMuted}>{error}</p> : null}
       {rows.length === 0 ? (
         <EmptyState

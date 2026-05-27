@@ -4,6 +4,7 @@ import type { DonorResponseStatus } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
+import { LoadingSkeleton } from "../ui/LoadingSkeleton";
 import styles from "./mobileApp.module.css";
 
 type DonorPin = {
@@ -28,7 +29,7 @@ export function DonorPinCard() {
 
   return (
     <article className={`${styles.card} ${current ? styles.pinCard : ""}`}>
-      {loading ? <p className="muted">A carregar PIN real...</p> : null}
+      {loading ? <LoadingSkeleton label="A sincronizar PIN de doação" /> : null}
       {error ? <p className="muted">{error}</p> : null}
       {!current ? (
         <>
