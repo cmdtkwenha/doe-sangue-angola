@@ -1,6 +1,7 @@
 import { mapRequest, type RequestRow } from "@doe-sangue-angola/shared-services";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { apiResponse, readJson } from "../../_utils/apiResponse";
+import { notifyAdmins, notifyHospitalUsers } from "../../_utils/notifications";
 import {
   createRouteSupabase,
   requireApiSession,
@@ -37,6 +38,10 @@ export async function POST(request: Request) {
       .select(requestColumns)
       .single();
     if (error) throw error;
+    if (status === "Cancelado") {
+      await notifyHospitalUsers(db, existing.hospital_id, "Pedido fechado", "O pedido foi marcado como cancelado.", "cancelled");
+      await notifyAdmins(db, "Pedido cancelado", `Pedido ${requestId} foi cancelado.`, "cancelled");
+    }
     return mapRequest(data as unknown as RequestRow);
   });
 }

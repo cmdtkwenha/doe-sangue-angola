@@ -1,15 +1,22 @@
 "use client";
 
-import { getUnreadNotificationCount } from "@doe-sangue-angola/shared-services";
-import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
+import { useApiData } from "@hooks/useApiData";
+import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
 import { useState } from "react";
 import styles from "./notifications.module.css";
 import { NotificationBadge } from "./NotificationBadge";
+import type { RealNotification } from "./types";
 
-export function NotificationBell({ donorId = "d1" }: { donorId?: string }) {
-  useRealtimeVersion();
+export function NotificationBell({ all = false }: { all?: boolean }) {
   const [open, setOpen] = useState(false);
-  const count = getUnreadNotificationCount(donorId);
+  const liveVersion = useSupabaseRealtimeVersion(["notifications"]);
+  const { data } = useApiData<RealNotification[]>(
+    `/api/notifications${all ? "?all=true" : ""}`,
+    [],
+    liveVersion
+  );
+  const unread = data.filter((item) => !item.read).length;
+  const latest = data[0]?.title ?? "Sem alertas novos";
 
   return (
     <span className={styles.bellWrap}>
@@ -17,13 +24,13 @@ export function NotificationBell({ donorId = "d1" }: { donorId?: string }) {
         aria-expanded={open}
         aria-label="Notificações"
         className={styles.bell}
-        onClick={() => setOpen(!open)}
+        onClick={() => setOpen((value) => !value)}
         type="button"
       >
         !
-        <NotificationBadge count={count} />
+        <NotificationBadge count={unread} />
       </button>
-      {open ? <span className={styles.popover}>{count} notificações por ler</span> : null}
+      {open ? <span className={styles.popover}>{unread} por ler · {latest}</span> : null}
     </span>
   );
 }

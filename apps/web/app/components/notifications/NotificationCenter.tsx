@@ -1,22 +1,29 @@
 "use client";
 
-import {
-  buildReminderCards,
-  listNotifications,
-  markAllNotificationsRead
-} from "@doe-sangue-angola/shared-services";
-import { useState } from "react";
-import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
+import { useApiData } from "@hooks/useApiData";
+import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
+import { EmptyState } from "../ui/EmptyState";
+import { LoadingSkeleton } from "../ui/LoadingSkeleton";
 import styles from "./notifications.module.css";
 import { NotificationBell } from "./NotificationBell";
 import { NotificationCard } from "./NotificationCard";
-import { ReminderPanel } from "./ReminderPanel";
+import type { RealNotification } from "./types";
 
-export function NotificationCenter({ donorId = "d1" }: { donorId?: string }) {
-  const [, setVersion] = useState(0);
-  useRealtimeVersion();
-  const notifications = listNotifications(donorId);
-  const reminders = buildReminderCards(donorId);
+export function NotificationCenter({ all = false }: { all?: boolean }) {
+  const liveVersion = useSupabaseRealtimeVersion(["notifications"]);
+  const { data, error, loading } = useApiData<RealNotification[]>(
+    `/api/notifications${all ? "?all=true" : ""}`,
+    [],
+    liveVersion
+  );
+
+  async function markAllRead() {
+    await fetch("/api/notifications", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ all: true })
+    });
+  }
 
   return (
     <section className={styles.panel}>
@@ -24,29 +31,18 @@ export function NotificationCenter({ donorId = "d1" }: { donorId?: string }) {
         <span>
           <strong>Centro de Notificações</strong>
           <br />
-          <small className="muted">Alertas push e mensagens no app.</small>
+          <small className="muted">Alertas reais do fluxo de doação.</small>
         </span>
-        <NotificationBell donorId={donorId} />
+        <NotificationBell all={all} />
       </div>
-      <div className={styles.providerGrid}>
-        <span>Push móvel</span>
-        <span>Expo preparado</span>
-        <span>FCM preparado</span>
-      </div>
-      <button
-        className={styles.markButton}
-        onClick={() => {
-          markAllNotificationsRead(donorId);
-          setVersion((item) => item + 1);
-        }}
-        type="button"
-      >
+      <button className={styles.markButton} onClick={() => void markAllRead()} type="button">
         Marcar todas como lidas
       </button>
-      {notifications.map((item) => (
-        <NotificationCard item={item} key={item.id} />
-      ))}
-      <ReminderPanel reminders={reminders} />
+      {loading ? <LoadingSkeleton label="A sincronizar notificações" /> : null}
+      {error ? <p className="muted">{error}</p> : null}
+      {data.length === 0 ? (
+        <EmptyState title="Sem notificações" message="Os alertas do workflow aparecerão aqui." />
+      ) : data.map((item) => <NotificationCard item={item} key={item.id} />)}
     </section>
   );
 }

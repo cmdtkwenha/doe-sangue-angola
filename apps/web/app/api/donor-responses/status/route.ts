@@ -2,6 +2,7 @@ import type { DonorResponseStatus } from "@doe-sangue-angola/shared-types";
 import { ApiError, apiResponse, readJson } from "../../_utils/apiResponse";
 import { auditApiAction } from "../../_utils/audit";
 import { createRouteSupabase, requireApiSession, requireEntityAccess, requireSameOrigin } from "../../_utils/security";
+import { notifyAdmins, notifyUser } from "../../_utils/notifications";
 import { assertPin, assertString, optionalString } from "../../_utils/validation";
 
 type ResponseStatus = Exclude<DonorResponseStatus, "accepted">;
@@ -18,7 +19,7 @@ export async function POST(request: Request) {
     const responseId = assertString(body.responseId, "Resposta do dador");
     const { data: existing, error } = await db
       .from("donor_responses")
-      .select("id,blood_request_id,hospital_id,confirmation_pin,status")
+      .select("id,blood_request_id,donor_id,hospital_id,confirmation_pin,status")
       .eq("id", responseId)
       .single();
     if (error) throw supabaseError("Não foi possível carregar a resposta do dador", error);
@@ -40,9 +41,48 @@ export async function POST(request: Request) {
       .single();
     if (updateError) throw supabaseError("Não foi possível atualizar o estado do dador", updateError);
     await syncRequest(db, existing.blood_request_id, status);
+    await notifyDonor(db, existing.donor_id, status);
+    if (status === "completed" || status === "cancelled") {
+      await notifyAdmins(db, workflowTitle(status), workflowMessage(status), status);
+    }
     await auditApiAction(principal, `Atualizou resposta do dador para ${status}.`);
     return data;
   });
+}
+
+async function notifyDonor(
+  db: Awaited<ReturnType<typeof createRouteSupabase>>,
+  donorId: string,
+  status: ResponseStatus
+) {
+  const { data } = await db.from("donors").select("user_id").eq("id", donorId).maybeSingle();
+  await notifyUser(db, {
+    message: workflowMessage(status),
+    publicUserId: data?.user_id,
+    role: "donor",
+    title: workflowTitle(status),
+    type: status
+  });
+}
+
+function workflowTitle(status: ResponseStatus) {
+  const titles: Record<ResponseStatus, string> = {
+    arrived: "Chegada confirmada",
+    cancelled: "Pedido cancelado",
+    completed: "Doação concluída",
+    pin_validated: "PIN validado"
+  };
+  return titles[status];
+}
+
+function workflowMessage(status: ResponseStatus) {
+  const messages: Record<ResponseStatus, string> = {
+    arrived: "O hospital marcou a sua chegada. Aguarde a validação do PIN.",
+    cancelled: "A resposta ao pedido foi cancelada.",
+    completed: "Obrigado. A doação foi concluída com sucesso.",
+    pin_validated: "O seu PIN foi validado pelo hospital."
+  };
+  return messages[status];
 }
 
 function normalizeActionStatus(status?: string): ResponseStatus | null {

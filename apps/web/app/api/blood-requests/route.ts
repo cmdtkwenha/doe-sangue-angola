@@ -11,6 +11,7 @@ import { matchingAgent } from "@doe-sangue-angola/agents";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { auditApiAction } from "../_utils/audit";
 import { ApiError, apiResponse, readJson } from "../_utils/apiResponse";
+import { notifyAdmins, notifyUser } from "../_utils/notifications";
 import {
   createRouteSupabase,
   requireApiSession,
@@ -135,9 +136,39 @@ export async function POST(request: Request) {
     if (error) throw new Error(formatSupabaseError(error));
 
     const requestRecord = mapRequest(data as unknown as RequestRow);
+    await notifyMatchedDonors(db, requestRecord);
+    if (requestRecord.urgency === "Critica") {
+      await notifyAdmins(
+        db,
+        "Pedido crítico criado",
+        `Pedido ${requestRecord.bloodType} em ${requestRecord.municipality}, ${requestRecord.province}.`,
+        "critical"
+      );
+    }
     await auditApiAction(principal, `Criou pedido de sangue ${requestRecord.bloodType} (${requestRecord.id}).`);
     return { matches: [], request: requestRecord };
   });
+}
+
+async function notifyMatchedDonors(
+  db: Awaited<ReturnType<typeof createRouteSupabase>>,
+  requestRecord: BloodRequest
+) {
+  const { data } = await db.from("donors").select(donorColumns).eq("province", requestRecord.province);
+  const donors = (data as unknown as DonorRow[] | null ?? []).map(mapDonor);
+  const matches = matchingAgent(requestRecord, donors).filter((item) => item.score >= 55);
+  await Promise.all(matches.map((match) =>
+    notifyUser(db, {
+      message: `Pedido ${requestRecord.bloodType} perto de si. ${requestRecord.units} bolsas necessárias.`,
+      publicUserId: match.donor.userId,
+      role: "donor",
+      title: "Pedido urgente perto de si",
+      type: requestRecord.urgency === "Critica" ? "urgent" : "request"
+    })
+  ));
+  if (matches.length === 0) {
+    await notifyAdmins(db, "Sem dadores compatíveis", `Pedido ${requestRecord.id} não encontrou dadores imediatos.`, "matching");
+  }
 }
 
 const requestColumns = [

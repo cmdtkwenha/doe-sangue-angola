@@ -1,22 +1,28 @@
-import { notificationActions } from "@constants/adminActions";
-import { communications } from "@doe-sangue-angola/shared-services";
+"use client";
+
+import { useApiData } from "@hooks/useApiData";
+import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
+import type { RealNotification } from "../../notifications/types";
 import { ManagementTable } from "./ManagementTable";
 
 export function NotificationsTable() {
+  const liveVersion = useSupabaseRealtimeVersion(["notifications"]);
+  const { data } = useApiData<RealNotification[]>("/api/notifications?all=true", [], liveVersion);
   return (
     <ManagementTable
       title="Notificações"
       exportName="notificacoes.csv"
-      columns={["Canal", "Destinatário", "Mensagem"]}
-      rows={communications.map((item) => ({
+      columns={["Perfil", "Título", "Mensagem", "Estado"]}
+      rows={data.map((item) => ({
         id: item.id,
-        status: item.status,
+        status: item.read ? "Lida" : "Por ler",
         values: {
-          Canal: item.channel,
-          Destinatário: item.recipient,
-          Mensagem: item.message
+          Estado: item.read ? "Lida" : "Por ler",
+          Mensagem: item.message,
+          Perfil: item.role,
+          Título: item.title
         },
-        actions: notificationActions
+        actions: ["Ver"]
       }))}
     />
   );

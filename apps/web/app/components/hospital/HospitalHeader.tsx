@@ -1,5 +1,6 @@
 "use client";
 
+import { NotificationBell } from "../notifications/NotificationBell";
 import styles from "./hospitalPortal.module.css";
 import { useCurrentHospital } from "./useCurrentHospital";
 
@@ -19,7 +20,7 @@ export function HospitalHeader() {
         </div>
       </div>
       <div className={styles.headerActions}>
-        <span className="pill red">12 alertas</span>
+        <NotificationBell />
         <strong>Dr. João Mendes</strong>
       </div>
     </header>

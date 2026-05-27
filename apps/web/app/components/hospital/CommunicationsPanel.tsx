@@ -1,41 +1,37 @@
 "use client";
 
-import type { BloodRequest } from "@doe-sangue-angola/shared-types";
+import { useApiData } from "../../hooks/useApiData";
+import { useSupabaseRealtimeVersion } from "../../hooks/useSupabaseRealtimeVersion";
+import type { RealNotification } from "../notifications/types";
+import { EmptyState } from "../ui/EmptyState";
+import { LoadingSkeleton } from "../ui/LoadingSkeleton";
 import base from "./hospitalPortal.module.css";
 import styles from "./hospitalAdvanced.module.css";
-import { useApiData } from "../../hooks/useApiData";
-import { useRealtimeVersion } from "../../hooks/useRealtimeVersion";
-import { useSupabaseRealtimeVersion } from "../../hooks/useSupabaseRealtimeVersion";
-import { useCurrentHospital } from "./useCurrentHospital";
 
 export function CommunicationsPanel() {
-  const version = useRealtimeVersion();
-  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses"]);
-  const { data: hospital } = useCurrentHospital();
-  const path = hospital?.id ? `/api/blood-requests?hospitalId=${hospital.id}` : "/api/blood-requests?hospitalId=missing";
-  const { data: requests, error, loading } = useApiData<BloodRequest[]>(path, [], version + liveVersion);
-  const messages = requests.slice(0, 4).map((request) => ({
-    body: `Pedido ${request.bloodType} com estado ${request.status}`,
-    status: request.urgency,
-    target: request.patientCode,
-    title: "Sistema"
-  }));
+  const liveVersion = useSupabaseRealtimeVersion(["notifications"]);
+  const { data: alerts, error, loading } = useApiData<RealNotification[]>(
+    "/api/notifications",
+    [],
+    liveVersion
+  );
   return (
     <section className={base.panel}>
       <div className={base.panelHead}>
-        <strong>Comunicações Recentes</strong>
+        <strong>Alertas Recentes do Workflow</strong>
         <a className="muted" href="/hospital/reports">Ver todas</a>
       </div>
-      {loading ? <p className={base.rowMuted}>A sincronizar comunicações...</p> : null}
+      {loading ? <LoadingSkeleton label="A sincronizar alertas" /> : null}
       {error ? <p className={base.rowMuted}>{error}</p> : null}
-      {messages.length === 0 ? <p className={base.rowMuted}>Sem comunicações recentes.</p> : null}
-      {messages.map((item) => (
-        <article className={styles.messageRow} key={`${item.title}-${item.target}`}>
+      {alerts.length === 0 ? (
+        <EmptyState title="Sem alertas recentes" message="Aceitações e validações aparecerão aqui." />
+      ) : alerts.slice(0, 4).map((item) => (
+        <article className={styles.messageRow} key={item.id}>
           <div className={styles.rowTop}>
-            <strong>{item.target}</strong>
-            <span className="pill">{item.title}</span>
+            <strong>{item.title}</strong>
+            <span className={item.read ? "pill" : "pill red"}>{item.type}</span>
           </div>
-          <span className={base.rowMuted}>{item.body} · {item.status}</span>
+          <span className={base.rowMuted}>{item.message}</span>
         </article>
       ))}
     </section>

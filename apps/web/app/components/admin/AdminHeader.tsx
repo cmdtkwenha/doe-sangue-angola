@@ -1,3 +1,4 @@
+import { NotificationBell } from "../notifications/NotificationBell";
 import styles from "./adminCore.module.css";
 
 export function AdminHeader() {
@@ -15,7 +16,7 @@ export function AdminHeader() {
         aria-label="Pesquisar"
       />
       <div className={styles.headerTools}>
-        <span className="pill red">12 alertas</span>
+        <NotificationBell all />
         <span className="pill">Português</span>
         <strong>09:42</strong>
       </div>

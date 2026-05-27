@@ -2,6 +2,7 @@ import type { Appointment } from "@doe-sangue-angola/shared-types";
 import { ApiError, apiResponse, readJson } from "../../_utils/apiResponse";
 import { auditApiAction } from "../../_utils/audit";
 import { createRouteSupabase, requireApiSession, requireSameOrigin } from "../../_utils/security";
+import { notifyHospitalUsers, notifyUser } from "../../_utils/notifications";
 import { assertString } from "../../_utils/validation";
 
 export async function POST(request: Request) {
@@ -47,6 +48,20 @@ export async function POST(request: Request) {
       .update({ status: "Doador a Caminho" })
       .eq("id", requestRow.id);
     if (statusError) throw supabaseError("Não foi possível atualizar o pedido de sangue", statusError);
+    await notifyHospitalUsers(
+      db,
+      requestRow.hospital_id,
+      "Dador aceitou pedido",
+      "Um dador compatível aceitou o pedido e está a caminho.",
+      "accepted"
+    );
+    await notifyUser(db, {
+      message: `Pedido aceite. Use o PIN ${response.confirmation_pin} no hospital.`,
+      publicUserId: donorRow.user_id,
+      role: "donor",
+      title: "Pedido aceite com sucesso",
+      type: "appointment"
+    });
     await auditApiAction(principal, `Aceitou pedido de sangue ${body.requestId}.`);
     return appointment;
   });
