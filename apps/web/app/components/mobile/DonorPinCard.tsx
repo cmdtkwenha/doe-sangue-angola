@@ -1,5 +1,6 @@
 "use client";
 
+import type { DonorResponseStatus } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
@@ -12,7 +13,7 @@ type DonorPin = {
   hospitalName: string;
   pin: string;
   requestBloodType: string;
-  status: string;
+  status: DonorResponseStatus;
 };
 
 export function DonorPinCard() {
@@ -58,8 +59,8 @@ export function DonorPinCard() {
   );
 }
 
-function statusLabel(status: string) {
-  const labels: Record<string, string> = {
+function statusLabel(status: DonorResponseStatus) {
+  const labels: Record<DonorResponseStatus, string> = {
     accepted: "Dador a Caminho",
     arrived: "Chegou",
     cancelled: "Cancelado",

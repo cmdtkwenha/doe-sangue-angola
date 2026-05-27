@@ -8,10 +8,12 @@ set status = case status
   when 'Chegou' then 'arrived'
   when 'PIN Validado' then 'pin_validated'
   when 'Concluído' then 'completed'
+  when 'Concluido' then 'completed'
   when 'Cancelado' then 'cancelled'
+  when 'Dador a Caminho' then 'accepted'
   else status
 end
-where status in ('Chegou', 'PIN Validado', 'Concluído', 'Cancelado');
+where status in ('Chegou', 'PIN Validado', 'Concluído', 'Concluido', 'Cancelado', 'Dador a Caminho');
 
 alter table public.donor_responses
   alter column status set default 'accepted';

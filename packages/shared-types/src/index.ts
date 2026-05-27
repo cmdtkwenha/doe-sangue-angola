@@ -25,6 +25,13 @@ export type RequestStatus =
   | "Triagem"
   | "Concluido";
 
+export type DonorResponseStatus =
+  | "accepted"
+  | "arrived"
+  | "pin_validated"
+  | "completed"
+  | "cancelled";
+
 export type Donor = {
   id: string;
   userId?: string;

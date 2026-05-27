@@ -1,10 +1,11 @@
+import type { DonorResponseStatus } from "@doe-sangue-angola/shared-types";
 import { ApiError, apiResponse, readJson } from "../../_utils/apiResponse";
 import { auditApiAction } from "../../_utils/audit";
 import { createRouteSupabase, requireApiSession, requireEntityAccess, requireSameOrigin } from "../../_utils/security";
 import { assertPin, assertString, optionalString } from "../../_utils/validation";
 
-type ResponseStatus = "arrived" | "cancelled" | "completed" | "pin_validated";
-type StatusBody = { confirmationPin?: string; responseId: string; status: ResponseStatus };
+type ResponseStatus = Exclude<DonorResponseStatus, "accepted">;
+type StatusBody = { confirmationPin?: string; responseId: string; status: string };
 const allowed: ResponseStatus[] = ["arrived", "cancelled", "completed", "pin_validated"];
 
 export async function POST(request: Request) {
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
       .single();
     if (error) throw supabaseError("Não foi possível carregar a resposta do dador", error);
     requireEntityAccess(principal, "hospital", existing.hospital_id);
-    const status = body.status;
+    const status = normalizeActionStatus(body.status);
     if (!status || !allowed.includes(status)) throw new ApiError(400, "Estado inválido.");
     if (status === "pin_validated") {
       const pin = assertPin(optionalString(body.confirmationPin, 4));
@@ -41,6 +42,21 @@ export async function POST(request: Request) {
     await auditApiAction(principal, `Atualizou resposta do dador para ${status}.`);
     return data;
   });
+}
+
+function normalizeActionStatus(status?: string): ResponseStatus | null {
+  const oldValues: Record<string, ResponseStatus> = {
+    arrived: "arrived",
+    cancelled: "cancelled",
+    Cancelado: "cancelled",
+    Chegou: "arrived",
+    completed: "completed",
+    Concluido: "completed",
+    "Concluído": "completed",
+    pin_validated: "pin_validated",
+    "PIN Validado": "pin_validated"
+  };
+  return oldValues[status ?? ""] ?? null;
 }
 
 function statusPayload(status: ResponseStatus) {

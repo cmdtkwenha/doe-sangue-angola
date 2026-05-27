@@ -1,5 +1,6 @@
 "use client";
 
+import type { DonorResponseStatus } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
@@ -22,7 +23,7 @@ type AcceptedDonor = {
   requestStatus: string;
   status: string;
 };
-type WorkflowStatus = "arrived" | "cancelled" | "completed" | "pin_validated";
+type WorkflowStatus = Exclude<DonorResponseStatus, "accepted">;
 
 export function IncomingDonorsList() {
   const version = useRealtimeVersion();

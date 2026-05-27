@@ -38,7 +38,7 @@ create table if not exists public.donor_responses (
   created_at timestamptz not null default now(),
   unique (donor_id, blood_request_id),
   check (confirmation_pin ~ '^[0-9]{4}$'),
-  check (status in ('accepted', 'Chegou', 'PIN Validado', 'Concluído', 'Cancelado'))
+  check (status in ('accepted', 'arrived', 'pin_validated', 'completed', 'cancelled'))
 );
 
 alter table public.donor_responses
@@ -46,7 +46,7 @@ alter table public.donor_responses
 
 alter table public.donor_responses
   add constraint donor_responses_status_check
-  check (status in ('accepted', 'Chegou', 'PIN Validado', 'Concluído', 'Cancelado'));
+  check (status in ('accepted', 'arrived', 'pin_validated', 'completed', 'cancelled'));
 
 create index if not exists donor_responses_donor_idx on public.donor_responses(donor_id, created_at desc);
 create index if not exists donor_responses_hospital_idx on public.donor_responses(hospital_id, created_at desc);

@@ -1,3 +1,4 @@
+import type { DonorResponseStatus } from "@doe-sangue-angola/shared-types";
 import { apiResponse } from "../../_utils/apiResponse";
 import { createRouteSupabase, requireApiSession } from "../../_utils/security";
 
@@ -51,10 +52,26 @@ export async function GET() {
         hospitalName: hospital?.name ?? "Hospital",
         pin: item.confirmation_pin ?? "----",
         requestBloodType: request?.blood_type ?? "-",
-        status: item.status ?? "accepted"
+        status: normalizeStatus(item.status)
       } satisfies DonorPinResponse;
     });
   });
+}
+
+function normalizeStatus(status?: string | null): DonorResponseStatus {
+  const oldValues: Record<string, DonorResponseStatus> = {
+    accepted: "accepted",
+    arrived: "arrived",
+    cancelled: "cancelled",
+    Cancelado: "cancelled",
+    Chegou: "arrived",
+    completed: "completed",
+    Concluido: "completed",
+    "Concluído": "completed",
+    pin_validated: "pin_validated",
+    "PIN Validado": "pin_validated"
+  };
+  return oldValues[status ?? ""] ?? "accepted";
 }
 
 function locationLabel(hospital?: { municipality?: string | null; province?: string | null } | null) {

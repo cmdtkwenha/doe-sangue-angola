@@ -1,3 +1,4 @@
+import type { DonorResponseStatus } from "@doe-sangue-angola/shared-types";
 import { ApiError, apiResponse } from "../../_utils/apiResponse";
 import { createRouteSupabase, requireApiSession } from "../../_utils/security";
 
@@ -62,10 +63,26 @@ export async function GET() {
         responseId: item.id,
         requestBloodType: request?.blood_type ?? "-",
         requestStatus: request?.status ?? "-",
-        status: item.status ?? "Pendente"
+        status: normalizeStatus(item.status)
       } satisfies AcceptedDonorRow;
     });
   });
+}
+
+function normalizeStatus(status?: string | null): DonorResponseStatus {
+  const oldValues: Record<string, DonorResponseStatus> = {
+    accepted: "accepted",
+    arrived: "arrived",
+    cancelled: "cancelled",
+    Cancelado: "cancelled",
+    Chegou: "arrived",
+    completed: "completed",
+    Concluido: "completed",
+    "Concluído": "completed",
+    pin_validated: "pin_validated",
+    "PIN Validado": "pin_validated"
+  };
+  return oldValues[status ?? ""] ?? "accepted";
 }
 
 async function getHospitalName(db: Awaited<ReturnType<typeof createRouteSupabase>>, id: string) {

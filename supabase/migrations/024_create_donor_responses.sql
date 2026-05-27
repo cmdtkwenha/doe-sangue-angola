@@ -24,7 +24,7 @@ alter table public.donor_responses
 alter table public.donor_responses
   drop constraint if exists donor_responses_status_check,
   add constraint donor_responses_status_check
-  check (status in ('accepted', 'Chegou', 'PIN Validado', 'Concluído', 'Cancelado'));
+  check (status in ('accepted', 'arrived', 'pin_validated', 'completed', 'cancelled'));
 
 create unique index if not exists donor_responses_unique_donor_request
   on public.donor_responses(donor_id, blood_request_id);
