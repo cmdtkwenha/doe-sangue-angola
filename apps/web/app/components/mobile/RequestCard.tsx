@@ -3,11 +3,13 @@ import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 
 export function RequestCard({
   accepted,
+  accepting,
   onAccept,
   onOpen,
   request
 }: {
   accepted?: boolean;
+  accepting?: boolean;
   onAccept?: (request: BloodRequest) => void;
   onOpen?: (request: BloodRequest) => void;
   request: BloodRequest;
@@ -50,11 +52,11 @@ export function RequestCard({
         <button
           aria-label={`Aceitar pedido ${request.bloodType} para ${request.units} bolsas`}
           className={styles.accept}
-          disabled={accepted}
-          onClick={() => !accepted && onAccept?.(request)}
+          disabled={accepted || accepting}
+          onClick={() => !accepted && !accepting && onAccept?.(request)}
           type="button"
         >
-          {accepted ? "ACEITE" : "ACEITAR"}
+          {accepted ? "ACEITE" : accepting ? "A PROCESSAR" : "ACEITAR"}
         </button>
       </div>
     </article>

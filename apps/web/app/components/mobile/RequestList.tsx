@@ -14,10 +14,12 @@ import { useAuth } from "../auth/useAuth";
 
 export function RequestList({
   acceptedRequestIds = [],
+  acceptingRequestId,
   onAccept,
   onOpen
 }: {
   acceptedRequestIds?: string[];
+  acceptingRequestId?: string;
   onAccept?: (request: BloodRequest) => void;
   onOpen?: (request: BloodRequest) => void;
 }) {
@@ -54,6 +56,7 @@ export function RequestList({
         .map((request) => (
         <RequestCard
           accepted={acceptedRequestIds.includes(request.id)}
+          accepting={acceptingRequestId === request.id}
           key={request.id}
           onAccept={onAccept}
           onOpen={onOpen}

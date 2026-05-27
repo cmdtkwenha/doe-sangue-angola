@@ -4,12 +4,14 @@ import styles from "./mobileApp.module.css";
 import { matchReasons } from "./mobileMock";
 
 export function RequestDetailsModal({
+  accepting,
   onAccept,
   onClose,
   onReject,
   open,
   request
 }: {
+  accepting?: boolean;
   onAccept?: () => void;
   onClose?: () => void;
   onReject?: () => void;
@@ -54,11 +56,12 @@ export function RequestDetailsModal({
         ))}
         <button
           className={styles.accept}
+          disabled={accepting}
           onClick={onAccept}
           style={{ width: "100%", marginTop: 18 }}
           type="button"
         >
-          ACEITAR PEDIDO
+          {accepting ? "A PROCESSAR..." : "ACEITAR PEDIDO"}
         </button>
         <button
           className={styles.cancel}

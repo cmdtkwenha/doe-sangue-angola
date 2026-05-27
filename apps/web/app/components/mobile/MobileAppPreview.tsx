@@ -9,6 +9,8 @@ import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
 import styles from "./mobileApp.module.css";
 import { DonorHome } from "./DonorHome";
 import { DonorEntityGate } from "./DonorEntityGate";
+import { ActionToast } from "../ui/ActionToast";
+import { ConfirmationModal } from "../ui/ConfirmationModal";
 import { LoadingSkeleton } from "../ui/LoadingSkeleton";
 import { MobileShell } from "./MobileShell";
 import { RequestDetailsModal } from "./RequestDetailsModal";
@@ -41,8 +43,13 @@ const FamilyEmergencyScreen = dynamic(() =>
 
 export function MobileAppPreview() {
   const [accepting, setAccepting] = useState(false);
+  const [pendingAccept, setPendingAccept] = useState<BloodRequest | null>(null);
   const [selected, setSelected] = useState<BloodRequest | null>(null);
   const [message, setMessage] = useState("Toque num pedido para ver detalhes.");
+  const [toast, setToast] = useState<{ message: string; tone: "error" | "success" }>({
+    message: "",
+    tone: "success"
+  });
   const { data: donor } = useCurrentDonor();
   const version = useRealtimeVersion();
   const liveVersion = useSupabaseRealtimeVersion(["donor_responses"]);
@@ -52,21 +59,28 @@ export function MobileAppPreview() {
     version + liveVersion
   );
   const acceptedIds = responses.map((item) => item.bloodRequestId);
-  const accept = async (request: BloodRequest) => {
+  const askAccept = (request: BloodRequest) => {
+    setSelected(null);
+    setPendingAccept(request);
+  };
+  const accept = async () => {
+    if (!pendingAccept) return;
     if (!donor) {
-      setMessage("Complete o perfil de dador antes de aceitar pedidos.");
+      showToast("Complete o perfil de dador antes de aceitar pedidos.", "error");
       return;
     }
-    if (acceptedIds.includes(request.id)) {
-      setMessage("Este pedido já foi aceite. Veja o seu PIN no painel inicial.");
+    if (acceptedIds.includes(pendingAccept.id)) {
+      showToast("Este pedido já foi aceite. Veja o seu PIN no painel inicial.", "error");
       return;
     }
     setAccepting(true);
     setMessage("A aceitar pedido...");
     try {
-      const result = await acceptRequestAction(donor.id, request.id);
-      setMessage(result.ok ? "Pedido aceite com sucesso. Veja o PIN no painel inicial." : result.message);
-      setSelected(null);
+      const result = await acceptRequestAction(donor.id, pendingAccept.id);
+      const text = result.ok ? "Pedido aceite com sucesso. Veja o PIN no painel inicial." : result.message;
+      setMessage(text);
+      showToast(text, result.ok ? "success" : "error");
+      if (result.ok) setPendingAccept(null);
     } finally {
       setAccepting(false);
     }
@@ -75,24 +89,44 @@ export function MobileAppPreview() {
     setMessage("Pedido recusado. Continuamos a procurar pedidos compatíveis.");
     setSelected(null);
   };
+  function showToast(message: string, tone: "error" | "success") {
+    setToast({ message, tone });
+    window.setTimeout(() => setToast({ message: "", tone: "success" }), 3200);
+  }
 
   return (
     <main className={styles.stage}>
       <DonorEntityGate>
       <section className={styles.grid}>
         <DonorHome />
-        <RequestList acceptedRequestIds={acceptedIds} onAccept={accept} onOpen={setSelected} />
+        <RequestList
+          acceptedRequestIds={acceptedIds}
+          acceptingRequestId={accepting ? pendingAccept?.id : undefined}
+          onAccept={askAccept}
+          onOpen={setSelected}
+        />
         <MobileShell active="requests">
           <RequestListContent />
           <p className="muted">{message}</p>
           {accepting ? <p className="muted">A criar compromisso de doação...</p> : null}
           <RequestDetailsModal
-            onAccept={() => selected && accept(selected)}
+            accepting={accepting}
+            onAccept={() => selected && askAccept(selected)}
             onClose={() => setSelected(null)}
             onReject={() => selected && reject(selected)}
             open={Boolean(selected)}
             request={selected}
           />
+          <ConfirmationModal
+            confirmLabel="Aceitar pedido"
+            loading={accepting}
+            message={pendingAccept ? `Confirmar aceitação do pedido ${pendingAccept.bloodType} em ${pendingAccept.hospitalName ?? "hospital selecionado"}?` : ""}
+            onClose={() => !accepting && setPendingAccept(null)}
+            onConfirm={() => void accept()}
+            open={Boolean(pendingAccept)}
+            title="Confirmar aceitação"
+          />
+          <ActionToast message={toast.message} tone={toast.tone} />
         </MobileShell>
         <DonorProfile />
         <EligibilityChecker />

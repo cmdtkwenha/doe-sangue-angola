@@ -7,6 +7,9 @@ import {
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
+import { useState } from "react";
+import { ActionToast } from "../ui/ActionToast";
+import { ConfirmationModal } from "../ui/ConfirmationModal";
 import { EmptyState } from "../ui/EmptyState";
 import styles from "./hospitalPortal.module.css";
 import { useCurrentHospital } from "./useCurrentHospital";
@@ -14,6 +17,13 @@ import { updateStatusAction } from "../workflow/workflowActions";
 
 export function ActiveRequestsTable() {
   const version = useRealtimeVersion();
+  const [closing, setClosing] = useState<BloodRequest | null>(null);
+  const [reason, setReason] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<{ message: string; tone: "error" | "success" }>({
+    message: "",
+    tone: "success"
+  });
   const { data: hospital } = useCurrentHospital();
   const hospitalId = hospital?.id ?? "";
   const { data: requests, error, loading } = useApiData<BloodRequest[]>(
@@ -21,6 +31,21 @@ export function ActiveRequestsTable() {
     [],
     version
   );
+
+  async function closeRequest() {
+    if (!closing) return;
+    setSaving(true);
+    const result = await updateStatusAction(closing.id, "Cancelado");
+    const message = result.ok ? "Pedido fechado com sucesso." : result.message;
+    showToast(message, result.ok ? "success" : "error");
+    if (result.ok) setClosing(null);
+    setSaving(false);
+  }
+
+  function showToast(message: string, tone: "error" | "success") {
+    setToast({ message, tone });
+    window.setTimeout(() => setToast({ message: "", tone: "success" }), 3200);
+  }
 
   return (
     <section className={styles.panel}>
@@ -49,7 +74,11 @@ export function ActiveRequestsTable() {
             {!isCompletedRequest(request.status) ? (
               <button
                 className="button secondary"
-                onClick={() => void updateStatusAction(request.id, "Cancelado")}
+                disabled={saving}
+                onClick={() => {
+                  setReason("");
+                  setClosing(request);
+                }}
                 type="button"
               >
                 Fechar
@@ -59,6 +88,20 @@ export function ActiveRequestsTable() {
           ))}
         </div>
       )}
+      <ConfirmationModal
+        confirmLabel="Fechar pedido"
+        loading={saving}
+        message={closing ? `Deseja fechar o pedido ${closing.bloodType} com ${closing.units} bolsas?` : ""}
+        onClose={() => !saving && setClosing(null)}
+        onConfirm={() => void closeRequest()}
+        open={Boolean(closing)}
+        reason={reason}
+        reasonOptions={["Resolvido", "Pedido duplicado", "Sem necessidade clínica", "Outro motivo"]}
+        setReason={setReason}
+        title="Confirmar fecho do pedido"
+        tone="danger"
+      />
+      <ActionToast message={toast.message} tone={toast.tone} />
       <a className={styles.footerLink} href="/hospital/requests">Ver todos os pedidos</a>
     </section>
   );
