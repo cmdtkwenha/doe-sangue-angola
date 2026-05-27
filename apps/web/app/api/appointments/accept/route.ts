@@ -80,7 +80,7 @@ async function createDonorResponse(
       blood_request_id: requestId,
       confirmation_pin: pin,
       donor_id: donorId,
-      eta_minutes: 30,
+      eta_minutes: 15,
       hospital_id: hospitalId,
       status: "accepted"
     })

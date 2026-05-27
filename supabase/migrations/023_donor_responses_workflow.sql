@@ -11,7 +11,6 @@ as $$
   from public.donors d
   left join public.users u on u.id = d.user_id
   where d.user_id = auth.uid()
-     or d.auth_user_id = auth.uid()
      or u.auth_user_id = auth.uid()
   limit 1
 $$;
