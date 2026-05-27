@@ -60,8 +60,7 @@ export function IncomingDonorsList() {
     ...row,
     status: optimistic[row.responseId] ?? normalizeDonorResponseStatus(row.status)
   }));
-  const activeRows = displayRows.filter((row) => isActiveStatus(row.status));
-  const historyRows = displayRows.filter((row) => !isActiveStatus(row.status));
+  const { activeRows, historyRows } = splitRows(displayRows);
 
   function ask(row: AcceptedDonor, status: WorkflowStatus) {
     const current = normalizeDonorResponseStatus(row.status);
@@ -142,7 +141,7 @@ export function IncomingDonorsList() {
               <DonorResponseStatusBadge status={row.status} />
             </span>
             <span className={styles.actions}>
-              <button disabled={saving || !canMoveDonorResponse(row.status, "arrived")} onClick={() => ask(row, "arrived")} type="button">Chegou</button>
+              <button disabled={saving || !canMoveDonorResponse(normalizeDonorResponseStatus(row.status), "arrived")} onClick={() => ask(row, "arrived")} type="button">Chegou</button>
               <input
                 aria-label="PIN do dador"
                 disabled={saving}
@@ -152,9 +151,9 @@ export function IncomingDonorsList() {
                 placeholder="PIN"
                 value={pins[row.responseId] ?? ""}
               />
-              <button disabled={saving || !canMoveDonorResponse(row.status, "pin_validated")} onClick={() => ask(row, "pin_validated")} type="button">PIN validado</button>
-              <button disabled={saving || !canMoveDonorResponse(row.status, "completed")} onClick={() => ask(row, "completed")} type="button">Doação concluída</button>
-              <button disabled={saving || !canMoveDonorResponse(row.status, "cancelled")} onClick={() => ask(row, "cancelled")} type="button">Cancelado</button>
+              <button disabled={saving || !canMoveDonorResponse(normalizeDonorResponseStatus(row.status), "pin_validated")} onClick={() => ask(row, "pin_validated")} type="button">PIN validado</button>
+              <button disabled={saving || !canMoveDonorResponse(normalizeDonorResponseStatus(row.status), "completed")} onClick={() => ask(row, "completed")} type="button">Doação concluída</button>
+              <button disabled={saving || !canMoveDonorResponse(normalizeDonorResponseStatus(row.status), "cancelled")} onClick={() => ask(row, "cancelled")} type="button">Cancelado</button>
             </span>
           </article>
           ))}
@@ -221,4 +220,20 @@ function statusLabel(status: string) {
 function isActiveStatus(status: string) {
   const normalized = normalizeDonorResponseStatus(status);
   return normalized !== "completed" && normalized !== "cancelled";
+}
+
+function splitRows(rows: AcceptedDonor[]) {
+  const activeKeys = new Set<string>();
+  const activeRows: AcceptedDonor[] = [];
+  const historyRows: AcceptedDonor[] = [];
+  rows.forEach((row) => {
+    const key = `${row.donorId}:${row.bloodRequestId ?? row.responseId}`;
+    if (isActiveStatus(row.status) && !activeKeys.has(key)) {
+      activeKeys.add(key);
+      activeRows.push(row);
+      return;
+    }
+    historyRows.push(row);
+  });
+  return { activeRows, historyRows };
 }

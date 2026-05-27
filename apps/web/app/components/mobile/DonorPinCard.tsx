@@ -35,7 +35,7 @@ export function DonorPinCard() {
       {!current ? (
         <>
           <strong>Meu PIN de Doação</strong>
-          <p className="muted">Aceite um pedido para gerar o seu PIN de doação.</p>
+          <p className="muted">Aceite um pedido para gerar o seu PIN.</p>
         </>
       ) : (
         <div className={styles.successCard}>
