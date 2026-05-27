@@ -88,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(next);
       if (next) {
         trackLoginEvent(next.user.email, next.user.role);
+        void fetch("/api/audit-logs/session", { method: "POST" }).catch(() => undefined);
         router.push(getRedirectForRole(next.user.role));
       }
     },

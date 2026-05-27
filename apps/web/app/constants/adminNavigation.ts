@@ -8,5 +8,6 @@ export const adminNavigation = [
   { label: "Fraude & Verificação", href: "/admin/fraud" },
   { label: "Auditoria & Logs", href: "/admin/audit" },
   { label: "Relatórios", href: "/admin/reports" },
+  { label: "Prontidão Piloto", href: "/admin/launch" },
   { label: "Definições", href: "/admin/settings" }
 ] as const;

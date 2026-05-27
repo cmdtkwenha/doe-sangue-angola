@@ -35,7 +35,6 @@ export function HospitalOnboarding() {
   const [hospitalId, setHospitalId] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("Escolha um hospital aprovado.");
-  const [profileDebug, setProfileDebug] = useState("");
 
   useEffect(() => {
     if (!supabase) {
@@ -127,10 +126,6 @@ export function HospitalOnboarding() {
       if (profile?.role !== "hospital" || profile.linked_entity_id !== hospitalId) {
         throw new Error("Perfil criado, mas o hospital ainda não ficou ligado.");
       }
-      setProfileDebug(
-        `role: ${profile.role ?? "-"} · linked_entity_id: ${profile.linked_entity_id ?? "-"} · hospital_id: ${profile.hospital_id ?? "-"}`
-      );
-
       await supabase.auth.refreshSession();
       setMessage("Hospital ligado com sucesso.");
       router.refresh();
@@ -183,7 +178,6 @@ export function HospitalOnboarding() {
           {saving ? "A ligar conta..." : "Ligar conta"}
         </button>
         <span className="muted" role="status">{message}</span>
-        {profileDebug ? <span className="muted">{profileDebug}</span> : null}
       </form>
     </OnboardingShell>
   );

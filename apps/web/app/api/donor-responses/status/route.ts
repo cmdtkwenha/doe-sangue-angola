@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     if (status === "completed" || status === "cancelled") {
       await notifyAdmins(db, workflowTitle(status), workflowMessage(status), status);
     }
-    await auditApiAction(principal, `Atualizou resposta do dador para ${status}.`);
+    await auditApiAction(principal, auditMessage(status, responseId));
     return data;
   });
 }
@@ -134,6 +134,16 @@ function workflowMessage(status: ResponseStatus) {
     pin_validated: "O seu PIN foi validado pelo hospital."
   };
   return messages[status];
+}
+
+function auditMessage(status: ResponseStatus, responseId: string) {
+  const actions: Record<ResponseStatus, string> = {
+    arrived: "Confirmou chegada do dador",
+    cancelled: "Cancelou resposta do dador",
+    completed: "Concluiu doação",
+    pin_validated: "Validou PIN do dador"
+  };
+  return `${actions[status]} (${responseId}).`;
 }
 
 function normalizeActionStatus(status?: string): ResponseStatus | null {
