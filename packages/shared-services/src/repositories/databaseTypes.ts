@@ -73,6 +73,11 @@ export type RequestRow = {
   notes?: string | null;
   status: RequestStatus;
   created_at: string;
+  hospitals?: {
+    municipality?: string | null;
+    name?: string | null;
+    province?: string | null;
+  } | null;
 };
 
 export type AppointmentRow = {
@@ -161,8 +166,16 @@ export function mapRequest(row: RequestRow): BloodRequest {
     notes: row.notes ?? undefined,
     status: row.status,
     createdBy: row.created_by ?? undefined,
-    createdAt: row.created_at
+    createdAt: row.created_at,
+    hospitalName: row.hospitals?.name ?? undefined,
+    hospitalLocation: formatHospitalLocation(row)
   };
+}
+
+function formatHospitalLocation(row: RequestRow) {
+  const municipality = row.hospitals?.municipality ?? row.municipality;
+  const province = row.hospitals?.province ?? row.province;
+  return [municipality, province].filter(Boolean).join(", ") || undefined;
 }
 
 export function mapAppointment(row: AppointmentRow): Appointment {

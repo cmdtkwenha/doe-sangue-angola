@@ -4,6 +4,7 @@ import { createRouteSupabase, requireApiSession } from "../../_utils/security";
 export type DonorPinResponse = {
   bloodRequestId: string;
   etaMinutes: number;
+  hospitalLocation: string;
   hospitalName: string;
   pin: string;
   requestBloodType: string;
@@ -34,7 +35,7 @@ export async function GET() {
     const requestIds = unique(responses.map((item) => item.blood_request_id));
     const [{ data: hospitals, error: hospitalError }, { data: requests, error: requestError }] =
       await Promise.all([
-        db.from("hospitals").select("id,name").in("id", hospitalIds),
+        db.from("hospitals").select("id,name,municipality,province").in("id", hospitalIds),
         db.from("blood_requests").select("id,blood_type").in("id", requestIds)
       ]);
     if (hospitalError) throw supabaseError("Não foi possível carregar o hospital", hospitalError);
@@ -46,6 +47,7 @@ export async function GET() {
       return {
         bloodRequestId: item.blood_request_id,
         etaMinutes: item.eta_minutes ?? 30,
+        hospitalLocation: locationLabel(hospital),
         hospitalName: hospital?.name ?? "Hospital",
         pin: item.confirmation_pin ?? "----",
         requestBloodType: request?.blood_type ?? "-",
@@ -53,6 +55,10 @@ export async function GET() {
       } satisfies DonorPinResponse;
     });
   });
+}
+
+function locationLabel(hospital?: { municipality?: string | null; province?: string | null } | null) {
+  return [hospital?.municipality, hospital?.province].filter(Boolean).join(", ") || "Localização a confirmar";
 }
 
 function unique(values: Array<string | null | undefined>) {

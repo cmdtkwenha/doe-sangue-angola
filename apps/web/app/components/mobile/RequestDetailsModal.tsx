@@ -36,12 +36,13 @@ export function RequestDetailsModal({
           <span className={`${styles.blood} ${styles.criticalText}`}>{request.bloodType}</span>
           <span className="pill red" style={{ marginLeft: 12 }}>{request.urgency}</span>
         </p>
-        <h3>{request.patientCode}</h3>
-        <p>Precisam de {request.units} bolsas</p>
+        <h3>{request.hospitalName ?? "Hospital"}</h3>
+        <p className="muted">{request.hospitalLocation ?? "Localização a confirmar"}</p>
+        <p>Precisam de {request.units} bolsas · Pedido {request.patientCode}</p>
         <div className={styles.modalMeta}>
-          <small>Estado<br /><strong>{request.status}</strong></small>
+          <small>Tipo<br /><strong>{request.bloodType}</strong></small>
           <small>Criado<br /><strong>{request.createdAt.slice(11, 16)}</strong></small>
-          <small>Emergência<br /><strong className={styles.criticalText}>MUITO ALTA</strong></small>
+          <small>Urgência<br /><strong className={styles.criticalText}>{request.urgency}</strong></small>
         </div>
         <hr />
         <strong>Por que você foi selecionada?</strong>

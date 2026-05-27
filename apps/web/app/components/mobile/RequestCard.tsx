@@ -37,16 +37,16 @@ export function RequestCard({
           <span className={`${styles.blood} ${textTone}`}>{request.bloodType}</span>
         </span>
         <span>
-          <strong>{request.patientCode}</strong>
+          <strong>{request.hospitalName ?? request.patientCode}</strong>
           <br />
-          <small>{request.units} bolsas</small>
+          <small>{request.hospitalLocation ?? "Localização a confirmar"}</small>
         </span>
         <span aria-hidden="true">⋮</span>
         </span>
       </button>
       <div className={styles.requestMeta}>
-        <small>Estado {request.status}</small>
-        <small>Criado {request.createdAt.slice(11, 16)}</small>
+        <small>{request.bloodType} · {request.units} bolsas</small>
+        <small>{request.urgency} · {request.createdAt.slice(11, 16)}</small>
         <button
           aria-label={`Aceitar pedido ${request.bloodType} para ${request.units} bolsas`}
           className={styles.accept}

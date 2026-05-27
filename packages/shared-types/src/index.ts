@@ -73,6 +73,8 @@ export type BloodRequest = {
   status: RequestStatus;
   createdBy?: string;
   createdAt: string;
+  hospitalName?: string;
+  hospitalLocation?: string;
 };
 
 export type Appointment = {

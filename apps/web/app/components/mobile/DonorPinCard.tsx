@@ -8,6 +8,7 @@ import styles from "./mobileApp.module.css";
 type DonorPin = {
   bloodRequestId: string;
   etaMinutes: number;
+  hospitalLocation: string;
   hospitalName: string;
   pin: string;
   requestBloodType: string;
@@ -36,7 +37,10 @@ export function DonorPinCard() {
           <span className={styles.check}>✓</span>
           <div>
             <strong>Pedido aceite com sucesso</strong>
-            <p className="muted">{current.hospitalName}</p>
+            <p className="muted">
+              {current.hospitalName}<br />
+              {current.hospitalLocation}
+            </p>
           </div>
           <div className={styles.pinGrid}>
             <span><small>Tipo</small><strong>{current.requestBloodType}</strong></span>

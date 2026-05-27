@@ -153,7 +153,8 @@ const requestColumns = [
   "notes",
   "urgency",
   "status",
-  "created_at"
+  "created_at",
+  "hospitals(name,municipality,province)"
 ].join(",");
 
 const donorColumns = [
