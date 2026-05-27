@@ -42,13 +42,16 @@ export function RequestCard({
           <strong>{request.hospitalName ?? request.patientCode}</strong>
           <br />
           <small>{request.hospitalLocation ?? "Localização a confirmar"}</small>
+          {request.distanceKm != null ? (
+            <small><br />{request.distanceKm} km · ETA {request.etaMinutes ?? "--"} min</small>
+          ) : null}
         </span>
         <span aria-hidden="true">⋮</span>
         </span>
       </button>
       <div className={styles.requestMeta}>
         <small>{request.bloodType} · {request.units} bolsas</small>
-        <small>{request.urgency} · {request.createdAt.slice(11, 16)}</small>
+        <small>{request.urgency} · {request.createdAt.slice(11, 16)} · {etaLabel(request)}</small>
         <button
           aria-label={`Aceitar pedido ${request.bloodType} para ${request.units} bolsas`}
           className={styles.accept}
@@ -61,4 +64,8 @@ export function RequestCard({
       </div>
     </article>
   );
+}
+
+function etaLabel(request: BloodRequest) {
+  return request.etaMinutes ? `ETA ${request.etaMinutes} min` : "ETA por município";
 }

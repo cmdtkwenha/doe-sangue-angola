@@ -53,7 +53,7 @@ export function MobileAppPreview() {
   });
   const { data: donor } = useCurrentDonor();
   const version = useRealtimeVersion();
-  const liveVersion = useSupabaseRealtimeVersion(["donor_responses"]);
+  const liveVersion = useSupabaseRealtimeVersion(["donor_responses", "donors"]);
   const { data: responses } = useApiData<Array<{ bloodRequestId: string }>>(
     "/api/donor/responses",
     [],

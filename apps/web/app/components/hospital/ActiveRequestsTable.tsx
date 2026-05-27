@@ -18,7 +18,7 @@ import { updateStatusAction } from "../workflow/workflowActions";
 
 export function ActiveRequestsTable() {
   const version = useRealtimeVersion();
-  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses"]);
+  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses", "donors"]);
   const [closing, setClosing] = useState<BloodRequest | null>(null);
   const [closedIds, setClosedIds] = useState<string[]>([]);
   const [reason, setReason] = useState("");

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
@@ -26,7 +27,8 @@ export function RequestList({
   onOpen?: (request: BloodRequest) => void;
 }) {
   const version = useRealtimeVersion();
-  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses"]);
+  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses", "donors"]);
+  const [locationMessage, setLocationMessage] = useState("A preparar localização segura...");
   const { session } = useAuth();
   const { data: donor } = useCurrentDonor();
   const userId = session?.user.authUserId ?? session?.user.id;
@@ -38,13 +40,31 @@ export function RequestList({
     version + liveVersion
   );
 
+  useEffect(() => {
+    if (!donorReady || !("geolocation" in navigator)) {
+      setLocationMessage("Usamos província/município quando a localização não está disponível.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocationMessage("Localização ativa: pedidos ordenados por distância e ETA.");
+        void saveLocation("granted", position.coords.latitude, position.coords.longitude);
+      },
+      () => {
+        setLocationMessage("Localização desativada: a procurar por província/município.");
+        void saveLocation("denied");
+      },
+      { enableHighAccuracy: false, maximumAge: 300000, timeout: 8000 }
+    );
+  }, [donorReady]);
+
   return (
     <MobileShell active="requests">
       <header className={styles.header}>
         <strong>← Pedidos Disponíveis</strong>
         <span>⌯</span>
       </header>
-      <p className="muted">Próximo de você · <strong>Luanda</strong></p>
+      <p className="muted">{locationMessage}</p>
       {loading ? <LoadingSkeleton label="A sincronizar pedidos compatíveis" /> : null}
       {error ? <p className="muted">{error}</p> : null}
       {requests.length === 0 ? (
@@ -68,4 +88,12 @@ export function RequestList({
       ))}
     </MobileShell>
   );
+}
+
+async function saveLocation(status: string, latitude?: number, longitude?: number) {
+  await fetch("/api/donors/location", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ latitude, locationPermissionStatus: status, longitude })
+  }).catch(() => undefined);
 }

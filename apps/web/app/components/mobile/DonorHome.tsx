@@ -17,7 +17,7 @@ import { useAuth } from "../auth/useAuth";
 export function DonorHome() {
   const [message, setMessage] = useState("Atalhos prontos.");
   const version = useRealtimeVersion();
-  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses"]);
+  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses", "donors"]);
   const { session } = useAuth();
   const { data: donor, loading } = useCurrentDonor();
   const userId = session?.user.authUserId ?? session?.user.id;

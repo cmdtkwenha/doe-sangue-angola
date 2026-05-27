@@ -9,7 +9,7 @@ import { useCurrentHospital } from "./useCurrentHospital";
 
 export function HospitalSummaryCards() {
   const version = useRealtimeVersion();
-  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses"]);
+  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses", "donors"]);
   const { data: hospital } = useCurrentHospital();
   const hospitalId = hospital?.id ?? "";
   const { data: requests, loading: loadingRequests } = useApiData<BloodRequest[]>(

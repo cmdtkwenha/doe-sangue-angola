@@ -40,6 +40,11 @@ export function RequestDetailsModal({
         </p>
         <h3>{request.hospitalName ?? "Hospital"}</h3>
         <p className="muted">{request.hospitalLocation ?? "Localização a confirmar"}</p>
+        <p className="muted">
+          {request.distanceKm != null
+            ? `${request.distanceKm} km de distância · ETA ${request.etaMinutes ?? "--"} min`
+            : "ETA calculado por província/município"}
+        </p>
         <p>Precisam de {request.units} bolsas · Pedido {request.patientCode}</p>
         <div className={styles.modalMeta}>
           <small>Tipo<br /><strong>{request.bloodType}</strong></small>

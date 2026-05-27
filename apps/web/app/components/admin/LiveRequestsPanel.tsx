@@ -11,7 +11,7 @@ type LiveRequest = BloodRequest & { hospital?: Hospital };
 
 export function LiveRequestsPanel() {
   const version = useRealtimeVersion();
-  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses"]);
+  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses", "donors"]);
   const { data: requests, error, loading } = useApiData<LiveRequest[]>(
     "/api/blood-requests",
     [],

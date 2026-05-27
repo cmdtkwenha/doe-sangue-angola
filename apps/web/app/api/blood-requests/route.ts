@@ -11,7 +11,9 @@ import { matchingAgent } from "@doe-sangue-angola/agents";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { auditApiAction } from "../_utils/audit";
 import { ApiError, apiResponse, readJson } from "../_utils/apiResponse";
-import { notifyAdmins, notifyUser } from "../_utils/notifications";
+import { distanceKm, etaMinutes } from "../_utils/location";
+import { notifyAdmins } from "../_utils/notifications";
+import { notifyMatchedDonors } from "../_utils/requestNotifications";
 import {
   createRouteSupabase,
   requireApiSession,
@@ -59,14 +61,15 @@ export async function GET(request: Request) {
       if (error) throw new Error(formatSupabaseError(error));
       const donorRecord = mapDonor(donorRow);
       return (data as unknown as RequestRow[])
-        .map(mapRequest)
+        .map((item) => enrichRequest(item, donorRecord))
         .filter((item) => !closedStatuses.includes(item.status))
-        .filter((item) => item.province === donorRecord.province)
+        .filter((item) => nearDonor(item, donorRecord))
         .filter((item) =>
           matchingAgent(item, [donorRecord]).some((match) =>
             match.donor.id === donorRecord.id && match.score >= 55
           )
-        );
+        )
+        .sort((a, b) => (a.etaMinutes ?? 999) - (b.etaMinutes ?? 999));
     }
 
     if (hospitalId) {
@@ -136,7 +139,7 @@ export async function POST(request: Request) {
     if (error) throw new Error(formatSupabaseError(error));
 
     const requestRecord = mapRequest(data as unknown as RequestRow);
-    await notifyMatchedDonors(db, requestRecord);
+    await notifyMatchedDonors(db, requestRecord, donorColumns);
     if (requestRecord.urgency === "Critica") {
       await notifyAdmins(
         db,
@@ -148,27 +151,6 @@ export async function POST(request: Request) {
     await auditApiAction(principal, `Criou pedido de sangue ${requestRecord.bloodType} (${requestRecord.id}).`);
     return { matches: [], request: requestRecord };
   });
-}
-
-async function notifyMatchedDonors(
-  db: Awaited<ReturnType<typeof createRouteSupabase>>,
-  requestRecord: BloodRequest
-) {
-  const { data } = await db.from("donors").select(donorColumns).eq("province", requestRecord.province);
-  const donors = (data as unknown as DonorRow[] | null ?? []).map(mapDonor);
-  const matches = matchingAgent(requestRecord, donors).filter((item) => item.score >= 55);
-  await Promise.all(matches.map((match) =>
-    notifyUser(db, {
-      message: `Pedido ${requestRecord.bloodType} perto de si. ${requestRecord.units} bolsas necessárias.`,
-      publicUserId: match.donor.userId,
-      role: "donor",
-      title: "Pedido urgente perto de si",
-      type: requestRecord.urgency === "Critica" ? "urgent" : "request"
-    })
-  ));
-  if (matches.length === 0) {
-    await notifyAdmins(db, "Sem dadores compatíveis", `Pedido ${requestRecord.id} não encontrou dadores imediatos.`, "matching");
-  }
 }
 
 const requestColumns = [
@@ -185,7 +167,7 @@ const requestColumns = [
   "urgency",
   "status",
   "created_at",
-  "hospitals(name,municipality,province)"
+  "hospitals(name,municipality,province,latitude,longitude)"
 ].join(",");
 
 const donorColumns = [
@@ -202,11 +184,30 @@ const donorColumns = [
   "gender",
   "last_donation",
   "last_donation_date",
+  "latitude",
+  "location_permission_status",
+  "longitude",
   "phone",
   "points",
   "preferred_hospital_id",
   "total_donations"
 ].join(",");
+
+function enrichRequest(row: RequestRow, donor: ReturnType<typeof mapDonor>) {
+  const request = mapRequest(row);
+  const distance = distanceKm(donor, row.hospitals);
+  return {
+    ...request,
+    distanceKm: distance,
+    etaMinutes: etaMinutes(distance)
+  };
+}
+
+function nearDonor(request: BloodRequest, donor: ReturnType<typeof mapDonor>) {
+  if (request.distanceKm != null) return request.distanceKm <= 80;
+  return request.province === donor.province
+    && (!request.municipality || request.municipality === donor.municipality || request.urgency === "Critica");
+}
 
 const closedStatuses = ["Agendado", "Cancelado", "Concluído", "Concluido", "Doador a Caminho", "PIN Validado"];
 

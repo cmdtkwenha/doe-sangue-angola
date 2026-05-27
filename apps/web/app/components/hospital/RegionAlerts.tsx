@@ -16,7 +16,7 @@ const toneMap: Record<string, string> = {
 
 export function RegionAlerts() {
   const version = useRealtimeVersion();
-  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses"]);
+  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses", "donors"]);
   const { data: hospital } = useCurrentHospital();
   const path = hospital?.id ? `/api/blood-requests?hospitalId=${hospital.id}` : "/api/blood-requests?hospitalId=missing";
   const { data: requests } = useApiData<BloodRequest[]>(path, [], version + liveVersion);

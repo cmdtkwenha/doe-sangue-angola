@@ -35,6 +35,9 @@ export type DonorRow = {
   gender?: string | null;
   last_donation: string | null;
   last_donation_date?: string | null;
+  latitude?: number | null;
+  location_permission_status?: string | null;
+  longitude?: number | null;
   phone?: string | null;
   points: number;
   preferred_hospital_id: string | null;
@@ -57,6 +60,8 @@ export type HospitalRow = {
   verified: boolean;
   capacity: number;
   contact: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 };
 
 export type RequestRow = {
@@ -77,6 +82,8 @@ export type RequestRow = {
     municipality?: string | null;
     name?: string | null;
     province?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
   } | null;
 };
 
@@ -130,6 +137,9 @@ export function mapDonor(row: DonorRow): Donor {
     eligibilityStatus: row.eligibility_status ?? "Pendente",
     gender: row.gender ?? undefined,
     lastDonation: row.last_donation_date ?? row.last_donation ?? "",
+    latitude: row.latitude ?? undefined,
+    locationPermissionStatus: row.location_permission_status ?? undefined,
+    longitude: row.longitude ?? undefined,
     phone: row.phone ?? row.users?.phone ?? undefined,
     points: row.points,
     totalDonations: row.total_donations ?? 0,
@@ -149,6 +159,8 @@ export function mapHospital(row: HospitalRow): Hospital {
     verified: row.verified,
     capacity: row.capacity,
     contact: row.contact ?? row.phone ?? "",
+    latitude: row.latitude ?? undefined,
+    longitude: row.longitude ?? undefined,
     type: row.facility_type ?? row.type ?? undefined
   };
 }

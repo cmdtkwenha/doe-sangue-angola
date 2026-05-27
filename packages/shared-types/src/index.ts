@@ -41,6 +41,9 @@ export type Donor = {
   municipality: string;
   available: boolean;
   lastDonation: string;
+  latitude?: number;
+  locationPermissionStatus?: string;
+  longitude?: number;
   points: number;
   totalDonations?: number;
   eligibilityStatus?: string;
@@ -65,6 +68,8 @@ export type Hospital = {
   verified: boolean;
   capacity: number;
   contact: string;
+  latitude?: number;
+  longitude?: number;
 };
 
 export type BloodRequest = {
@@ -80,6 +85,8 @@ export type BloodRequest = {
   status: RequestStatus;
   createdBy?: string;
   createdAt: string;
+  distanceKm?: number;
+  etaMinutes?: number;
   hospitalName?: string;
   hospitalLocation?: string;
 };

@@ -11,7 +11,7 @@ import { MetricCard } from "./MetricCard";
 
 export function AdminMetrics() {
   const version = useRealtimeVersion();
-  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses"]);
+  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses", "donors"]);
   const refresh = version + liveVersion;
   const { data: donors, error: donorError, loading: loadingDonors } = useApiData<Donor[]>("/api/donors", [], refresh);
   const { data: hospitals, error: hospitalError, loading: loadingHospitals } = useApiData<Hospital[]>("/api/hospitals", [], refresh);

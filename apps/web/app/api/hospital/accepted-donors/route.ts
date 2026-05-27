@@ -1,5 +1,6 @@
 import type { DonorResponseStatus } from "@doe-sangue-angola/shared-types";
 import { ApiError, apiResponse } from "../../_utils/apiResponse";
+import { distanceKm, etaMinutes } from "../../_utils/location";
 import { createRouteSupabase, requireApiSession } from "../../_utils/security";
 
 export type AcceptedDonorRow = {
@@ -39,9 +40,9 @@ export async function GET() {
     const requestIds = unique(responses.map((item) => item.blood_request_id));
     const [{ data: donors, error: donorError }, { data: requests, error: requestError }, hospital] =
       await Promise.all([
-        db.from("donors").select("id,full_name,blood_type,phone").in("id", donorIds),
+        db.from("donors").select("id,full_name,blood_type,phone,latitude,longitude").in("id", donorIds),
         db.from("blood_requests").select("id,blood_type,status").in("id", requestIds),
-        getHospitalName(db, hospitalId ?? "")
+        getHospital(db, hospitalId ?? "")
       ]);
     if (donorError) throw supabaseError("Não foi possível carregar dados dos dadores", donorError);
     if (requestError) throw supabaseError("Não foi possível carregar pedidos de sangue", requestError);
@@ -49,6 +50,7 @@ export async function GET() {
     return responses.map((item) => {
       const donor = donors?.find((row) => row.id === item.donor_id);
       const request = requests?.find((row) => row.id === item.blood_request_id);
+      const distance = distanceKm(donor, hospital);
       return {
         bloodRequestId: item.blood_request_id ?? undefined,
         createdAt: item.created_at ?? undefined,
@@ -56,9 +58,9 @@ export async function GET() {
         donorId: item.donor_id,
         donorName: donor?.full_name ?? "Dador aceite",
         donorPhone: donor?.phone ?? "por completar",
-        eta: `${item.eta_minutes ?? 30} min`,
+        eta: `${etaMinutes(distance) ?? item.eta_minutes ?? 30} min`,
         hospitalId: item.hospital_id,
-        hospitalName: hospital,
+        hospitalName: hospital.name,
         pin: item.confirmation_pin ?? "----",
         responseId: item.id,
         requestBloodType: request?.blood_type ?? "-",
@@ -85,10 +87,18 @@ function normalizeStatus(status?: string | null): DonorResponseStatus {
   return oldValues[status ?? ""] ?? "accepted";
 }
 
-async function getHospitalName(db: Awaited<ReturnType<typeof createRouteSupabase>>, id: string) {
-  const { data, error } = await db.from("hospitals").select("name").eq("id", id).maybeSingle();
+async function getHospital(db: Awaited<ReturnType<typeof createRouteSupabase>>, id: string) {
+  const { data, error } = await db
+    .from("hospitals")
+    .select("name,latitude,longitude")
+    .eq("id", id)
+    .maybeSingle();
   if (error) throw supabaseError("Não foi possível carregar o hospital", error);
-  return data?.name ?? "Hospital";
+  return {
+    latitude: data?.latitude,
+    longitude: data?.longitude,
+    name: data?.name ?? "Hospital"
+  };
 }
 
 function unique(values: Array<string | null | undefined>) {

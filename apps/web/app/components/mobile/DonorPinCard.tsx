@@ -19,7 +19,7 @@ type DonorPin = {
 
 export function DonorPinCard() {
   const version = useRealtimeVersion();
-  const liveVersion = useSupabaseRealtimeVersion(["donor_responses", "blood_requests"]);
+  const liveVersion = useSupabaseRealtimeVersion(["donor_responses", "blood_requests", "donors"]);
   const { data, error, loading } = useApiData<DonorPin[]>(
     "/api/donor/responses",
     [],
