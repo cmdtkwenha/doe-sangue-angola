@@ -26,16 +26,21 @@ export function DonorPinCard() {
   const current = data[0];
 
   return (
-    <article className={styles.card}>
-      <strong>Meu PIN de Doação</strong>
+    <article className={`${styles.card} ${current ? styles.pinCard : ""}`}>
       {loading ? <p className="muted">A carregar PIN real...</p> : null}
       {error ? <p className="muted">{error}</p> : null}
       {!current ? (
-        <p className="muted">Aceite um pedido para gerar o seu PIN de doação.</p>
+        <>
+          <strong>Meu PIN de Doação</strong>
+          <p className="muted">Aceite um pedido para gerar o seu PIN de doação.</p>
+        </>
       ) : (
         <div className={styles.successCard}>
-          <span className={styles.check}>✓</span>
-          <div>
+          <div className={styles.pinHero}>
+            <small>Meu PIN de Doação</small>
+            <strong>PIN {current.pin}</strong>
+          </div>
+          <div className={styles.pinHospital}>
             <strong>Pedido aceite com sucesso</strong>
             <p className="muted">
               {current.hospitalName}<br />
@@ -46,10 +51,6 @@ export function DonorPinCard() {
             <span><small>Tipo</small><strong>{current.requestBloodType}</strong></span>
             <span><small>ETA</small><strong>{current.etaMinutes} min</strong></span>
             <span><small>Estado</small><strong>{statusLabel(current.status)}</strong></span>
-          </div>
-          <div className={styles.pinBox}>
-            <small>PIN de confirmação</small>
-            <strong>{current.pin}</strong>
           </div>
         </div>
       )}
