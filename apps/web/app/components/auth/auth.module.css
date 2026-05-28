@@ -69,23 +69,6 @@
   gap: 10px;
 }
 
-.envDebug {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 14px 0;
-}
-
-.envDebug span {
-  border: 1px solid #d9dee7;
-  border-radius: 999px;
-  background: #f7f8fb;
-  color: #111820;
-  font-size: 12px;
-  font-weight: 900;
-  padding: 8px 10px;
-}
-
 .links {
   display: flex;
   flex-wrap: wrap;
