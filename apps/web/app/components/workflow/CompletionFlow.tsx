@@ -4,6 +4,7 @@ import { useState } from "react";
 import styles from "./workflow.module.css";
 import { completeDonationAction } from "./workflowActions";
 import { useWorkflowSnapshot } from "./useWorkflowSnapshot";
+import { ContextualTooltip } from "../support";
 
 export function CompletionFlow() {
   const { request, responses, refresh } = useWorkflowSnapshot();
@@ -27,6 +28,10 @@ export function CompletionFlow() {
       <div className={styles.head}>
         <div>
           <div className={styles.title}>Conclusão e Recompensa</div>
+          <ContextualTooltip
+            title="Concluir doação"
+            text="Use somente depois de validar PIN e confirmar que a colheita foi realizada."
+          />
           <p className="muted">{message}</p>
         </div>
         <span className="pill green">rewardAgent</span>

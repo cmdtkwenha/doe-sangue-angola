@@ -17,6 +17,7 @@ import { RequestDetailsModal } from "./RequestDetailsModal";
 import { RequestList } from "./RequestList";
 import { acceptRequestAction } from "../workflow/workflowActions";
 import { useCurrentDonor } from "./useCurrentDonor";
+import { OnboardingCompletionTracker, OperationalWalkthrough } from "../support";
 
 const load = (label: string) => () => <LoadingSkeleton label={label} />;
 const DonationSuccessScreen = dynamic(() =>
@@ -102,6 +103,16 @@ export function MobileAppPreview() {
       <DonorEntityGate>
       <section className={styles.grid}>
         <DonorHome />
+        <OperationalWalkthrough role="donor" />
+        <OnboardingCompletionTracker
+          title="Perfil de dador"
+          items={[
+            { done: Boolean(donor?.id), label: "Perfil criado" },
+            { done: Boolean(donor?.bloodType), label: "Tipo sanguíneo" },
+            { done: Boolean(donor?.province), label: "Província" },
+            { done: Boolean(donor?.municipality), label: "Município" }
+          ]}
+        />
         <RequestList
           acceptedRequestIds={acceptedIds}
           acceptingRequestId={accepting ? pendingAccept?.id : undefined}

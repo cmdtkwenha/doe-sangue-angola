@@ -5,6 +5,7 @@ import { AppointmentSchedule } from "./AppointmentSchedule";
 import advanced from "./hospitalAdvanced.module.css";
 import { HospitalEntityGate } from "./HospitalEntityGate";
 import { HospitalHeader } from "./HospitalHeader";
+import { HospitalSetupTracker } from "./HospitalSetupTracker";
 import { HospitalSidebar } from "./HospitalSidebar";
 import { HospitalSummaryCards } from "./HospitalSummaryCards";
 import { IncomingDonorsList } from "./IncomingDonorsList";
@@ -75,6 +76,9 @@ const RequestStatusTimeline = dynamic(() =>
 const RequestWizard = dynamic(() =>
   import("./automation/RequestWizard").then((module) => module.RequestWizard),
 { loading: load("A preparar criação de pedido") });
+const OperationalWalkthrough = dynamic(() =>
+  import("../support").then((module) => module.OperationalWalkthrough),
+{ loading: load("A preparar guia operacional") });
 
 export function HospitalPortal() {
   return (
@@ -84,6 +88,8 @@ export function HospitalPortal() {
         <HospitalHeader />
         <HospitalEntityGate>
         <div className={styles.workspace}>
+          <OperationalWalkthrough role="hospital" />
+          <HospitalSetupTracker />
           <section className={styles.topGrid}>
             <UrgentRequestCard />
             <HospitalSummaryCards />

@@ -1,0 +1,87 @@
+.panel,
+.tooltip,
+.contact,
+.tracker {
+  background: #fff;
+  border: 1px solid #e5eaf2;
+  border-radius: 14px;
+  box-shadow: 0 14px 36px rgba(16, 24, 40, 0.06);
+  padding: 16px;
+}
+
+.panel {
+  display: grid;
+  gap: 12px;
+}
+
+.steps,
+.items,
+.contactGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.step,
+.item {
+  background: #fbfcfe;
+  border: 1px solid #edf0f4;
+  border-radius: 12px;
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+}
+
+.tooltip {
+  display: inline-grid;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.tipButton {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 999px;
+  color: #9a3412;
+  cursor: help;
+  font-size: 12px;
+  font-weight: 900;
+  min-height: 36px;
+  padding: 0 12px;
+}
+
+.contactGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.form {
+  display: grid;
+  gap: 10px;
+}
+
+.form input,
+.form select,
+.form textarea {
+  border: 1px solid #d8dee8;
+  border-radius: 10px;
+  font: inherit;
+  padding: 11px 12px;
+  width: 100%;
+}
+
+.progress {
+  background: #edf0f4;
+  border-radius: 999px;
+  height: 9px;
+  overflow: hidden;
+}
+
+.bar {
+  background: linear-gradient(90deg, #d01424, #f59e0b);
+  height: 100%;
+}
+
+@media (max-width: 760px) {
+  .contactGrid {
+    grid-template-columns: 1fr;
+  }
+}

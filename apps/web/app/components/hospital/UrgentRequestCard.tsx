@@ -4,6 +4,7 @@ import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { useState } from "react";
 import { createRequestAction } from "../workflow/workflowActions";
 import styles from "./hospitalPortal.module.css";
+import { ContextualTooltip } from "../support";
 import { useCurrentHospital } from "./useCurrentHospital";
 
 export function UrgentRequestCard() {
@@ -30,6 +31,10 @@ export function UrgentRequestCard() {
       <span className={styles.bolt}>!</span>
       <div>
         <strong>Solicitação Urgente com 1 Clique</strong>
+        <ContextualTooltip
+          title="Pedido urgente"
+          text="Use apenas quando o hospital precisa de sangue imediato e quer notificar dadores compatíveis."
+        />
         <p className="muted">{message}</p>
         <button className="button" onClick={create} type="button">
           CRIAR PEDIDO URGENTE

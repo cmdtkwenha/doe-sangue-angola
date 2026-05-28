@@ -1,5 +1,6 @@
 import styles from "./mobileApp.module.css";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
+import { ContextualTooltip } from "../support";
 
 export function RequestCard({
   accepted,
@@ -52,6 +53,10 @@ export function RequestCard({
       <div className={styles.requestMeta}>
         <small>{request.bloodType} · {request.units} bolsas</small>
         <small>{request.urgency} · {request.createdAt.slice(11, 16)} · {etaLabel(request)}</small>
+        <ContextualTooltip
+          title="Aceitar pedido"
+          text="Confirme hospital e disponibilidade. Ao aceitar, o sistema gera o seu PIN de doação."
+        />
         <button
           aria-label={`Aceitar pedido ${request.bloodType} para ${request.units} bolsas`}
           className={styles.accept}

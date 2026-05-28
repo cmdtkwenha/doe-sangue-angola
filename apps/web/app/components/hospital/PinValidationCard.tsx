@@ -4,6 +4,7 @@ import { useState } from "react";
 import { validatePinAction } from "../workflow/workflowActions";
 import { useWorkflowSnapshot } from "../workflow/useWorkflowSnapshot";
 import styles from "./hospitalAdvanced.module.css";
+import { ContextualTooltip } from "../support";
 
 export function PinValidationCard() {
   const { appointment, matches, request, refresh } = useWorkflowSnapshot();
@@ -21,6 +22,10 @@ export function PinValidationCard() {
     <section className={styles.pinCard}>
       <div className="eyebrow">Validação PIN</div>
       <h2>Confirmar dador recebido</h2>
+      <ContextualTooltip
+        title="Validação PIN"
+        text="Peça o PIN mostrado na app do dador. Só valide se o dador chegou presencialmente."
+      />
       <div className={styles.pinGrid}>
         {(expected || "----").split("").map((digit, index) => (
           <span className={styles.digit} key={`${digit}-${index}`}>{digit}</span>

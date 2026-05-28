@@ -30,6 +30,12 @@ const PilotModeBanner = dynamic(() =>
 const PilotDashboardSection = dynamic(() =>
   import("../pilot").then((module) => module.PilotDashboardSection),
 { loading: () => <LoadingSkeleton label="A carregar painel piloto" /> });
+const OperationalWalkthrough = dynamic(() =>
+  import("../support").then((module) => module.OperationalWalkthrough),
+{ loading: () => <LoadingSkeleton label="A preparar guia operacional" /> });
+const SupportIssuesPanel = dynamic(() =>
+  import("../support").then((module) => module.SupportIssuesPanel),
+{ loading: () => <LoadingSkeleton label="A carregar suporte" /> });
 const RequestStatusTimeline = dynamic(() =>
   import("../workflow/RequestStatusTimeline").then((module) => module.RequestStatusTimeline),
 { loading: () => <LoadingSkeleton label="A sincronizar fluxo de pedidos" /> });
@@ -42,7 +48,9 @@ export function AdminDashboard() {
         <AdminHeader />
         <div className={styles.workspace}>
           <PilotModeBanner />
+          <OperationalWalkthrough role="admin" />
           <PilotDashboardSection />
+          <SupportIssuesPanel />
           <RealtimeStatusStrip />
           <RequestStatusTimeline />
           <AdminMetrics />
