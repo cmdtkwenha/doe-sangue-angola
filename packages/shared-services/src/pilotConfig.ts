@@ -10,6 +10,14 @@ export type PilotAccount = {
   role: UserRole;
 };
 
+export type PilotIssue = {
+  id: string;
+  owner: "Admin" | "Hospital" | "Dador";
+  priority: "Alta" | "Média" | "Baixa";
+  status: "Aberto" | "Em revisão" | "Resolvido";
+  title: string;
+};
+
 export const pilotProvinces = ["Luanda", "Benguela"] as const;
 
 export const pilotConfig = {
@@ -51,6 +59,47 @@ export const pilotAccounts: PilotAccount[] = [
   }
 ];
 
+export const firstPilotAccounts: PilotAccount[] = [
+  {
+    email: "admin.piloto@sangueangola.ao",
+    name: "Admin Piloto",
+    password: "Piloto@2026",
+    province: "Luanda",
+    role: "admin"
+  },
+  {
+    email: "hospital.piloto@sangueangola.ao",
+    name: "Hospital Piloto Luanda",
+    password: "Piloto@2026",
+    province: "Luanda",
+    role: "hospital"
+  },
+  ...["ana", "maria", "joao", "paulo", "teresa"].map((name, index) => ({
+    email: `dador.${name}@sangueangola.ao`,
+    name: `Dador Piloto ${index + 1}`,
+    password: "Piloto@2026",
+    province: "Luanda" as const,
+    role: "donor" as const
+  }))
+];
+
+export const pilotIssues: PilotIssue[] = [
+  {
+    id: "PILOT-01",
+    owner: "Admin",
+    priority: "Alta",
+    status: "Aberto",
+    title: "Confirmar 25 hospitais importados antes do teste."
+  },
+  {
+    id: "PILOT-02",
+    owner: "Hospital",
+    priority: "Média",
+    status: "Em revisão",
+    title: "Validar PIN em dispositivo real durante a sessão."
+  }
+];
+
 export function seedPilotAccounts() {
   monitoringService({
     message: "Contas piloto preparadas",
@@ -82,5 +131,19 @@ export function getPilotAnalytics() {
     notificationsSafe: pilotConfig.notifications,
     provinces: pilotProvinces,
     requests: pilotRequests.length
+  };
+}
+
+export function getFirstPilotDashboard() {
+  const analytics = getPilotAnalytics();
+  const donorUsers = firstPilotAccounts.filter((account) => account.role === "donor");
+  const hospitalUsers = firstPilotAccounts.filter((account) => account.role === "hospital");
+
+  return {
+    donors: donorUsers.length,
+    hospitals: hospitalUsers.length,
+    issues: pilotIssues,
+    requests: analytics.requests,
+    users: firstPilotAccounts.length
   };
 }
