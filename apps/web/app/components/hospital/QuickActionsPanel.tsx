@@ -4,9 +4,15 @@ import { useState } from "react";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import base from "./hospitalPortal.module.css";
 import styles from "./hospitalAdvanced.module.css";
-import { quickActions } from "./hospitalAgentService";
 import { createRequestAction } from "../workflow/workflowActions";
 import { useCurrentHospital } from "./useCurrentHospital";
+
+const quickActions = [
+  ["Novo Pedido de Sangue", "Criar pedido", "red"],
+  ["Pedido Urgente", "Notificar dadores agora", "gold"],
+  ["Confirmar Chegada", "Validar PIN do dador", "green"],
+  ["Mensagem aos Dadores", "Enviar comunicação", "black"]
+] as const;
 
 export function QuickActionsPanel() {
   const { data: hospital } = useCurrentHospital();

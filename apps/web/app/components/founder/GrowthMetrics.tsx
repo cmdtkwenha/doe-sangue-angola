@@ -1,14 +1,20 @@
-import { donors, hospitals, requests } from "@doe-sangue-angola/shared-services";
+"use client";
+
+import type { BloodRequest, Donor, Hospital } from "@doe-sangue-angola/shared-types";
+import { useApiData } from "../../hooks/useApiData";
 import styles from "./founder.module.css";
 
-const metricData = [
-  ["Hospitais", hospitals.length, "+2 piloto"],
-  ["Dadores", donors.length, "+4 teste"],
-  ["Pedidos", requests.length, "ativos"],
-  ["Províncias", new Set(hospitals.map((hospital) => hospital.province)).size, "cobertas"]
-] as const;
-
 export function GrowthMetrics() {
+  const { data: hospitals } = useApiData<Hospital[]>("/api/hospitals", []);
+  const { data: donors } = useApiData<Donor[]>("/api/donors", []);
+  const { data: requests } = useApiData<BloodRequest[]>("/api/blood-requests", []);
+  const metricData = [
+    ["Hospitais", hospitals.length, "reais"],
+    ["Dadores", donors.length, "reais"],
+    ["Pedidos", requests.length, "reais"],
+    ["Províncias", new Set(hospitals.map((hospital) => hospital.province)).size, "cobertas"]
+  ] as const;
+
   return (
     <section className={styles.panel}>
       <div className="eyebrow">Crescimento</div>

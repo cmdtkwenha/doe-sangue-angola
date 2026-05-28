@@ -1,27 +1,36 @@
+"use client";
+
 import { donorActions } from "@constants/adminActions";
-import { donors, listDonorVerificationQueue } from "@doe-sangue-angola/shared-services";
+import type { Donor } from "@doe-sangue-angola/shared-types";
+import { useApiData } from "../../../hooks/useApiData";
+import { useSupabaseRealtimeVersion } from "../../../hooks/useSupabaseRealtimeVersion";
 import { ManagementTable } from "./ManagementTable";
+import styles from "./management.module.css";
 
 export function DonorsTable() {
-  const verification = new Map(listDonorVerificationQueue().map((item) => [item.id, item.status]));
+  const version = useSupabaseRealtimeVersion(["donors"]);
+  const { data: donors, error } = useApiData<Donor[]>("/api/donors", [], version);
 
   return (
-    <ManagementTable
-      title="Dadores"
-      exportName="dadores.csv"
-      columns={["Nome", "Tipo", "Província", "Município", "Pontos"]}
-      rows={donors.map((donor) => ({
-        id: donor.id,
-        status: verification.get(donor.id) ?? "Pendente",
-        values: {
-          Nome: donor.name,
-          Tipo: donor.bloodType,
-          Província: donor.province,
-          Município: donor.municipality,
-          Pontos: String(donor.points)
-        },
-        actions: donorActions
-      }))}
-    />
+    <>
+      {error ? <p className={styles.error}>Falha ao carregar dadores: {error}</p> : null}
+      <ManagementTable
+        title="Dadores"
+        exportName="dadores.csv"
+        columns={["Nome", "Tipo", "Província", "Município", "Pontos"]}
+        rows={donors.map((donor) => ({
+          id: donor.id,
+          status: donor.available ? "Verificado" : "Pendente",
+          values: {
+            Nome: donor.name,
+            Tipo: donor.bloodType,
+            Província: donor.province,
+            Município: donor.municipality,
+            Pontos: String(donor.points)
+          },
+          actions: donorActions
+        }))}
+      />
+    </>
   );
 }

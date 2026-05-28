@@ -27,9 +27,6 @@ const MonitoringDashboard = dynamic(() =>
 const PilotModeBanner = dynamic(() =>
   import("../pilot").then((module) => module.PilotModeBanner),
 { loading: () => <LoadingSkeleton label="A carregar modo piloto" /> });
-const PilotDashboardSection = dynamic(() =>
-  import("../pilot").then((module) => module.PilotDashboardSection),
-{ loading: () => <LoadingSkeleton label="A carregar painel piloto" /> });
 const OperationalWalkthrough = dynamic(() =>
   import("../support").then((module) => module.OperationalWalkthrough),
 { loading: () => <LoadingSkeleton label="A preparar guia operacional" /> });
@@ -49,7 +46,6 @@ export function AdminDashboard() {
         <div className={styles.workspace}>
           <PilotModeBanner />
           <OperationalWalkthrough role="admin" />
-          <PilotDashboardSection />
           <SupportIssuesPanel />
           <RealtimeStatusStrip />
           <RequestStatusTimeline />

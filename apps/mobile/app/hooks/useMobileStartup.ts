@@ -1,6 +1,7 @@
 import {
   getDonorHome,
   getDonorHomeAsync,
+  isSupabaseMode,
   type DonorHomeSnapshot
 } from "@doe-sangue-angola/shared-services";
 import { useEffect, useState } from "react";
@@ -29,7 +30,7 @@ export function useMobileStartup(donorId: string) {
       } catch {
         if (active) {
           setError("Não foi possível preparar o app. Tente novamente.");
-          setHome(getDonorHome("d1"));
+          setHome(isSupabaseMode() ? null : getDonorHome("d1"));
         }
       } finally {
         if (active) setLoading(false);

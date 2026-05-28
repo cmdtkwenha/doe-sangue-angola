@@ -17,6 +17,7 @@ export const supabaseRepositories: AppRepositories = {
 };
 
 export function getRepositories() {
+  if (process.env.NODE_ENV === "production") return supabaseRepositories;
   return getDataMode() === "supabase" && isDatabaseConfigured()
     ? supabaseRepositories
     : mockRepositories;

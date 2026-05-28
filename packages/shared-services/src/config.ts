@@ -7,6 +7,7 @@ const readPublicEnv = (value: string | undefined) => value?.trim().toLowerCase()
 export function getDataMode(): DataMode {
   const value = readPublicEnv(process.env.NEXT_PUBLIC_DATA_MODE ?? process.env.EXPO_PUBLIC_DATA_MODE);
 
+  if (!value && process.env.NODE_ENV === "production") return "supabase";
   return value === "supabase" ? "supabase" : "mock";
 }
 

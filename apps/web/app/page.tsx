@@ -1,9 +1,10 @@
-import { getBackendStatus, getNationalSummary } from "@doe-sangue-angola/shared-services";
+import { dataProvider, getBackendStatus, isDatabaseConfigured } from "@doe-sangue-angola/shared-services";
+import type { BloodRequest, Donor, Hospital } from "@doe-sangue-angola/shared-types";
 import { Sidebar } from "./components/shell/Sidebar";
 
-export default function HomePage() {
-  const summary = getNationalSummary();
+export default async function HomePage() {
   const backend = getBackendStatus();
+  const summary = await loadRealSummary();
 
   return (
     <main className="app-shell">
@@ -29,4 +30,27 @@ export default function HomePage() {
       </section>
     </main>
   );
+}
+
+async function loadRealSummary() {
+  if (!isDatabaseConfigured()) {
+    return {
+      activeRequests: "-",
+      availableDonors: "-",
+      criticalRequests: "-",
+      hospitals: "-"
+    };
+  }
+  const [hospitals, donors, requests] = await Promise.all([
+    dataProvider.listHospitals(),
+    dataProvider.listDonors(),
+    dataProvider.listRequests()
+  ]) as [Hospital[], Donor[], BloodRequest[]];
+  const active = requests.filter((request) => !["Cancelado", "Concluído", "Concluido"].includes(request.status));
+  return {
+    activeRequests: active.length,
+    availableDonors: donors.filter((donor) => donor.available).length,
+    criticalRequests: active.filter((request) => request.urgency === "Critica").length,
+    hospitals: hospitals.filter((hospital) => hospital.verified).length
+  };
 }

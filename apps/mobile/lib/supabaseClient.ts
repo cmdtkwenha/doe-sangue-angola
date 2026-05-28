@@ -22,10 +22,13 @@ export function isSupabaseConfigured() {
 }
 
 export function getSupabaseClientStatus() {
+  const production = process.env.EXPO_PUBLIC_APP_ENV === "production";
   return {
-    mode: isSupabaseConfigured() ? "supabase-ready" : "mock",
+    mode: isSupabaseConfigured() ? "supabase-ready" : production ? "missing-config" : "mock",
     message: isSupabaseConfigured()
       ? "Variáveis Expo Supabase configuradas; cliente real pode ser ativado."
+      : production
+        ? "Configure EXPO_PUBLIC_SUPABASE_URL e EXPO_PUBLIC_SUPABASE_ANON_KEY."
       : "A usar serviços mockados."
   };
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { createInAppNotification, donors } from "@doe-sangue-angola/shared-services";
 import { useState } from "react";
 import styles from "./founder.module.css";
 
@@ -9,10 +8,7 @@ export function BroadcastTool() {
   const [status, setStatus] = useState("Pronto para enviar notificação de teste.");
 
   function sendBroadcast() {
-    donors.slice(0, 3).forEach((donor) =>
-      createInAppNotification(donor.id, "Mensagem da plataforma", message, "urgent")
-    );
-    setStatus("Mensagem de teste registada para os dadores selecionados.");
+    setStatus("Envio real deve ser feito pelo centro de notificações com Supabase ativo.");
   }
 
   return (
