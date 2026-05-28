@@ -9,6 +9,7 @@ export function SupportIssueForm({ action, page, role }: {
   role: "admin" | "hospital" | "donor";
 }) {
   const [message, setMessage] = useState("");
+  const [severity, setSeverity] = useState("Média");
   const [status, setStatus] = useState("");
   const [type, setType] = useState("Problema operacional");
 
@@ -16,7 +17,7 @@ export function SupportIssueForm({ action, page, role }: {
     event.preventDefault();
     setStatus("A enviar reporte...");
     const response = await fetch("/api/support/issues", {
-      body: JSON.stringify({ action, message, page, role, type }),
+      body: JSON.stringify({ action, message, page, role, severity, type }),
       headers: { "Content-Type": "application/json" },
       method: "POST"
     });
@@ -34,6 +35,15 @@ export function SupportIssueForm({ action, page, role }: {
           <option>Dado incorreto</option>
           <option>Erro de PIN</option>
           <option>Feedback do piloto</option>
+        </select>
+      </label>
+      <label>
+        Gravidade
+        <select value={severity} onChange={(event) => setSeverity(event.target.value)}>
+          <option>Baixa</option>
+          <option>Média</option>
+          <option>Alta</option>
+          <option>Crítica</option>
         </select>
       </label>
       <label>

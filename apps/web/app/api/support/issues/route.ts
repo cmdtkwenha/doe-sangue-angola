@@ -6,6 +6,7 @@ type IssueBody = {
   message: string;
   page: string;
   role: "admin" | "hospital" | "donor";
+  severity: "Baixa" | "Média" | "Alta" | "Crítica";
   type: string;
 };
 
@@ -15,7 +16,7 @@ export async function GET() {
     const db = await createRouteSupabase();
     const { data, error } = await db
       .from("support_issues")
-      .select("id,role,page,action,type,message,status,created_at")
+      .select("id,role,page,action,type,severity,message,status,created_at")
       .order("created_at", { ascending: false })
       .limit(50);
 
@@ -40,6 +41,7 @@ export async function POST(request: Request) {
         message,
         page: body.page ?? "Página não indicada",
         role: body.role ?? principal.role,
+        severity: body.severity ?? "Média",
         status: "Aberto",
         type: body.type ?? "Problema operacional",
         user_id: principal.authUserId

@@ -11,6 +11,7 @@ type Issue = {
   message: string;
   page: string;
   role: string;
+  severity?: string;
   status: string;
   type: string;
 };
@@ -34,6 +35,9 @@ export function SupportIssuesPanel() {
             <article className={styles.item} key={issue.id}>
               <strong>{issue.type} · {issue.role}</strong>
               <span className="muted">{issue.page} · {issue.action}</span>
+              <span className={issue.severity === "Crítica" ? "pill red" : "pill gold"}>
+                {issue.severity ?? "Média"}
+              </span>
               <span>{issue.message}</span>
             </article>
           ))}

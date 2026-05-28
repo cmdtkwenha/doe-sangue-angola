@@ -3,6 +3,9 @@ import { SupportContactSection, SupportIssueForm } from "../components/support";
 import styles from "./help.module.css";
 
 const articles = [
+  ["Guia do Admin Piloto", "/help/admin-guide"],
+  ["Guia do Hospital Piloto", "/help/hospital-guide"],
+  ["Guia do Dador Piloto", "/help/donor-guide"],
   ["Como doar sangue", "/help/como-doar-sangue"],
   ["Como validar PIN", "/help/como-validar-pin"],
   ["Como criar pedido urgente", "/help/como-criar-pedido-urgente"],
