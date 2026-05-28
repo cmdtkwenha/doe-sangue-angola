@@ -1,5 +1,6 @@
 export type FeatureFlagKey =
   | "emergencyMode"
+  | "featureFreeze"
   | "gamification"
   | "maps"
   | "notifications"
@@ -13,8 +14,17 @@ export type FeatureFlag = {
 };
 
 function readFlag(name: string, fallback: boolean) {
-  const value = process.env[`NEXT_PUBLIC_FEATURE_${name}`] ??
-    process.env[`EXPO_PUBLIC_FEATURE_${name}`];
+  const snakeName = name.replace(/([a-z])([A-Z])/g, "$1_$2").toUpperCase();
+  const compactName = name.toUpperCase();
+  const aliases = name === "featureFreeze"
+    ? ["FREEZE", "FEATURE_FREEZE", compactName]
+    : [snakeName, compactName];
+  const value = aliases
+    .flatMap((alias) => [
+      process.env[`NEXT_PUBLIC_FEATURE_${alias}`],
+      process.env[`EXPO_PUBLIC_FEATURE_${alias}`]
+    ])
+    .find((item) => item != null);
   if (value == null) return fallback;
   return value === "true";
 }
@@ -25,7 +35,8 @@ export function getFeatureFlags(): FeatureFlag[] {
     flag("notifications", "Notificações", "Alertas in-app e preparação push.", true),
     flag("maps", "Mapas e ETA", "Distância e localização aproximada.", true),
     flag("gamification", "Recompensas", "Pontos, níveis e progresso do dador.", true),
-    flag("emergencyMode", "Modo emergência", "Pedidos críticos de maior alcance.", false)
+    flag("emergencyMode", "Modo emergência", "Pedidos críticos de maior alcance.", false),
+    flag("featureFreeze", "Feature freeze", "Bloqueia mudanças funcionais durante o piloto.", false)
   ];
 }
 
@@ -39,5 +50,5 @@ function flag(
   description: string,
   fallback: boolean
 ): FeatureFlag {
-  return { description, enabled: readFlag(key.toUpperCase(), fallback), key, label };
+  return { description, enabled: readFlag(key, fallback), key, label };
 }

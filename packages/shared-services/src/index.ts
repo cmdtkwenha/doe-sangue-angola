@@ -10,6 +10,7 @@ export * from "./config";
 export * from "./constants";
 export * from "./dataProvider";
 export * from "./databaseService";
+export * from "./deploymentReadinessService";
 export * from "./demoScenarioService";
 export * from "./donorService";
 export * from "./env";
