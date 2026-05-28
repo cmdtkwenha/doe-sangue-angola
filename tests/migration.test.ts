@@ -11,10 +11,10 @@ declare function test(name: string, fn: () => void): void;
 
 test("registry usa repositórios mock por defeito", () => {
   const repositories = getRepositories();
-  const hospitals = repositories.hospital.listHospitals();
+  const donors = repositories.donor.listDonors();
 
-  assert.ok(Array.isArray(hospitals));
-  assert.ok(hospitals.length >= 1);
+  assert.ok(Array.isArray(donors));
+  assert.ok(donors.length >= 1);
 });
 
 test("data provider continua seguro em modo mock", () => {

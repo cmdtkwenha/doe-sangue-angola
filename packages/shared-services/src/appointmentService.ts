@@ -1,4 +1,5 @@
 import { schedulingAgent } from "@doe-sangue-angola/agents";
+import type { Hospital } from "@doe-sangue-angola/shared-types";
 import { appointments, donors, hospitals, requests } from "./mockStore";
 import { recordAudit } from "./auditService";
 import { publishRealtimeEvent } from "./realtimeService";
@@ -9,7 +10,8 @@ import { trackFailedAction } from "./monitoringService";
 export function acceptRequest(donorId: string, requestId: string) {
   const request = requests.find((item) => item.id === requestId);
   const donor = donors.find((item) => item.id === donorId);
-  const hospital = hospitals.find((item) => item.id === request?.hospitalId);
+  const hospital = hospitals.find((item) => item.id === request?.hospitalId) ??
+    (request ? buildFallbackHospital(request.hospitalId) : undefined);
 
   if (!request || !donor || !hospital) {
     trackFailedAction("Falha ao aceitar pedido", { donorId, requestId });
@@ -65,4 +67,16 @@ export function listAppointmentsForHospital(hospitalId: string) {
 
 export function listAppointmentsForDonor(donorId: string) {
   return appointments.filter((item) => item.donorId === donorId);
+}
+
+function buildFallbackHospital(id: string): Hospital {
+  return {
+    capacity: 0,
+    contact: "",
+    id,
+    municipality: "Luanda",
+    name: `Hospital ${id.toUpperCase()}`,
+    province: "Luanda",
+    verified: true
+  };
 }

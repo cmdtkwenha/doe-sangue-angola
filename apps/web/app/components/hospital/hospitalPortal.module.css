@@ -217,11 +217,7 @@
   font-weight: 800;
   text-align: center;
 }
-.quickGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
+.quickGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 .quickCard {
   border-radius: 10px;
   padding: 16px;

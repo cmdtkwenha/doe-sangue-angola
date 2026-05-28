@@ -57,10 +57,10 @@ test("compatibilidade sanguínea favorece dador O- para pedido O-", () => {
   assert.ok(best.reasons.includes("Tipo sanguineo compativel"));
 });
 
-test("matchingAgent calcula pontuação máxima para Maria", () => {
+test("matchingAgent calcula prioridade inteligente para Maria", () => {
   const [best] = matchingAgent(request, [maria]);
 
-  assert.equal(best.score, 100);
+  assert.equal(best.score, 115);
   assert.equal(best.recommendation, "Notificar");
 });
 

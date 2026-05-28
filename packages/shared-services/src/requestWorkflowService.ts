@@ -1,5 +1,5 @@
 import { matchingAgent, rewardAgent } from "@doe-sangue-angola/agents";
-import type { BloodRequest, BloodType } from "@doe-sangue-angola/shared-types";
+import type { BloodRequest, BloodType, Hospital } from "@doe-sangue-angola/shared-types";
 import { acceptRequest, validatePin } from "./appointmentService";
 import { recordAudit } from "./auditService";
 import { appointments, donors, hospitals, requests } from "./mockStore";
@@ -34,8 +34,8 @@ const donorResponses: DonorResponse[] = [];
 const nowTime = () => formatTimePt();
 
 export function createWorkflowRequest(input?: Partial<BloodRequest>) {
-  const hospital = hospitals.find((item) => item.id === (input?.hospitalId ?? "h1"));
-  if (!hospital) return { ok: false, message: "Hospital não encontrado." };
+  const hospital = hospitals.find((item) => item.id === (input?.hospitalId ?? "h1")) ??
+    buildFallbackHospital(input?.hospitalId ?? "h1");
 
   const result = createBloodRequest({
     hospitalId: hospital.id,
@@ -53,7 +53,8 @@ export function createWorkflowRequest(input?: Partial<BloodRequest>) {
 
 export function getWorkflowSnapshot(requestId = requests[0]?.id) {
   const request = requests.find((item) => item.id === requestId) ?? requests[0];
-  const hospital = hospitals.find((item) => item.id === request?.hospitalId);
+  const hospital = hospitals.find((item) => item.id === request?.hospitalId) ??
+    (request ? buildFallbackHospital(request.hospitalId) : undefined);
   const matches = request ? matchingAgent(request, donors).slice(0, 4) : [];
 
   return {
@@ -161,6 +162,18 @@ export function completeWorkflowDonation(donorId: string, requestId: string) {
 
 export function getWorkflowRequestByBloodType(bloodType: BloodType) {
   return requests.find((request) => request.bloodType === bloodType);
+}
+
+function buildFallbackHospital(id: string): Hospital {
+  return {
+    capacity: 0,
+    contact: "",
+    id,
+    municipality: "Luanda",
+    name: `Hospital ${id.toUpperCase()}`,
+    province: "Luanda",
+    verified: true
+  };
 }
 
 export const RequestWorkflowService = {

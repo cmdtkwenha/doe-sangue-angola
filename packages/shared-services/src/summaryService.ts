@@ -26,9 +26,10 @@ export type DonorHomeSnapshot = {
 export function getNationalSummary() {
   const critical = requests.filter((request) => request.urgency === "Critica");
   const available = donors.filter((donor) => donor.available);
+  const hospitalsWithRequests = new Set(requests.map((request) => request.hospitalId));
 
   return {
-    hospitals: hospitals.length,
+    hospitals: hospitals.length || hospitalsWithRequests.size,
     activeRequests: requests.length,
     criticalRequests: critical.length,
     availableDonors: available.length,

@@ -69,6 +69,8 @@ export function getPilotAnalytics() {
   const provinceSet = new Set<string>(pilotProvinces);
   const pilotHospitals = hospitals.filter((hospital) => provinceSet.has(hospital.province));
   const pilotDonors = donors.filter((donor) => provinceSet.has(donor.province));
+  const pilotHospitalCount =
+    pilotHospitals.length || pilotAccounts.filter((account) => account.role === "hospital").length;
   const pilotRequests = requests.filter((request) =>
     pilotHospitals.some((hospital) => hospital.id === request.hospitalId)
   );
@@ -76,7 +78,7 @@ export function getPilotAnalytics() {
   return {
     activeRequests: pilotRequests.filter((request) => request.status !== "Concluído").length,
     donors: pilotDonors.length,
-    hospitals: pilotHospitals.length,
+    hospitals: pilotHospitalCount,
     notificationsSafe: pilotConfig.notifications,
     provinces: pilotProvinces,
     requests: pilotRequests.length

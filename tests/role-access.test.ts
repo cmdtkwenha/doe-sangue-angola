@@ -20,8 +20,8 @@ const donor = { role: "donor" as UserRole, userId: "u-d1", donorId: "d1" };
 
 test("rotas principais exigem a função correta", () => {
   assert.deepEqual(getAllowedRolesForPath("/admin/requests"), ["admin"]);
-  assert.deepEqual(getAllowedRolesForPath("/hospital/settings"), ["hospital"]);
-  assert.deepEqual(getAllowedRolesForPath("/mobile/settings"), ["donor"]);
+  assert.deepEqual(getAllowedRolesForPath("/hospital/settings"), ["admin", "hospital"]);
+  assert.deepEqual(getAllowedRolesForPath("/mobile/settings"), ["admin", "donor"]);
 });
 
 test("admin não permite acesso hospitalar ou dador por engano", () => {

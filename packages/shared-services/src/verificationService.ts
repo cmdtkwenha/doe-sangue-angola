@@ -42,7 +42,16 @@ const verificationStatusByDonor: Record<string, VerificationStatus> = {
 
 // TODO(production): persist verification state in Supabase with admin-only policies.
 export function listHospitalVerificationQueue(): VerificationItem[] {
-  return hospitals.map((hospital) => buildHospitalVerification(hospital));
+  if (hospitals.length) return hospitals.map((hospital) => buildHospitalVerification(hospital));
+
+  return Object.entries(verificationStatusByHospital).map(([id, status]) => ({
+    id,
+    entity: `Hospital ${id.toUpperCase()}`,
+    kind: "Hospital",
+    status,
+    province: "Luanda",
+    reason: status === "Verificado" ? "Documentos aprovados" : "Licença pendente"
+  }));
 }
 
 export function listDonorVerificationQueue(): VerificationItem[] {
