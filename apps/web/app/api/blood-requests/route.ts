@@ -13,6 +13,7 @@ import { auditApiAction } from "../_utils/audit";
 import { ApiError, apiResponse, readJson } from "../_utils/apiResponse";
 import { notifyAdmins } from "../_utils/notifications";
 import { notifyMatchedDonors } from "../_utils/requestNotifications";
+import { assertTableRateLimit } from "../_utils/rateLimit";
 import {
   createRouteSupabase,
   requireApiSession,
@@ -27,6 +28,7 @@ import {
   assertUrgency,
   optionalString
 } from "../_utils/validation";
+import { donorColumns, requestColumns } from "./columns";
 
 export async function GET(request: Request) {
   return apiResponse(async () => {
@@ -106,6 +108,14 @@ export async function POST(request: Request) {
       .eq("id", hospitalId)
       .single();
     if (hospitalError) throw new Error(formatSupabaseError(hospitalError));
+    await assertTableRateLimit(db, {
+      column: "hospital_id",
+      label: "Muitos pedidos criados por este hospital",
+      max: 12,
+      minutes: 10,
+      table: "blood_requests",
+      value: hospitalId
+    });
 
     const input = {
       bloodType: assertBloodType(body.bloodType),
@@ -151,46 +161,6 @@ export async function POST(request: Request) {
     return { matches: [], request: requestRecord };
   });
 }
-
-const requestColumns = [
-  "id",
-  "created_by",
-  "hospital_id",
-  "patient_code",
-  "blood_type",
-  "units",
-  "units_needed",
-  "province",
-  "municipality",
-  "notes",
-  "urgency",
-  "status",
-  "created_at",
-  "hospitals(name,municipality,province)"
-].join(",");
-
-const donorColumns = [
-  "id",
-  "user_id",
-  "blood_type",
-  "province",
-  "municipality",
-  "available",
-  "birth_date",
-  "email",
-  "eligibility_status",
-  "full_name",
-  "gender",
-  "last_donation",
-  "last_donation_date",
-  "next_eligible_donation_date",
-  "phone",
-  "points",
-  "preferred_hospital_id",
-  "reliability_score",
-  "response_speed_minutes",
-  "total_donations"
-].join(",");
 
 function enrichRequest(row: RequestRow, donor: ReturnType<typeof mapDonor>) {
   const request = mapRequest(row);

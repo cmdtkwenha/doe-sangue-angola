@@ -4,6 +4,7 @@ import { auditApiAction } from "../../_utils/audit";
 import { createRouteSupabase, requireApiSession, requireEntityAccess, requireSameOrigin } from "../../_utils/security";
 import { notifyAdmins, notifyUser } from "../../_utils/notifications";
 import { assertPin, assertString, optionalString } from "../../_utils/validation";
+import { assertPinRate, clearPinFailures, recordFailedPin } from "../pinSecurity";
 
 type ResponseStatus = Exclude<DonorResponseStatus, "accepted">;
 type StatusBody = { confirmationPin?: string; responseId: string; status: string };
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
     const responseId = assertString(body.responseId, "Resposta do dador");
     const { data: existing, error } = await db
       .from("donor_responses")
-      .select("id,blood_request_id,donor_id,hospital_id,confirmation_pin,pin_expires_at,status")
+      .select("id,blood_request_id,donor_id,hospital_id,confirmation_pin,failed_pin_attempts,pin_expires_at,pin_locked_until,status")
       .eq("id", responseId)
       .single();
     if (error) throw supabaseError("Não foi possível carregar a resposta do dador", error);
@@ -29,7 +30,11 @@ export async function POST(request: Request) {
     assertTransition(normalizeCurrentStatus(existing.status), status);
     if (status === "pin_validated") {
       const pin = assertPin(optionalString(body.confirmationPin, 4));
-      if (pin !== existing.confirmation_pin) throw new ApiError(400, "PIN inválido.");
+      assertPinRate(existing);
+      if (pin !== existing.confirmation_pin) {
+        await recordFailedPin(db, principal, responseId);
+        throw new ApiError(400, "PIN inválido. Confirme os 4 dígitos com o dador.");
+      }
       if (existing.pin_expires_at && new Date(existing.pin_expires_at).getTime() < Date.now()) {
         throw new ApiError(409, "PIN expirado. Gere um novo compromisso de doação.");
       }
@@ -37,12 +42,13 @@ export async function POST(request: Request) {
 
     const payload = statusPayload(status);
     const { data, error: updateError } = await db
-      .from("donor_responses")
-      .update(payload)
+    .from("donor_responses")
+    .update(payload)
       .eq("id", responseId)
       .select("id,status")
       .single();
     if (updateError) throw supabaseError("Não foi possível atualizar o estado do dador", updateError);
+    if (status === "pin_validated") await clearPinFailures(db, responseId);
     await applyOperationalEffects(db, responseId, existing.donor_id, status);
     await syncRequest(db, existing.blood_request_id, status);
     await notifyDonor(db, existing.donor_id, status);

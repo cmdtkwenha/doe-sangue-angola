@@ -1,0 +1,39 @@
+export const requestColumns = [
+  "id",
+  "created_by",
+  "hospital_id",
+  "patient_code",
+  "blood_type",
+  "units",
+  "units_needed",
+  "province",
+  "municipality",
+  "notes",
+  "urgency",
+  "status",
+  "created_at",
+  "hospitals(name,municipality,province)"
+].join(",");
+
+export const donorColumns = [
+  "id",
+  "user_id",
+  "blood_type",
+  "province",
+  "municipality",
+  "available",
+  "birth_date",
+  "email",
+  "eligibility_status",
+  "full_name",
+  "gender",
+  "last_donation",
+  "last_donation_date",
+  "next_eligible_donation_date",
+  "phone",
+  "points",
+  "preferred_hospital_id",
+  "reliability_score",
+  "response_speed_minutes",
+  "total_donations"
+].join(",");

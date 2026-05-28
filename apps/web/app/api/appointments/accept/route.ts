@@ -2,7 +2,9 @@ import type { Appointment } from "@doe-sangue-angola/shared-types";
 import { ApiError, apiResponse, readJson } from "../../_utils/apiResponse";
 import { auditApiAction } from "../../_utils/audit";
 import { createRouteSupabase, requireApiSession, requireSameOrigin } from "../../_utils/security";
+import { donorBlocked } from "../../_utils/donorEligibility";
 import { notifyHospitalUsers, notifyUser } from "../../_utils/notifications";
+import { assertTableRateLimit } from "../../_utils/rateLimit";
 import { assertString } from "../../_utils/validation";
 
 export async function POST(request: Request) {
@@ -15,11 +17,11 @@ export async function POST(request: Request) {
     const db = await createRouteSupabase();
     const { data: donor, error } = await db
       .from("donors")
-      .select("id,user_id")
+      .select("id,user_id,available,next_eligible_donation_date")
       .eq("id", donorId)
       .maybeSingle();
     if (error) throw supabaseError("Não foi possível carregar o dador", error);
-    const donorRow = donor as unknown as { id: string; user_id?: string } | null;
+    const donorRow = donor as unknown as { available?: boolean; id: string; next_eligible_donation_date?: string | null; user_id?: string } | null;
     if (!donorRow?.id) throw new ApiError(404, "Perfil de dador não encontrado.");
     if (
       principal.role !== "admin" &&
@@ -28,6 +30,17 @@ export async function POST(request: Request) {
     ) {
       throw new ApiError(403, "Acesso negado a este dador.");
     }
+    if (donorBlocked(donorRow)) {
+      throw new ApiError(409, `Ainda não pode doar. Próxima data elegível: ${donorRow.next_eligible_donation_date}.`);
+    }
+    await assertTableRateLimit(db, {
+      column: "donor_id",
+      label: "Muitas tentativas de aceitar pedidos",
+      max: 5,
+      minutes: 10,
+      table: "donor_responses",
+      value: donorId
+    });
     const requestId = assertString(body.requestId, "Pedido");
     const { data: bloodRequest, error: requestError } = await db
       .from("blood_requests")
