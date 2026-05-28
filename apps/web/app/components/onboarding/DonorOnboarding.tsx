@@ -10,6 +10,7 @@ import styles from "./onboarding.module.css";
 
 const bloodTypes: BloodType[] = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"];
 const genders = ["Masculino", "Feminino"];
+const consentVersion = "pilot-v1";
 
 export function DonorOnboarding() {
   const { refreshSession, session } = useAuth();
@@ -17,6 +18,7 @@ export function DonorOnboarding() {
   const [form, setForm] = useState({
     birthDate: "",
     bloodType: "O+" as BloodType,
+    consentAccepted: false,
     emergencyContactName: "",
     emergencyContactPhone: "",
     gender: "",
@@ -27,7 +29,9 @@ export function DonorOnboarding() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("Preencha os dados reais do dador.");
   const missingFormFields = requiredFields(form);
-  const formReady = missingFormFields.length === 0 && isEligibleBirthDate(form.birthDate);
+  const formReady = missingFormFields.length === 0 &&
+    isEligibleBirthDate(form.birthDate) &&
+    form.consentAccepted;
 
   async function save() {
     if (!session?.user.id) return setMessage("Sessão inválida. Entre novamente.");
@@ -49,6 +53,7 @@ export function DonorOnboarding() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          consentVersion,
           email: session.user.email,
           fullName: session.user.name,
           userId
@@ -100,9 +105,22 @@ export function DonorOnboarding() {
           setForm({ ...form, emergencyContactPhone })} />
         <label className="eyebrow">Data de nascimento *</label>
         <DonorBirthDateSelect onChange={(birthDate) => setForm({ ...form, birthDate })} />
+        <label className={styles.consentBox}>
+          <input
+            checked={form.consentAccepted}
+            onChange={(event) => setForm({ ...form, consentAccepted: event.target.checked })}
+            type="checkbox"
+          />
+          <span>
+            Aceito os Termos de Uso, a Política de Privacidade e o Aviso Médico.
+            Entendo que os meus dados de perfil, tipo sanguíneo, localização e notificações
+            serão usados para compatibilidade e coordenação de doações.
+          </span>
+        </label>
         {missingFormFields.length ? (
           <small className="muted">Campos em falta: {missingFormFields.join(", ")}.</small>
         ) : null}
+        {!form.consentAccepted ? <small className="muted">Consentimento obrigatório para continuar.</small> : null}
         <button className="button" disabled={saving || !formReady} onClick={save} type="button">
           {saving ? "A guardar..." : "Guardar perfil"}
         </button>
@@ -114,6 +132,7 @@ export function DonorOnboarding() {
 
 function requiredFields(form: {
   birthDate: string;
+  consentAccepted?: boolean;
   gender: string;
   municipality: string;
   phone: string;

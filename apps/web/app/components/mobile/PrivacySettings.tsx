@@ -33,6 +33,13 @@ export function PrivacySettings() {
           />
         </label>
       ))}
+      <div className={styles.notice}>
+        <strong>Eliminar conta</strong>
+        <span>
+          Para pedir eliminação, contacte suporte com o email da conta. A equipa confirmará identidade
+          antes de apagar ou anonimizar dados do piloto.
+        </span>
+      </div>
     </section>
   );
 }

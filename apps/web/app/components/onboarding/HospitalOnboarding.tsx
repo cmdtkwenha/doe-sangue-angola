@@ -35,6 +35,7 @@ export function HospitalOnboarding() {
   const [hospitalId, setHospitalId] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("Escolha um hospital aprovado.");
+  const [responsibilityAccepted, setResponsibilityAccepted] = useState(false);
 
   useEffect(() => {
     if (!supabase) {
@@ -72,7 +73,7 @@ export function HospitalOnboarding() {
 
   async function save(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault();
-    if (!session?.user.id || !hospitalId) {
+    if (!session?.user.id || !hospitalId || !responsibilityAccepted) {
       setMessage("Selecione um hospital aprovado antes de continuar.");
       return;
     }
@@ -126,6 +127,13 @@ export function HospitalOnboarding() {
       if (profile?.role !== "hospital" || profile.linked_entity_id !== hospitalId) {
         throw new Error("Perfil criado, mas o hospital ainda não ficou ligado.");
       }
+      await supabase.from("legal_consents").insert({
+        consent_type: "hospital_responsibility",
+        page: "/onboarding/hospital",
+        role: "hospital",
+        user_id: authUser.id,
+        version: "pilot-v1"
+      });
       await supabase.auth.refreshSession();
       setMessage("Hospital ligado com sucesso.");
       router.refresh();
@@ -170,9 +178,20 @@ export function HospitalOnboarding() {
         {!loading && approved.length === 0 ? (
           <span className="muted">Nenhum hospital aprovado encontrado.</span>
         ) : null}
+        <label className={styles.consentBox}>
+          <input
+            checked={responsibilityAccepted}
+            onChange={(event) => setResponsibilityAccepted(event.target.checked)}
+            type="checkbox"
+          />
+          <span>
+            Confirmo que o hospital é responsável por validar identidade, elegibilidade clínica,
+            PIN, documentação e segurança antes de concluir qualquer doação.
+          </span>
+        </label>
         <button
           className="button"
-          disabled={saving || !hospitalId}
+          disabled={saving || !hospitalId || !responsibilityAccepted}
           type="submit"
         >
           {saving ? "A ligar conta..." : "Ligar conta"}

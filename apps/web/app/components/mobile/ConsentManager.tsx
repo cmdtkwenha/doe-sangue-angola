@@ -19,6 +19,10 @@ export function ConsentManager() {
         <strong>Aviso médico</strong>
         <span>Este app coordena doações. A decisão final é sempre da equipa clínica.</span>
       </div>
+      <p className={styles.finePrint}>
+        Usamos dados de perfil, tipo sanguíneo, localização aproximada e notificações para
+        compatibilidade, contacto e segurança operacional.
+      </p>
       {consentItems.map((item) => (
         <label className={styles.row} key={item}>
           <span>{item}</span>

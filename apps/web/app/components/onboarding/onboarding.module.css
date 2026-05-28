@@ -117,6 +117,19 @@
   padding: 12px;
 }
 
+.consentBox {
+  align-items: start;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  color: #7c2d12;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: auto 1fr;
+  line-height: 1.45;
+  padding: 12px;
+}
+
 .dateGrid {
   display: grid;
   grid-template-columns: 0.75fr 1.2fr 1fr;

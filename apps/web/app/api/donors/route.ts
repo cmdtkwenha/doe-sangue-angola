@@ -1,13 +1,18 @@
 import { mapDonor, type DonorRow } from "@doe-sangue-angola/shared-services";
-import type { BloodType, Donor } from "@doe-sangue-angola/shared-types";
+import type { BloodType } from "@doe-sangue-angola/shared-types";
 import { auditApiAction } from "../_utils/audit";
 import { ApiError, apiResponse, readJson } from "../_utils/apiResponse";
 import { createRouteSupabase, requireApiSession, requireAuthUser, requireSameOrigin } from "../_utils/security";
 import { assertBloodType, assertString, optionalString } from "../_utils/validation";
+import { donorColumns, saveDonor } from "./donorProfilePersistence";
+
+type DbClient = Awaited<ReturnType<typeof createRouteSupabase>>;
 
 type DonorBody = {
   birthDate: string;
   bloodType: BloodType;
+  consentAccepted?: boolean;
+  consentVersion?: string;
   email?: string;
   emergencyContactName?: string;
   emergencyContactPhone?: string;
@@ -80,11 +85,13 @@ export async function POST(request: Request) {
       emergencyContactName: optionalString(body.emergencyContactName, 120),
       emergencyContactPhone: optionalString(body.emergencyContactPhone, 40),
       fullName: assertString(body.fullName, "Nome completo", 180),
-    gender: assertGender(body.gender),
+      gender: assertGender(body.gender),
       municipality: assertString(body.municipality, "Município", 120),
       phone: assertString(body.phone, "Telefone", 40),
       userId: authUser.id,
-      province: assertString(body.province, "Província", 120)
+      province: assertString(body.province, "Província", 120),
+      consentAccepted: body.consentAccepted === true,
+      consentVersion: optionalString(body.consentVersion, 40) ?? "pilot-v1"
     });
     const { error: linkError } = await db
       .from("profiles")
@@ -102,8 +109,6 @@ export async function POST(request: Request) {
     return donor;
   });
 }
-
-type DbClient = Awaited<ReturnType<typeof createRouteSupabase>>;
 
 async function ensureProfile(db: DbClient, authUser: { id: string; email?: string }, body: Partial<DonorBody>) {
   const { data: existing, error: findError } = await db
@@ -126,90 +131,6 @@ async function ensureProfile(db: DbClient, authUser: { id: string; email?: strin
   if (error) throw new Error(formatSupabaseError(error));
   return data;
 }
-
-async function saveDonor(db: DbClient, input: SaveDonorInput): Promise<Donor> {
-  await upsertPublicUser(db, input);
-  const payload = {
-    birth_date: input.birthDate || null,
-    blood_type: input.bloodType,
-    eligibility_status: "Elegível",
-    email: input.email,
-    emergency_contact_name: input.emergencyContactName,
-    emergency_contact_phone: input.emergencyContactPhone,
-    full_name: input.fullName,
-    gender: input.gender,
-    municipality: input.municipality,
-    phone: input.phone,
-    province: input.province,
-    user_id: input.userId,
-    available: true
-  };
-  const { data: existing, error: findError } = await db
-    .from("donors")
-    .select("id")
-    .eq("user_id", input.userId)
-    .maybeSingle();
-  if (findError) throw new Error(formatSupabaseError(findError));
-  const query = existing?.id
-    ? db.from("donors").update(payload).eq("id", existing.id)
-    : db.from("donors").insert(payload);
-  const { data, error } = await query.select(donorColumns).single();
-  if (error) throw new Error(formatSupabaseError(error));
-  return mapDonor(data as unknown as DonorRow);
-}
-
-async function upsertPublicUser(db: DbClient, input: SaveDonorInput) {
-  const { error } = await db
-    .from("users")
-    .upsert({
-      id: input.userId,
-      auth_user_id: input.userId,
-      email: input.email,
-      name: input.fullName || input.email.split("@")[0] || "Utilizador",
-      phone: input.phone,
-      role: "donor"
-    }, { onConflict: "email" });
-  if (error) throw new Error(formatSupabaseError(error));
-}
-
-type SaveDonorInput = {
-  birthDate: string;
-  bloodType: BloodType;
-  email: string;
-  emergencyContactName?: string;
-  emergencyContactPhone?: string;
-  fullName: string;
-  gender?: string;
-  municipality: string;
-  phone: string;
-  province: string;
-  userId: string;
-};
-
-const donorColumns = [
-  "id",
-  "full_name",
-  "email",
-  "emergency_contact_name",
-  "emergency_contact_phone",
-  "phone",
-  "blood_type",
-  "province",
-  "municipality",
-  "gender",
-  "available",
-  "birth_date",
-  "last_donation",
-  "last_donation_date",
-  "next_eligible_donation_date",
-  "total_donations",
-  "eligibility_status",
-  "points",
-  "preferred_hospital_id",
-  "reliability_score",
-  "response_speed_minutes",
-  "user_id"
-].join(",");
 
 function formatSupabaseError(error: { message: string }) {
   return error.message;
