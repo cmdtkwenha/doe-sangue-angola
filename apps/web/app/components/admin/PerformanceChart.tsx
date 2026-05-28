@@ -1,31 +1,42 @@
+"use client";
+
+import type { BloodRequest } from "@doe-sangue-angola/shared-types";
+import { useApiData } from "@hooks/useApiData";
+import { EmptyState } from "../ui/EmptyState";
 import styles from "./adminAdvanced.module.css";
 
-const stats = [
-  ["Taxa de Atendimento", "87%", "6%"],
-  ["Tempo Médio de Resposta", "28 min", "-12 min"],
-  ["Doações Realizadas", "1.248", "15%"]
-];
-
 export function PerformanceChart() {
+  const { data: requests, loading } = useApiData<BloodRequest[]>("/api/blood-requests", []);
+  const completed = requests.filter((request) => ["Concluído", "Concluido"].includes(request.status));
+  const active = requests.filter((request) => !["Cancelado", "Concluído", "Concluido"].includes(request.status));
+  const fulfilment = requests.length ? Math.round((completed.length / requests.length) * 100) : 0;
+
   return (
     <section className={styles.panel}>
       <div className={styles.panelHead}>
         <strong>Análise de Desempenho</strong>
-        <span className="muted">Últimos 7 dias</span>
+        <span className="muted">Dados Supabase</span>
       </div>
-      <div className={styles.advancedGrid}>
-        {stats.map(([label, value, delta]) => (
-          <div key={label}>
-            <span className="muted">{label}</span>
-            <h3 style={{ margin: "6px 0" }}>{value}</h3>
-            <span className="pill">{delta}</span>
-          </div>
-        ))}
-      </div>
-      <svg className={styles.chart} viewBox="0 0 620 170">
-        <polyline fill="none" points="20,65 115,72 210,78 305,60 400,44 495,86 600,58" stroke="#d01424" strokeWidth="5" />
-        <polyline fill="none" points="20,104 115,108 210,122 305,106 400,76 495,112 600,84" stroke="#087443" strokeWidth="5" />
-      </svg>
+      {loading ? <p className="muted">A calcular desempenho real...</p> : null}
+      {!loading && requests.length === 0 ? (
+        <EmptyState title="Sem desempenho real" message="O painel aparece após pedidos piloto." />
+      ) : (
+        <div className={styles.advancedGrid}>
+          <Metric label="Taxa de cumprimento" value={`${fulfilment}%`} />
+          <Metric label="Pedidos ativos" value={String(active.length)} />
+          <Metric label="Doações concluídas" value={String(completed.length)} />
+        </div>
+      )}
     </section>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <span className="muted">{label}</span>
+      <h3 style={{ margin: "6px 0" }}>{value}</h3>
+      <span className="pill">Real</span>
+    </div>
   );
 }
