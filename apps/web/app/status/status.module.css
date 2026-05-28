@@ -1,0 +1,53 @@
+.shell {
+  background: #f6f8fb;
+  color: #111827;
+  min-height: 100vh;
+  padding: 32px;
+}
+
+.content {
+  display: grid;
+  gap: 18px;
+  margin: 0 auto;
+  max-width: 960px;
+}
+
+.hero,
+.panel,
+.metric {
+  background: #fff;
+  border: 1px solid #e5eaf2;
+  border-radius: 18px;
+  box-shadow: 0 14px 36px rgba(16, 24, 40, 0.06);
+}
+
+.hero,
+.panel {
+  padding: 22px;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.metric {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+}
+
+.metric strong {
+  font-size: 24px;
+}
+
+@media (max-width: 760px) {
+  .shell {
+    padding: 18px;
+  }
+
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+}

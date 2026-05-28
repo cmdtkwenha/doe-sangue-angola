@@ -1,6 +1,7 @@
 "use client";
 
 import type { BloodType } from "@doe-sangue-angola/shared-types";
+import { analyticsEvents } from "@doe-sangue-angola/shared-services";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "../auth/useAuth";
@@ -63,6 +64,7 @@ export function DonorOnboarding() {
       if (!response.ok || payload?.ok === false) {
         throw new Error(payload?.message ?? "Não foi possível guardar o perfil.");
       }
+      analyticsEvents.onboardingCompleted("donor");
       setMessage("Perfil guardado com sucesso. A abrir a aplicação...");
       void refreshSession();
       router.replace("/mobile");

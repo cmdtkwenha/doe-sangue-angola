@@ -1,6 +1,7 @@
 "use client";
 
 import type { UserRole } from "@doe-sangue-angola/shared-types";
+import { analyticsEvents } from "@doe-sangue-angola/shared-services";
 import Link from "next/link";
 import { useState } from "react";
 import { AccessibleForm, FieldHint } from "../accessibility";
@@ -22,6 +23,7 @@ export function RegisterForm() {
       label="Criar conta Doe Sangue Angola"
       onSubmit={(event) => {
         event.preventDefault();
+        analyticsEvents.signup(role);
         void register({ email, name, password, role });
       }}
     >

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { monitoringService } from "@doe-sangue-angola/shared-services";
 import { supabase } from "../../lib/supabaseClient";
 
 type Listener = () => void;
@@ -67,7 +68,16 @@ function createEntry(table: string): RealtimeEntry {
       entry.listeners.forEach((notify) => notify());
     }
   );
-  entry.channel.subscribe();
+  entry.channel.subscribe((status) => {
+    if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+      monitoringService({
+        message: `Realtime ${table} desligado: ${status}`,
+        metadata: { status, table },
+        status: "warning",
+        type: "ERROR"
+      });
+    }
+  });
   return entry;
 }
 

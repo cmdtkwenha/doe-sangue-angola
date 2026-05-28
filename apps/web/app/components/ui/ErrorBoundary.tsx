@@ -2,6 +2,7 @@
 
 import type { ErrorInfo, ReactNode } from "react";
 import { Component } from "react";
+import { reportError } from "@doe-sangue-angola/shared-services";
 import { ErrorState } from "./ErrorState";
 
 export class ErrorBoundary extends Component<
@@ -19,6 +20,12 @@ export class ErrorBoundary extends Component<
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     this.setState({ componentStack: info.componentStack ?? "" });
+    reportError(error, {
+      feature: "frontend.error_boundary",
+      metadata: {
+        path: typeof window === "undefined" ? "server" : window.location.pathname
+      }
+    });
     console.error("[ErrorBoundary] React render crash", {
       componentStack: info.componentStack,
       message: error.message,

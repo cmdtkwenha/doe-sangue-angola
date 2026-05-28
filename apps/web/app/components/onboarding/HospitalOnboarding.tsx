@@ -1,6 +1,7 @@
 "use client";
 
 import type { Hospital } from "@doe-sangue-angola/shared-types";
+import { analyticsEvents } from "@doe-sangue-angola/shared-services";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
@@ -135,6 +136,7 @@ export function HospitalOnboarding() {
         version: "pilot-v1"
       });
       await supabase.auth.refreshSession();
+      analyticsEvents.onboardingCompleted("hospital");
       setMessage("Hospital ligado com sucesso.");
       router.refresh();
       setTimeout(() => router.replace("/hospital"), 500);

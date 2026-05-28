@@ -1,6 +1,7 @@
 "use client";
 
 import { ErrorState } from "./components/ui/ErrorState";
+import { reportError } from "@doe-sangue-angola/shared-services";
 
 export default function AppError({
   error,
@@ -23,6 +24,7 @@ export default function AppError({
       stack: error.stack
     });
   }
+  reportError(error, { feature: "frontend.route_error" });
 
   return (
     <main style={{ padding: 24 }}>

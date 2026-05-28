@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  analyticsEvents,
   publishRealtimeEvent,
+  withRetry
 } from "@doe-sangue-angola/shared-services";
 import type {
   Appointment,
@@ -18,16 +20,21 @@ type CreateRequestResult = {
 };
 
 async function post<T>(path: string, body: unknown) {
-  const response = await fetch(path, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body)
+  return withRetry(async () => {
+    const response = await fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    const payload = (await response.json()) as ApiEnvelope<T>;
+    if (!response.ok || !payload.ok) {
+      return { ok: false as const, message: payload.message ?? "Falha na sincronização." };
+    }
+    return { ok: true as const, data: payload.data as T };
+  }, {
+    attempts: 2,
+    label: path
   });
-  const payload = (await response.json()) as ApiEnvelope<T>;
-  if (!response.ok || !payload.ok) {
-    return { ok: false as const, message: payload.message ?? "Falha na sincronização." };
-  }
-  return { ok: true as const, data: payload.data as T };
 }
 
 export async function createRequestAction(input?: RequestDraft) {
@@ -53,6 +60,7 @@ export async function acceptRequestAction(donorId: string, requestId: string) {
   if (result.ok) {
     publishRealtimeEvent("DONOR_ACCEPTED", { donorId, requestId });
     publishRealtimeEvent("APPOINTMENT_CREATED", { appointment: result.data });
+    analyticsEvents.requestAccepted(requestId);
   }
   return result;
 }
@@ -73,9 +81,13 @@ export async function updateAppointmentStatusAction(
 }
 
 export async function validatePinAction(pin: string, requestId: string) {
-  return post<Appointment>("/api/appointments/validate-pin", { pin, requestId });
+  const result = await post<Appointment>("/api/appointments/validate-pin", { pin, requestId });
+  if (result.ok) analyticsEvents.pinValidated(requestId);
+  return result;
 }
 
 export async function completeDonationAction(donorId: string, requestId: string) {
-  return post<BloodRequest>("/api/appointments/complete", { donorId, requestId });
+  const result = await post<BloodRequest>("/api/appointments/complete", { donorId, requestId });
+  if (result.ok) analyticsEvents.donationCompleted(requestId);
+  return result;
 }

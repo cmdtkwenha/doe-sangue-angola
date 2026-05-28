@@ -2,7 +2,11 @@ import { listApiRequestLogs, listMonitoringRecords } from "@doe-sangue-angola/sh
 import { AdminSystemHealthPanel } from "./AdminSystemHealthPanel";
 import { BackupStatusPanel } from "./BackupStatusPanel";
 import { ErrorLogTable } from "./ErrorLogTable";
+import { FeatureFlagsPanel } from "./FeatureFlagsPanel";
+import { OperationalAlertsPanel } from "./OperationalAlertsPanel";
+import { ProductionMonitoringPanel } from "./ProductionMonitoringPanel";
 import { RecoveryChecklist } from "./RecoveryChecklist";
+import { ResiliencePanel } from "./ResiliencePanel";
 import styles from "./monitoring.module.css";
 
 export function MonitoringDashboard() {
@@ -11,7 +15,10 @@ export function MonitoringDashboard() {
 
   return (
     <section className={styles.grid}>
+      <ProductionMonitoringPanel />
+      <OperationalAlertsPanel />
       <AdminSystemHealthPanel />
+      <FeatureFlagsPanel />
       <section className={styles.panel}>
         <div className={styles.head}>
           <strong>Atividade Monitorizada</strong>
@@ -43,6 +50,7 @@ export function MonitoringDashboard() {
         ))}
       </section>
       <ErrorLogTable />
+      <ResiliencePanel />
       <BackupStatusPanel />
       <RecoveryChecklist />
     </section>
