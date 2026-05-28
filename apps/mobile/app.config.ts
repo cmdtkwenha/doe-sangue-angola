@@ -11,6 +11,12 @@ const config: ExpoConfig = {
   version: "0.1.0",
   orientation: "portrait",
   userInterfaceStyle: "light",
+  icon: "./assets/icon.png",
+  splash: {
+    backgroundColor: "#f8f9fb",
+    image: "./assets/splash.png",
+    resizeMode: "contain"
+  },
   extra: {
     eas: {
       projectId: easProjectId
@@ -40,7 +46,8 @@ const config: ExpoConfig = {
     versionCode: 1,
     permissions: ["POST_NOTIFICATIONS"],
     adaptiveIcon: {
-      backgroundColor: "#d71920"
+      backgroundColor: "#d71920",
+      foregroundImage: "./assets/adaptive-icon.png"
     }
   }
 };

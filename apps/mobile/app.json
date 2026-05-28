@@ -7,6 +7,17 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "extra": {
+      "eas": {
+        "projectId": "1673a331-7f7e-4a57-af56-d59bc3850b27"
+      }
+    },
+    "icon": "./assets/icon.png",
+    "splash": {
+      "backgroundColor": "#f8f9fb",
+      "image": "./assets/splash.png",
+      "resizeMode": "contain"
+    },
     "plugins": [
       "expo-dev-client",
       [
@@ -34,7 +45,8 @@
         "POST_NOTIFICATIONS"
       ],
       "adaptiveIcon": {
-        "backgroundColor": "#d71920"
+        "backgroundColor": "#d71920",
+        "foregroundImage": "./assets/adaptive-icon.png"
       }
     }
   }
