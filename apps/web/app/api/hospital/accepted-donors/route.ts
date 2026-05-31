@@ -45,17 +45,19 @@ export async function GET() {
       ]);
     if (donorError) throw supabaseError("Não foi possível carregar dados dos dadores", donorError);
     if (requestError) throw supabaseError("Não foi possível carregar pedidos de sangue", requestError);
+    const users = await getUsers(db, unique((donors ?? []).map((item) => item.user_id)));
 
     return responses.map((item) => {
       const donor = donors?.find((row) => row.id === item.donor_id);
+      const user = users.find((row) => row.id === donor?.user_id);
       const request = requests?.find((row) => row.id === item.blood_request_id);
       return {
         bloodRequestId: item.blood_request_id ?? undefined,
         createdAt: item.created_at ?? undefined,
         donorBloodType: donor?.blood_type ?? "-",
         donorId: item.donor_id,
-        donorName: "Dador aceite",
-        donorPhone: "por completar",
+        donorName: user?.name ?? "Dador aceite",
+        donorPhone: user?.phone ?? "por completar",
         eta: `${item.eta_minutes ?? 30} min`,
         hospitalId: item.hospital_id,
         hospitalName: hospital.name,
@@ -67,6 +69,16 @@ export async function GET() {
       } satisfies AcceptedDonorRow;
     });
   });
+}
+
+async function getUsers(db: Awaited<ReturnType<typeof createRouteSupabase>>, ids: string[]) {
+  if (!ids.length) return [] as Array<{ id: string; name: string | null; phone: string | null }>;
+  const { data, error } = await db
+    .from("users")
+    .select("id,name,phone")
+    .in("id", ids);
+  if (error) throw supabaseError("Não foi possível carregar contactos dos dadores", error);
+  return data ?? [];
 }
 
 function normalizeStatus(status?: string | null): DonorResponseStatus {
