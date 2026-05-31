@@ -99,7 +99,6 @@ export const donorColumns = [
   "consent_version",
   "last_donation",
   "last_donation_date",
-  "next_eligible_donation_date",
   "total_donations",
   "eligibility_status",
   "points",
