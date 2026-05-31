@@ -41,6 +41,8 @@ export type Donor = {
   municipality: string;
   available: boolean;
   lastDonation: string;
+  consentAcceptedAt?: string;
+  consentVersion?: string;
   latitude?: number;
   locationPermissionStatus?: string;
   longitude?: number;

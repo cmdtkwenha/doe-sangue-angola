@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { DigitalDonorCard } from "./DigitalDonorCard";
 import { DonationSummaryCard } from "./DonationSummaryCard";
 import { EmergencyContactCard } from "./EmergencyContactCard";
@@ -25,6 +26,7 @@ export function DonorProfile() {
     return (
       <MobileShell active="profile">
         <EmptyState
+          action={<Link className="button" href="/mobile/onboarding">Completar perfil</Link>}
           message="Complete o onboarding para criar o seu perfil de dador."
           title="Perfil de dador em falta"
         />
@@ -45,10 +47,39 @@ export function DonorProfile() {
         </span>
       </header>
       <DigitalDonorCard donor={donor} />
+      <article className={profile.panel}>
+        <div className={profile.contact}>
+          <strong>Dados do perfil</strong>
+          <Link className="button secondary" href="/mobile/onboarding">Editar</Link>
+        </div>
+        <div className={profile.detailGrid}>
+          <Detail label="Tipo sanguíneo" value={donor.bloodType} />
+          <Detail label="Província" value={donor.province} />
+          <Detail label="Município" value={donor.municipality} />
+          <Detail label="Telefone" value={donor.phone} />
+          <Detail label="Género" value={donor.gender} />
+          <Detail label="Nascimento" value={donor.birthDate} />
+          <Detail label="Contacto SOS" value={donor.emergencyContactName} />
+          <Detail label="Telefone SOS" value={donor.emergencyContactPhone} />
+          <Detail
+            label="Consentimento"
+            value={donor.consentAcceptedAt ? `Aceite (${donor.consentVersion ?? "versão atual"})` : "Pendente"}
+          />
+        </div>
+      </article>
       <ProfileProgress donor={donor} />
       <DonationSummaryCard donor={donor} />
       <EmergencyContactCard donor={donor} />
     </MobileShell>
+  );
+}
+
+function Detail({ label, value }: { label: string; value?: string }) {
+  return (
+    <span className={profile.detail}>
+      <small>{label}</small>
+      <strong>{value || "Por completar"}</strong>
+    </span>
   );
 }
 

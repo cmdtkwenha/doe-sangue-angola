@@ -82,6 +82,26 @@
   margin-top: 12px;
 }
 
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.detail {
+  display: grid;
+  gap: 3px;
+  padding: 9px;
+  border-radius: 10px;
+  background: #fbfcfe;
+}
+
+.detail small {
+  color: #697386;
+  font-weight: 800;
+}
+
 .summaryTile,
 .historyRow {
   border-radius: 10px;

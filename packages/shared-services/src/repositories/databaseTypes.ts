@@ -27,6 +27,8 @@ export type DonorRow = {
   municipality: string;
   available: boolean;
   birth_date?: string | null;
+  consent_accepted_at?: string | null;
+  consent_version?: string | null;
   email?: string | null;
   emergency_contact_name?: string | null;
   emergency_contact_phone?: string | null;
@@ -134,6 +136,8 @@ export function mapDonor(row: DonorRow): Donor {
     municipality: row.municipality,
     available: row.available,
     birthDate: row.birth_date ?? undefined,
+    consentAcceptedAt: row.consent_accepted_at ?? undefined,
+    consentVersion: row.consent_version ?? undefined,
     email: row.email ?? undefined,
     emergencyContactName: row.emergency_contact_name ?? undefined,
     emergencyContactPhone: row.emergency_contact_phone ?? undefined,

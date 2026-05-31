@@ -3,7 +3,7 @@
 import type { BloodType } from "@doe-sangue-angola/shared-types";
 import { analyticsEvents } from "@doe-sangue-angola/shared-services";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../auth/useAuth";
 import { DonorBirthDateSelect, isEligibleBirthDate } from "./DonorBirthDateSelect";
 import { OnboardingShell } from "./OnboardingShell";
@@ -29,10 +29,40 @@ export function DonorOnboarding() {
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("Preencha os dados reais do dador.");
+  const [loaded, setLoaded] = useState(false);
   const missingFormFields = requiredFields(form);
   const formReady = missingFormFields.length === 0 &&
     isEligibleBirthDate(form.birthDate) &&
     form.consentAccepted;
+
+  useEffect(() => {
+    async function loadExistingProfile() {
+      const userId = session?.user.authUserId ?? session?.user.id;
+      if (!userId || loaded) return;
+      setLoaded(true);
+      try {
+        const response = await fetch(`/api/donors?userId=${userId}`);
+        const payload = await response.json().catch(() => null);
+        const donor = payload?.data;
+        if (!response.ok || !donor?.id) return;
+        setForm({
+          birthDate: donor.birthDate ?? "",
+          bloodType: donor.bloodType ?? "O+",
+          consentAccepted: Boolean(donor.consentAcceptedAt),
+          emergencyContactName: donor.emergencyContactName ?? "",
+          emergencyContactPhone: donor.emergencyContactPhone ?? "",
+          gender: donor.gender ?? "",
+          municipality: donor.municipality ?? "",
+          phone: donor.phone ?? "",
+          province: donor.province ?? "Luanda"
+        });
+        setMessage("Perfil existente carregado. Pode rever e guardar alterações.");
+      } catch {
+        setMessage("Não foi possível carregar o perfil existente. Pode preencher novamente.");
+      }
+    }
+    void loadExistingProfile();
+  }, [loaded, session]);
 
   async function save() {
     if (!session?.user.id) return setMessage("Sessão inválida. Entre novamente.");

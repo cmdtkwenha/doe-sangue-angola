@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabaseClient";
@@ -59,6 +60,7 @@ export function DonorEntityGate({ children }: { children: ReactNode }) {
     return (
       <MobileShell active="profile">
         <EmptyState
+          action={<Link className="button" href="/mobile/onboarding">Completar perfil</Link>}
           message={`Dador encontrado: não. Motivo do bloqueio: ${state.reason}`}
           title="Perfil ainda não configurado."
         />

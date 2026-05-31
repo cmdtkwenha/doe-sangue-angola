@@ -26,16 +26,9 @@ export async function saveDonor(db: DbClient, input: SaveDonorInput): Promise<Do
     throw new ApiError(400, "Aceite os termos, privacidade e aviso médico para continuar.");
   }
   await upsertPublicUser(db, input);
-  const { data: existing, error: findError } = await db
+  const query = db
     .from("donors")
-    .select("id")
-    .eq("user_id", input.userId)
-    .maybeSingle();
-  if (findError) throw new Error(formatSupabaseError(findError));
-
-  const query = existing?.id
-    ? db.from("donors").update(buildPayload(input)).eq("id", existing.id)
-    : db.from("donors").insert(buildPayload(input));
+    .upsert(buildPayload(input), { onConflict: "user_id" });
   const { data, error } = await query.select(donorColumns).single();
   if (error) throw new Error(formatSupabaseError(error));
   await recordConsent(db, input);
@@ -102,6 +95,8 @@ export const donorColumns = [
   "gender",
   "available",
   "birth_date",
+  "consent_accepted_at",
+  "consent_version",
   "last_donation",
   "last_donation_date",
   "next_eligible_donation_date",
