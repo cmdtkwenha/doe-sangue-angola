@@ -21,7 +21,8 @@ export function NationalOperationsCenter() {
     "donor_responses",
     "donors",
     "hospital_inventory",
-    "hospitals"
+    "hospitals",
+    "inventory_movements"
   ]);
   const { data, error, loading } = useApiData<NationalOperationsData | null>(
     "/api/admin/national-operations",

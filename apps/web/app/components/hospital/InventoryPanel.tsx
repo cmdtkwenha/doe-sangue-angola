@@ -18,7 +18,7 @@ type InventoryRow = {
 
 export function InventoryPanel() {
   const version = useRealtimeVersion();
-  const liveVersion = useSupabaseRealtimeVersion(["hospital_inventory", "blood_requests", "donor_responses"]);
+  const liveVersion = useSupabaseRealtimeVersion(["hospital_inventory", "inventory_movements", "blood_requests", "donor_responses"]);
   const { data: hospital } = useCurrentHospital();
   const hospitalId = hospital?.id ?? "";
   const { data: inventory, loading, error } = useApiData<InventoryRow[]>(

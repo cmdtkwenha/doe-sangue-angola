@@ -11,12 +11,17 @@ type InventoryItem = {
   safeMinimum: number;
   units: number;
 };
+type InventorySummary = {
+  items: InventoryItem[];
+  shortagesByProvince: Array<{ critical: number; low: number; province: string }>;
+};
 
 export function BloodInventoryTable() {
-  const { data: inventory, error, loading } = useApiData<InventoryItem[]>(
+  const { data: summary, error, loading } = useApiData<InventorySummary>(
     "/api/admin/inventory-summary",
-    []
+    { items: [], shortagesByProvince: [] }
   );
+  const inventory = summary.items;
 
   return (
     <section className={styles.panel}>
@@ -50,6 +55,17 @@ export function BloodInventoryTable() {
           };
         })}
       />
+      {summary.shortagesByProvince.length ? (
+        <div className={styles.requestList}>
+          {summary.shortagesByProvince.map((item) => (
+            <article className={styles.requestRow} key={item.province}>
+              <strong>{item.province}</strong>
+              <span>{item.critical} críticos · {item.low} baixos</span>
+              <span className={item.critical ? "pill red" : "pill gold"}>Escassez</span>
+            </article>
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }

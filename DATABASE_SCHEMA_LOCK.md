@@ -64,6 +64,10 @@ Do not patch runtime errors by adding frontend-only fields.
 `id`, `hospital_id`, `blood_type`, `units_available`, `daily_usage_estimate`,
 `safe_minimum`, `updated_at`
 
+### inventory_movements
+`id`, `hospital_id`, `blood_type`, `movement_type`, `units`, `note`,
+`created_by`, `created_at`
+
 ### hospitals
 `id`, `name`, `province`, `municipality`, `verified`, `verification_status`,
 `rejection_reason`, `capacity`, `contact`, `created_at`, `address`, `email`,

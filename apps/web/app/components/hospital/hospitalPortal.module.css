@@ -199,6 +199,19 @@
   font-weight: 800;
   padding: 6px 8px;
 }
+.inventoryRow button {
+  min-height: 34px;
+  border: 1px solid #f1c5ca;
+  border-radius: 8px;
+  background: #fff7f8;
+  color: #b80f1f;
+  cursor: pointer;
+  font-weight: 800;
+}
+.inventoryRow button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
 .actions button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
