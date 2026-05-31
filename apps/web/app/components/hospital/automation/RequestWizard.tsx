@@ -27,6 +27,10 @@ export function RequestWizard() {
       <form className={styles.form} onSubmit={async (event) => {
         event.preventDefault();
         const hospitalId = hospital?.id ?? "";
+        if (hospital?.verificationStatus !== "verified" || !hospital.verified) {
+          setMessage("Apenas hospitais verificados podem criar pedidos reais.");
+          return;
+        }
         const validation = validateBloodRequestDraft({ bloodType, units, urgency, hospitalId });
         if (!validation.valid) {
           setMessage(validation.errors.join(" "));
@@ -51,7 +55,7 @@ export function RequestWizard() {
           {["Desastre", "Critica", "Alta", "Media", "Normal"].map((item) => <option key={item}>{item}</option>)}
         </select>
         <input className={styles.input} onChange={(event) => setNotes(event.target.value)} placeholder="Notas clínicas" value={notes} />
-        <button className={styles.button} type="submit">Criar e notificar dadores</button>
+        <button className={styles.button} disabled={hospital?.verificationStatus !== "verified"} type="submit">Criar e notificar dadores</button>
       </form>
       <p className="muted">{message}</p>
     </section>

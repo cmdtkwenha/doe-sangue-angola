@@ -8,7 +8,7 @@ const schemaContract = {
   donors: ["id", "user_id", "blood_type", "province", "municipality", "available", "eligibility_status", "last_donation", "points", "preferred_hospital_id", "created_at", "reliability_score", "response_speed_minutes", "next_eligible_donation_date", "consent_accepted_at", "consent_version", "privacy_policy_version", "medical_disclaimer_version", "emergency_contact_name", "emergency_contact_phone", "gender", "birth_date", "latitude", "longitude", "location_permission_status", "last_donation_date"],
   fraud_reviews: ["id", "blood_request_id", "donor_id", "risk", "status", "created_at"],
   hospital_inventory: ["id", "hospital_id", "blood_type", "units_available", "daily_usage_estimate", "safe_minimum", "updated_at"],
-  hospitals: ["id", "name", "province", "municipality", "verified", "capacity", "contact", "created_at", "address", "email", "facility_type", "license_number", "phone", "latitude", "longitude"],
+  hospitals: ["id", "name", "province", "municipality", "verified", "verification_status", "rejection_reason", "capacity", "contact", "created_at", "address", "email", "facility_type", "license_number", "phone", "latitude", "longitude"],
   legal_consents: ["id", "user_id", "role", "consent_type", "version", "page", "accepted_at"],
   municipalities: ["id", "name", "province"],
   notification_preferences: ["id", "donor_id", "preferences", "created_at"],

@@ -12,6 +12,7 @@ export type ManagementRow = {
   status: string;
   values: Record<string, string>;
   actions: string[];
+  onAction?: (action: string) => void;
 };
 
 export function ManagementTable({
@@ -84,7 +85,7 @@ export function ManagementTable({
             <tr key={row.id}>
               {columns.map((column) => <td data-label={column} key={column}>{row.values[column]}</td>)}
               <td data-label="Estado"><StatusBadge status={row.status} /></td>
-              <td data-label="Ações"><ActionMenu actions={row.actions} label={`Ações ${row.id}`} /></td>
+              <td data-label="Ações"><ActionMenu actions={row.actions} label={`Ações ${row.id}`} onAction={row.onAction} /></td>
             </tr>
           ))}
         </tbody>

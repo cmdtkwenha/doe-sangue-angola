@@ -35,5 +35,32 @@ export function HospitalEntityGate({ children }: { children: ReactNode }) {
     );
   }
 
+  if (hospital.verificationStatus !== "verified" || !hospital.verified) {
+    return (
+      <div className={styles.workspace}>
+        <EmptyState
+          message={hospitalStatusMessage(hospital.verificationStatus, hospital.rejectionReason)}
+          title={hospitalStatusTitle(hospital.verificationStatus)}
+        />
+      </div>
+    );
+  }
+
   return <>{children}</>;
+}
+
+function hospitalStatusTitle(status?: string) {
+  if (status === "rejected") return "Conta rejeitada";
+  if (status === "suspended") return "Conta suspensa";
+  return "Conta em revisão";
+}
+
+function hospitalStatusMessage(status?: string, reason?: string) {
+  if (status === "rejected") {
+    return `${reason ?? "A candidatura foi rejeitada."} Contacte o suporte para rever a situação.`;
+  }
+  if (status === "suspended") {
+    return "A conta foi suspensa. Contacte o suporte antes de criar novos pedidos.";
+  }
+  return "A sua conta hospitalar está em revisão. Quando for aprovada pelo Admin, poderá criar pedidos reais.";
 }

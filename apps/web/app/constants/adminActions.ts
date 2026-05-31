@@ -1,7 +1,8 @@
 export const hospitalActions = [
-  "Verificar hospital",
+  "Aprovar hospital",
+  "Rejeitar hospital",
   "Suspender hospital",
-  "Exportar relatório"
+  "Reativar hospital"
 ];
 
 export const donorActions = [

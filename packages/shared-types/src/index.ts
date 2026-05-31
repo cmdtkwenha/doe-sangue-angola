@@ -38,6 +38,12 @@ export type DonorEligibilityStatus =
   | "permanently_deferred"
   | "needs_review";
 
+export type HospitalVerificationStatus =
+  | "pending"
+  | "verified"
+  | "rejected"
+  | "suspended";
+
 export type Donor = {
   id: string;
   userId?: string;
@@ -77,6 +83,8 @@ export type Hospital = {
   province: string;
   municipality: string;
   verified: boolean;
+  verificationStatus?: HospitalVerificationStatus;
+  rejectionReason?: string;
   capacity: number;
   contact: string;
   latitude?: number;

@@ -3,7 +3,11 @@
 import { useState } from "react";
 import styles from "./management.module.css";
 
-export function ActionMenu({ actions, label }: { actions: string[]; label?: string }) {
+export function ActionMenu({ actions, label, onAction }: {
+  actions: string[];
+  label?: string;
+  onAction?: (action: string) => void;
+}) {
   const [message, setMessage] = useState("");
 
   return (
@@ -13,7 +17,10 @@ export function ActionMenu({ actions, label }: { actions: string[]; label?: stri
         className={styles.menu}
         defaultValue=""
         onChange={(event) => {
-          if (event.target.value) setMessage(`${event.target.value} registado.`);
+          if (event.target.value) {
+            onAction?.(event.target.value);
+            setMessage(`${event.target.value} registado.`);
+          }
           event.target.value = "";
         }}
       >

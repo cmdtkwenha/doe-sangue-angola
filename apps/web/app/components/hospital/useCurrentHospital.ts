@@ -17,8 +17,10 @@ type HospitalRow = {
   name: string;
   phone?: string | null;
   province: string;
+  rejection_reason?: string | null;
   type?: string | null;
   verified?: boolean | null;
+  verification_status?: string | null;
 };
 
 export function useCurrentHospital() {
@@ -98,7 +100,15 @@ function mapHospital(row: HospitalRow): Hospital {
     municipality: row.municipality,
     name: row.name,
     province: row.province,
+    rejectionReason: row.rejection_reason ?? undefined,
     type: row.facility_type ?? row.type ?? "Hospital",
-    verified: Boolean(row.verified)
+    verified: Boolean(row.verified),
+    verificationStatus: normalizeHospitalStatus(row)
   };
+}
+
+function normalizeHospitalStatus(row: HospitalRow) {
+  const value = row.verification_status;
+  if (value === "pending" || value === "verified" || value === "rejected" || value === "suspended") return value;
+  return row.verified ? "verified" : "pending";
 }

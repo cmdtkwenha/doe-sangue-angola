@@ -1,12 +1,11 @@
-import type { VerificationStatus } from "@doe-sangue-angola/shared-services";
-
-const toneByStatus: Record<VerificationStatus, string> = {
+const toneByStatus: Record<string, string> = {
+  Suspenso: "pill red",
   Verificado: "pill green",
   Pendente: "pill gold",
   Rejeitado: "pill red",
   "Revisão Necessária": "pill red"
 };
 
-export function VerificationStatusBadge({ status }: { status: VerificationStatus }) {
-  return <span className={toneByStatus[status]}>{status}</span>;
+export function VerificationStatusBadge({ status }: { status: string }) {
+  return <span className={toneByStatus[status] ?? "pill gold"}>{status}</span>;
 }

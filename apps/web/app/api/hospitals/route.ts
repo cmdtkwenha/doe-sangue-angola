@@ -19,7 +19,9 @@ export async function GET(request: Request) {
       return hospitalRepository.findHospitalByUserId(userId);
     }
     const hospitals = await hospitalRepository.listHospitals();
-    return principal.role === "admin" ? hospitals : hospitals.filter((item) => item.verified);
+    return principal.role === "admin"
+      ? hospitals
+      : hospitals.filter((item) => item.verified && item.verificationStatus === "verified");
   });
 }
 

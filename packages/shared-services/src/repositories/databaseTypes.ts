@@ -1,12 +1,4 @@
-import type {
-  Appointment,
-  BloodRequest,
-  BloodType,
-  Donor,
-  Hospital,
-  RequestStatus,
-  Urgency
-} from "@doe-sangue-angola/shared-types";
+import type { Appointment, BloodRequest, BloodType, Donor, Hospital, RequestStatus, Urgency } from "@doe-sangue-angola/shared-types";
 import type { MockNotification } from "../notificationService";
 
 export type UserRow = {
@@ -58,6 +50,8 @@ export type HospitalRow = {
   municipality: string;
   type?: string | null;
   verified: boolean;
+  verification_status?: string | null;
+  rejection_reason?: string | null;
   capacity: number;
   contact: string | null;
   latitude?: number | null;
@@ -78,13 +72,7 @@ export type RequestRow = {
   notes?: string | null;
   status: RequestStatus;
   created_at: string;
-  hospitals?: {
-    municipality?: string | null;
-    name?: string | null;
-    province?: string | null;
-    latitude?: number | null;
-    longitude?: number | null;
-  } | null;
+  hospitals?: { municipality?: string | null; name?: string | null; province?: string | null; latitude?: number | null; longitude?: number | null } | null;
 };
 
 export type AppointmentRow = {
@@ -166,12 +154,20 @@ export function mapHospital(row: HospitalRow): Hospital {
     province: row.province,
     municipality: row.municipality,
     verified: row.verified,
+    verificationStatus: normalizeHospitalStatus(row.verification_status, row.verified),
+    rejectionReason: row.rejection_reason ?? undefined,
     capacity: row.capacity,
     contact: row.contact ?? row.phone ?? "",
     latitude: row.latitude ?? undefined,
     longitude: row.longitude ?? undefined,
     type: row.facility_type ?? row.type ?? undefined
   };
+}
+
+function normalizeHospitalStatus(value?: string | null, verified?: boolean) {
+  const valid = ["pending", "verified", "rejected", "suspended"];
+  if (valid.includes(value ?? "")) return value as Hospital["verificationStatus"];
+  return verified ? "verified" : "pending";
 }
 
 export function mapRequest(row: RequestRow): BloodRequest {

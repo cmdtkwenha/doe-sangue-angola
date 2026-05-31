@@ -104,10 +104,11 @@ export async function POST(request: Request) {
     const db = await createRouteSupabase();
     const { data: hospital, error: hospitalError } = await db
       .from("hospitals")
-      .select("id,province,municipality")
+      .select("id,province,municipality,verified,verification_status,rejection_reason")
       .eq("id", hospitalId)
       .single();
     if (hospitalError) throw new Error(formatSupabaseError(hospitalError));
+    assertHospitalCanRequest(hospital);
     await assertTableRateLimit(db, {
       column: "hospital_id",
       label: "Muitos pedidos criados por este hospital",
@@ -160,6 +161,21 @@ export async function POST(request: Request) {
     await auditApiAction(principal, `Criou pedido de sangue ${requestRecord.bloodType} (${requestRecord.id}).`);
     return { matches: [], request: requestRecord };
   });
+}
+
+function assertHospitalCanRequest(hospital: {
+  rejection_reason?: string | null;
+  verification_status?: string | null;
+  verified?: boolean | null;
+}) {
+  const status = hospital.verification_status ?? (hospital.verified ? "verified" : "pending");
+  if (status === "verified" && hospital.verified !== false) return;
+  const labels: Record<string, string> = {
+    pending: "Conta em revisão. Aguarde aprovação do Admin para criar pedidos reais.",
+    rejected: `Conta rejeitada. ${hospital.rejection_reason ?? "Contacte o suporte."}`,
+    suspended: "Conta suspensa. Contacte o suporte antes de criar pedidos."
+  };
+  throw new ApiError(403, labels[status] ?? "Hospital não aprovado para criar pedidos.");
 }
 
 function enrichRequest(row: RequestRow, donor: ReturnType<typeof mapDonor>) {

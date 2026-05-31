@@ -22,8 +22,10 @@ type HospitalRow = {
   name: string;
   phone?: string | null;
   province: string;
+  rejection_reason?: string | null;
   type?: string | null;
   verified?: boolean | null;
+  verification_status?: string | null;
 };
 
 export function HospitalOnboarding() {
@@ -32,7 +34,7 @@ export function HospitalOnboarding() {
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const approved = hospitals.filter((hospital) => hospital.verified);
+  const approved = hospitals.filter((hospital) => hospital.verified && hospital.verificationStatus === "verified");
   const [hospitalId, setHospitalId] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("Escolha um hospital aprovado.");
@@ -90,9 +92,10 @@ export function HospitalOnboarding() {
       if (!authUser?.id) throw new Error("Sessão inválida. Entre novamente.");
       const { data: hospital, error: hospitalError } = await supabase
         .from("hospitals")
-        .select("id,verified")
+        .select("id,verified,verification_status")
         .eq("id", hospitalId)
         .eq("verified", true)
+        .eq("verification_status", "verified")
         .single();
       if (hospitalError) throw new Error(formatSupabaseError(hospitalError));
       if (!hospital?.id) throw new Error("Hospital aprovado não encontrado.");
@@ -215,9 +218,17 @@ function mapHospital(row: HospitalRow): Hospital {
     municipality: row.municipality,
     name: row.name,
     province: row.province,
+    rejectionReason: row.rejection_reason ?? undefined,
     type: row.facility_type ?? row.type ?? "Hospital",
-    verified: Boolean(row.verified)
+    verified: Boolean(row.verified),
+    verificationStatus: normalizeHospitalStatus(row)
   };
+}
+
+function normalizeHospitalStatus(row: HospitalRow) {
+  const value = row.verification_status;
+  if (value === "pending" || value === "verified" || value === "rejected" || value === "suspended") return value;
+  return row.verified ? "verified" : "pending";
 }
 
 function formatSupabaseError(error: {

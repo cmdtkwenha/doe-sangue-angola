@@ -65,9 +65,9 @@ Do not patch runtime errors by adding frontend-only fields.
 `safe_minimum`, `updated_at`
 
 ### hospitals
-`id`, `name`, `province`, `municipality`, `verified`, `capacity`, `contact`,
-`created_at`, `address`, `email`, `facility_type`, `license_number`,
-`phone`, `latitude`, `longitude`
+`id`, `name`, `province`, `municipality`, `verified`, `verification_status`,
+`rejection_reason`, `capacity`, `contact`, `created_at`, `address`, `email`,
+`facility_type`, `license_number`, `phone`, `latitude`, `longitude`
 
 ### legal_consents
 `id`, `user_id`, `role`, `consent_type`, `version`, `page`, `accepted_at`
