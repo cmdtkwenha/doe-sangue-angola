@@ -11,7 +11,9 @@ export const appRoutes = {
 export const roleHomeRoute: Record<UserRole, string> = {
   admin: appRoutes.admin,
   hospital: appRoutes.hospital,
-  donor: appRoutes.donor
+  donor: appRoutes.donor,
+  support: appRoutes.unauthorized,
+  viewer: appRoutes.unauthorized
 };
 
 export const protectedRoutes = [

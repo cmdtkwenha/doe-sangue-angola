@@ -10,7 +10,7 @@ export type BloodType =
   | "AB-"
   | "AB+";
 
-export type UserRole = "admin" | "hospital" | "donor";
+export type UserRole = "admin" | "hospital" | "donor" | "support" | "viewer";
 
 export type Urgency = "Desastre" | "Critica" | "Alta" | "Media" | "Normal";
 

@@ -8,7 +8,9 @@ import type { UserRole } from "@doe-sangue-angola/shared-types";
 const roleLabels: Record<UserRole, string> = {
   admin: "Admin",
   hospital: "Hospital",
-  donor: "Dador"
+  donor: "Dador",
+  support: "Suporte",
+  viewer: "Observador"
 };
 
 const areaLabels: Record<PermissionArea, string> = {

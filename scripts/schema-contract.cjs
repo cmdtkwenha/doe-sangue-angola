@@ -17,13 +17,13 @@ const schemaContract = {
   municipalities: ["id", "name", "province"],
   notification_preferences: ["id", "donor_id", "preferences", "created_at"],
   notifications: ["id", "user_id", "role", "title", "body", "message", "type", "read", "read_at", "created_at"],
-  profiles: ["id", "auth_user_id", "role", "linked_entity_id", "name", "email", "phone", "created_at"],
+  profiles: ["id", "auth_user_id", "role", "linked_entity_id", "name", "email", "phone", "account_status", "last_activity_at", "password_reset_requested_at", "created_at", "updated_at"],
   provinces: ["id", "name"],
   push_tokens: ["id", "donor_id", "platform", "token", "active", "created_at"],
   referrals: ["id", "referrer_donor_id", "invited_name", "status", "reward_points", "created_at"],
   rewards: ["id", "donor_id", "points", "reason", "tier", "created_at"],
   support_issues: ["id", "user_id", "role", "page", "action", "type", "severity", "message", "status", "created_at"],
-  users: ["id", "auth_user_id", "role", "name", "email", "phone", "linked_entity_id", "created_at"]
+  users: ["id", "auth_user_id", "role", "name", "email", "phone", "linked_entity_id", "account_status", "last_activity_at", "password_reset_requested_at", "created_at", "updated_at"]
 };
 
 module.exports = { schemaContract };

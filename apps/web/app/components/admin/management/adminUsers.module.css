@@ -1,0 +1,143 @@
+.stack {
+  display: grid;
+  gap: 16px;
+}
+
+.toolbar,
+.card {
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.07);
+  padding: 18px;
+}
+
+.toolbar {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.toolbar h2 {
+  margin: 2px 0 0;
+}
+
+.toolbar input,
+.controls select {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  color: #111827;
+  font: inherit;
+  min-height: 42px;
+  padding: 0 12px;
+}
+
+.toolbar input {
+  min-width: min(360px, 100%);
+}
+
+.card {
+  display: grid;
+  gap: 14px;
+}
+
+.identity {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.identity span:first-child {
+  display: grid;
+  gap: 3px;
+  margin-right: auto;
+}
+
+.identity small,
+.meta small,
+.controls span {
+  color: #64748b;
+  font-size: 0.76rem;
+}
+
+.meta {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.meta span {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+}
+
+.controls {
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.controls label {
+  display: grid;
+  gap: 5px;
+  min-width: 180px;
+}
+
+.controls button {
+  background: #fff;
+  border: 1px solid rgba(185, 28, 28, 0.18);
+  border-radius: 12px;
+  color: #b91c1c;
+  cursor: pointer;
+  font-weight: 800;
+  min-height: 42px;
+  padding: 0 12px;
+}
+
+.controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.badge {
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 6px 10px;
+}
+
+.danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.neutral {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+@media (max-width: 760px) {
+  .toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .toolbar input,
+  .controls label,
+  .controls button {
+    width: 100%;
+  }
+}

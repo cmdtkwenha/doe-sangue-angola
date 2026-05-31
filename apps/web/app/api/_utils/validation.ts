@@ -14,7 +14,7 @@ const statuses: RequestStatus[] = [
   "Triagem",
   "Concluido"
 ];
-const roles: UserRole[] = ["admin", "hospital", "donor"];
+const roles: UserRole[] = ["admin", "hospital", "donor", "support", "viewer"];
 
 export function assertString(value: unknown, label: string, max = 160) {
   if (typeof value !== "string" || !value.trim()) {

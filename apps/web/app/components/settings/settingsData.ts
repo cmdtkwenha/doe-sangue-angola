@@ -74,11 +74,31 @@ export const settingsData: Record<UserRole, SettingSection[]> = {
         { label: "Eliminar conta", description: "Pedido formal com confirmação manual.", tone: "danger", type: "button", value: "Solicitar" }
       ]
     }
+  ],
+  support: [
+    {
+      eyebrow: "Suporte",
+      title: "Acesso limitado",
+      rows: [
+        { label: "Perfil", description: "Conta de apoio sem acesso administrativo.", type: "value", value: "Suporte" }
+      ]
+    }
+  ],
+  viewer: [
+    {
+      eyebrow: "Visualização",
+      title: "Acesso limitado",
+      rows: [
+        { label: "Perfil", description: "Conta de consulta sem gestão operacional.", type: "value", value: "Observador" }
+      ]
+    }
   ]
 };
 
 export const settingsTitles: Record<UserRole, [string, string]> = {
   admin: ["Definições da plataforma", "Controle idioma, segurança, notificações e utilizadores."],
   hospital: ["Definições do hospital", "Mantenha perfil clínico, equipa, inventário e documentos atualizados."],
-  donor: ["Definições do dador", "Gerencie privacidade, notificações, contacto e preferências pessoais."]
+  donor: ["Definições do dador", "Gerencie privacidade, notificações, contacto e preferências pessoais."],
+  support: ["Definições de suporte", "Acesso limitado para apoio operacional."],
+  viewer: ["Definições de observador", "Acesso limitado para consulta."]
 };

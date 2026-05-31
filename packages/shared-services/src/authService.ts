@@ -13,12 +13,16 @@ export type AuthUser = {
 
 export const roleRedirects: Record<UserRole, string> = {
   admin: "/admin",
+  support: "/unauthorized",
+  viewer: "/unauthorized",
   hospital: "/hospital",
   donor: "/mobile"
 };
 
 export const roleOnboardingRedirects: Record<UserRole, string> = {
   admin: "/onboarding/admin",
+  support: "/unauthorized",
+  viewer: "/unauthorized",
   hospital: "/onboarding/hospital",
   donor: "/onboarding/donor"
 };
@@ -36,12 +40,12 @@ export function isAuthorized(role: UserRole, allowed: UserRole[]) {
 }
 
 export function normalizeRole(role: unknown): UserRole {
-  if (role === "admin" || role === "hospital" || role === "donor") return role;
+  if (role === "admin" || role === "hospital" || role === "donor" || role === "support" || role === "viewer") return role;
   return "donor";
 }
 
 export function isKnownRole(role: unknown): role is UserRole {
-  return role === "admin" || role === "hospital" || role === "donor";
+  return role === "admin" || role === "hospital" || role === "donor" || role === "support" || role === "viewer";
 }
 
 export function isDemoAuthAllowed() {

@@ -85,11 +85,29 @@ export const onboardingSteps: Record<UserRole, OnboardingStep[]> = {
       body: "Responda à elegibilidade e ative notificações para pedidos urgentes.",
       status: "Pendente"
     }
+  ],
+  support: [
+    {
+      eyebrow: "Acesso limitado",
+      title: "Conta de suporte",
+      body: "Esta função é gerida por administradores e não abre portais operacionais.",
+      status: "Pronto"
+    }
+  ],
+  viewer: [
+    {
+      eyebrow: "Acesso limitado",
+      title: "Conta de observador",
+      body: "Esta função é gerida por administradores e não altera dados operacionais.",
+      status: "Pronto"
+    }
   ]
 };
 
 export const roleLabels: Record<UserRole, string> = {
   admin: "Administração Nacional",
   hospital: "Hospital/Clínica",
-  donor: "Dador"
+  donor: "Dador",
+  support: "Suporte",
+  viewer: "Observador"
 };

@@ -103,7 +103,8 @@ Do not patch runtime errors by adding frontend-only fields.
 
 ### profiles
 `id`, `auth_user_id`, `role`, `linked_entity_id`, `name`, `email`, `phone`,
-`created_at`
+`account_status`, `last_activity_at`, `password_reset_requested_at`,
+`created_at`, `updated_at`
 
 ### provinces
 `id`, `name`
@@ -124,7 +125,8 @@ Do not patch runtime errors by adding frontend-only fields.
 
 ### users
 `id`, `auth_user_id`, `role`, `name`, `email`, `phone`, `linked_entity_id`,
-`created_at`
+`account_status`, `last_activity_at`, `password_reset_requested_at`,
+`created_at`, `updated_at`
 
 ## Workflow Review
 
