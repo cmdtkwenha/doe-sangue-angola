@@ -15,25 +15,11 @@ import {
 import { ConfirmationModal } from "../ui/ConfirmationModal";
 import { EmptyState } from "../ui/EmptyState";
 import { LoadingSkeleton } from "../ui/LoadingSkeleton";
+import { HospitalDonorDetailsModal } from "./HospitalDonorDetailsModal";
 import styles from "./hospitalPortal.module.css";
+import { formatTime, splitRows } from "./incomingDonorRows";
+import type { AcceptedDonor, PendingAction, WorkflowStatus } from "./incomingDonorTypes";
 import { useCurrentHospital } from "./useCurrentHospital";
-
-type AcceptedDonor = {
-  bloodRequestId?: string;
-  createdAt?: string;
-  donorBloodType: string;
-  donorId: string;
-  donorName: string;
-  donorPhone: string;
-  eta: string;
-  pin: string;
-  responseId: string;
-  requestBloodType: string;
-  requestStatus: string;
-  status: string;
-};
-type WorkflowStatus = Exclude<DonorResponseStatus, "accepted">;
-type PendingAction = { row: AcceptedDonor; status: WorkflowStatus } | null;
 const cancelReasons = ["Dador cancelou", "PIN inválido", "Pedido encerrado", "Outro motivo"];
 
 export function IncomingDonorsList() {
@@ -44,6 +30,7 @@ export function IncomingDonorsList() {
   const [pins, setPins] = useState<Record<string, string>>({});
   const [optimistic, setOptimistic] = useState<Record<string, DonorResponseStatus>>({});
   const [reason, setReason] = useState("");
+  const [selected, setSelected] = useState<AcceptedDonor | null>(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ message: string; tone: "error" | "success" }>({
     message: "",
@@ -142,6 +129,7 @@ export function IncomingDonorsList() {
             </span>
             <span className={styles.actions}>
               <button disabled={saving || !canMoveDonorResponse(normalizeDonorResponseStatus(row.status), "arrived")} onClick={() => ask(row, "arrived")} type="button">Chegou</button>
+              <button disabled={saving} onClick={() => setSelected(row)} type="button">Ver detalhes</button>
               <input
                 aria-label="PIN do dador"
                 disabled={saving}
@@ -190,6 +178,15 @@ export function IncomingDonorsList() {
         tone={pending?.status === "cancelled" ? "danger" : "primary"}
       />
       <ActionToast message={toast.message} tone={toast.tone} />
+      <HospitalDonorDetailsModal
+        donor={selected}
+        onAction={(row, status) => {
+          setSelected(null);
+          ask(row, status);
+        }}
+        onClose={() => setSelected(null)}
+        saving={saving}
+      />
       <a className={styles.footerLink} href="/hospital/donors">Ver todos os dadores</a>
     </section>
   );
@@ -208,32 +205,6 @@ function removeOptimistic(
   return next;
 }
 
-function formatTime(value?: string) {
-  if (!value) return "hora pendente";
-  return new Date(value).toLocaleTimeString("pt-AO", { hour: "2-digit", minute: "2-digit" });
-}
-
 function statusLabel(status: string) {
   return donorResponseLabels[normalizeDonorResponseStatus(status)];
-}
-
-function isActiveStatus(status: string) {
-  const normalized = normalizeDonorResponseStatus(status);
-  return normalized !== "completed" && normalized !== "cancelled";
-}
-
-function splitRows(rows: AcceptedDonor[]) {
-  const activeKeys = new Set<string>();
-  const activeRows: AcceptedDonor[] = [];
-  const historyRows: AcceptedDonor[] = [];
-  rows.forEach((row) => {
-    const key = `${row.donorId}:${row.bloodRequestId ?? row.responseId}`;
-    if (isActiveStatus(row.status) && !activeKeys.has(key)) {
-      activeKeys.add(key);
-      activeRows.push(row);
-      return;
-    }
-    historyRows.push(row);
-  });
-  return { activeRows, historyRows };
 }
