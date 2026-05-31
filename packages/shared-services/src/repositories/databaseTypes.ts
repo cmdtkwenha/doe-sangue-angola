@@ -29,11 +29,8 @@ export type DonorRow = {
   birth_date?: string | null;
   consent_accepted_at?: string | null;
   consent_version?: string | null;
-  email?: string | null;
   emergency_contact_name?: string | null;
   emergency_contact_phone?: string | null;
-  eligibility_status?: string | null;
-  full_name?: string | null;
   gender?: string | null;
   last_donation: string | null;
   last_donation_date?: string | null;
@@ -41,14 +38,11 @@ export type DonorRow = {
   location_permission_status?: string | null;
   longitude?: number | null;
   next_eligible_donation_date?: string | null;
-  phone?: string | null;
   points: number;
   preferred_hospital_id: string | null;
   reliability_score?: number | null;
   response_speed_minutes?: number | null;
-  total_donations?: number | null;
   user_id?: string | null;
-  users?: { name?: string | null; phone?: string | null } | null;
 };
 
 export type HospitalRow = {
@@ -130,7 +124,7 @@ export function mapDonor(row: DonorRow): Donor {
   return {
     id: row.id,
     userId: row.user_id ?? undefined,
-    name: row.full_name ?? row.users?.name ?? "Dador verificado",
+    name: "Dador verificado",
     bloodType: row.blood_type,
     province: row.province,
     municipality: row.municipality,
@@ -138,21 +132,19 @@ export function mapDonor(row: DonorRow): Donor {
     birthDate: row.birth_date ?? undefined,
     consentAcceptedAt: row.consent_accepted_at ?? undefined,
     consentVersion: row.consent_version ?? undefined,
-    email: row.email ?? undefined,
     emergencyContactName: row.emergency_contact_name ?? undefined,
     emergencyContactPhone: row.emergency_contact_phone ?? undefined,
-    eligibilityStatus: row.eligibility_status ?? "Pendente",
+    eligibilityStatus: "Pendente",
     gender: row.gender ?? undefined,
     lastDonation: row.last_donation_date ?? row.last_donation ?? "",
     latitude: row.latitude ?? undefined,
     locationPermissionStatus: row.location_permission_status ?? undefined,
     longitude: row.longitude ?? undefined,
     nextEligibleDonationDate: row.next_eligible_donation_date ?? undefined,
-    phone: row.phone ?? row.users?.phone ?? undefined,
     points: row.points,
     reliabilityScore: row.reliability_score ?? undefined,
     responseSpeedMinutes: row.response_speed_minutes ?? undefined,
-    totalDonations: row.total_donations ?? 0,
+    totalDonations: 0,
     preferredHospitalId: row.preferred_hospital_id ?? undefined
   };
 }

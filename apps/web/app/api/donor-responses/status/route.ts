@@ -89,15 +89,14 @@ async function rewardOnce(
 }
 
 async function updateCooldown(db: Awaited<ReturnType<typeof createRouteSupabase>>, donorId: string) {
-  const { data } = await db.from("donors").select("gender,total_donations").eq("id", donorId).maybeSingle();
+  const { data } = await db.from("donors").select("gender").eq("id", donorId).maybeSingle();
   const days = data?.gender === "Feminino" ? 120 : 90;
   const next = new Date();
   next.setDate(next.getDate() + days);
   await db.from("donors").update({
     available: false,
     last_donation_date: new Date().toISOString().slice(0, 10),
-    next_eligible_donation_date: next.toISOString().slice(0, 10),
-    total_donations: (data?.total_donations ?? 0) + 1
+    next_eligible_donation_date: next.toISOString()
   }).eq("id", donorId);
 }
 

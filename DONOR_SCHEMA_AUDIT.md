@@ -12,14 +12,10 @@ The consolidated migration is:
 Identity and ownership:
 
 - `id`
-- `auth_user_id`
 - `user_id`
 
 Profile fields:
 
-- `full_name`
-- `email`
-- `phone`
 - `blood_type`
 - `province`
 - `municipality`
@@ -31,11 +27,9 @@ Profile fields:
 Eligibility and donation status:
 
 - `available`
-- `eligibility_status`
 - `last_donation`
 - `last_donation_date`
 - `next_eligible_donation_date`
-- `total_donations`
 
 Rewards and matching:
 
@@ -63,17 +57,18 @@ System:
 
 ## Write Paths
 
-- Donor onboarding saves profile fields with `upsert` by `user_id`.
+- Donor onboarding saves donor fields with `upsert` by `user_id`.
+- Name, email and phone are saved in `public.users`, not in `public.donors`.
 - Donor location updates only optional location fields.
-- Donation completion updates cooldown, availability, totals and last donation date.
+- Donation completion updates cooldown, availability and last donation date.
 - Rewards update donor `points`.
 
 ## Read Paths
 
 - Donor dashboard reads the current donor by `user_id`.
 - Admin donor tables read registered donors.
-- Request matching reads blood type, province, municipality and eligibility fields.
-- Hospital accepted donor panels read donor name, blood type and phone.
+- Request matching reads blood type, province, municipality and cooldown fields.
+- Hospital accepted donor panels read donor blood type and workflow state.
 
 ## Onboarding Contract
 
@@ -82,7 +77,7 @@ Required onboarding fields:
 - `blood_type`
 - `province`
 - `municipality`
-- `phone`
+- `phone` (stored on `public.users.phone`)
 - `gender`
 - `emergency_contact_name`
 - `emergency_contact_phone`
@@ -90,6 +85,8 @@ Required onboarding fields:
 - consent checkbox accepted
 
 Optional fields must not block donor onboarding.
+
+`phone` is required by onboarding but stored on `public.users.phone`.
 
 ## Notes
 

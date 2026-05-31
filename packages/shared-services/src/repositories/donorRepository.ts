@@ -5,11 +5,8 @@ import { rewardRepository } from "./rewardRepository";
 
 const donorColumns = [
   "id",
-  "full_name",
-  "email",
   "emergency_contact_name",
   "emergency_contact_phone",
-  "phone",
   "blood_type",
   "province",
   "municipality",
@@ -18,12 +15,11 @@ const donorColumns = [
   "birth_date",
   "last_donation",
   "last_donation_date",
-  "total_donations",
-  "eligibility_status",
   "points",
   "preferred_hospital_id",
-  "user_id",
-  "users(name,phone)"
+  "reliability_score",
+  "response_speed_minutes",
+  "user_id"
 ].join(",");
 
 export const donorRepository = {
@@ -70,17 +66,12 @@ export const donorRepository = {
     const { data, error } = await db
       .from("donors")
       .upsert({
-        email: input.email,
-        full_name: input.fullName,
-        phone: input.phone,
         user_id: input.userId,
         blood_type: input.bloodType,
         province: input.province,
         municipality: input.municipality,
         birth_date: input.birthDate || null,
         gender: input.gender || null,
-        eligibility_status: input.eligibilityStatus ?? "Elegível",
-        total_donations: input.totalDonations ?? 0,
         available: true
       }, { onConflict: "user_id" })
       .select(donorColumns)
@@ -119,12 +110,10 @@ export type DonorProfileInput = {
   birthDate: string;
   bloodType: BloodType;
   email?: string;
-  eligibilityStatus?: string;
   fullName: string;
   gender?: string;
   municipality: string;
   phone: string;
   province: string;
-  totalDonations?: number;
   userId: string;
 };

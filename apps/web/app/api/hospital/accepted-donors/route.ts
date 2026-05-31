@@ -39,7 +39,7 @@ export async function GET() {
     const requestIds = unique(responses.map((item) => item.blood_request_id));
     const [{ data: donors, error: donorError }, { data: requests, error: requestError }, hospital] =
       await Promise.all([
-        db.from("donors").select("id,full_name,blood_type,phone").in("id", donorIds),
+        db.from("donors").select("id,user_id,blood_type").in("id", donorIds),
         db.from("blood_requests").select("id,blood_type,status").in("id", requestIds),
         getHospital(db, hospitalId ?? "")
       ]);
@@ -54,8 +54,8 @@ export async function GET() {
         createdAt: item.created_at ?? undefined,
         donorBloodType: donor?.blood_type ?? "-",
         donorId: item.donor_id,
-        donorName: donor?.full_name ?? "Dador aceite",
-        donorPhone: donor?.phone ?? "por completar",
+        donorName: "Dador aceite",
+        donorPhone: "por completar",
         eta: `${item.eta_minutes ?? 30} min`,
         hospitalId: item.hospital_id,
         hospitalName: hospital.name,

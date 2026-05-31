@@ -23,17 +23,13 @@ export const donorColumns = [
   "municipality",
   "available",
   "birth_date",
-  "email",
-  "eligibility_status",
-  "full_name",
   "gender",
   "last_donation",
   "last_donation_date",
   "next_eligible_donation_date",
-  "phone",
   "points",
   "preferred_hospital_id",
   "reliability_score",
   "response_speed_minutes",
-  "total_donations"
+  "consent_accepted_at"
 ].join(",");

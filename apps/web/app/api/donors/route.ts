@@ -40,7 +40,7 @@ export async function GET(request: Request) {
         .eq("user_id", userId)
         .maybeSingle();
       if (error) throw new Error(formatSupabaseError(error));
-      return data ? mapDonor(data as unknown as DonorRow) : null;
+      return data ? await enrichDonor(db, data as unknown as DonorRow) : null;
     }
     if (principal.role === "hospital" && principal.hospitalId) {
       const { data: appointments, error: appointmentError } = await db
@@ -54,17 +54,17 @@ export async function GET(request: Request) {
         .from("donors")
         .select(donorColumns)
         .in("id", donorIds)
-        .order("full_name", { ascending: true });
+        .order("created_at", { ascending: false });
       if (error) throw new Error(formatSupabaseError(error));
-      return (data as unknown as DonorRow[]).map(mapDonor);
+      return Promise.all((data as unknown as DonorRow[]).map((row) => enrichDonor(db, row)));
     }
     if (principal.role !== "admin") throw new ApiError(403, "Lista restrita ao admin.");
     const { data, error } = await db
       .from("donors")
       .select(donorColumns)
-      .order("full_name", { ascending: true });
+      .order("created_at", { ascending: false });
     if (error) throw new Error(formatSupabaseError(error));
-    return (data as unknown as DonorRow[]).map(mapDonor);
+    return Promise.all((data as unknown as DonorRow[]).map((row) => enrichDonor(db, row)));
   });
 }
 
@@ -108,6 +108,22 @@ export async function POST(request: Request) {
     }, `Atualizou perfil de dador ${donor.id}.`);
     return donor;
   });
+}
+
+async function enrichDonor(db: DbClient, row: DonorRow) {
+  const donor = mapDonor(row);
+  if (!row.user_id) return donor;
+  const { data } = await db
+    .from("users")
+    .select("name,email,phone")
+    .eq("id", row.user_id)
+    .maybeSingle();
+  return {
+    ...donor,
+    email: data?.email ?? donor.email,
+    name: data?.name ?? donor.name,
+    phone: data?.phone ?? donor.phone
+  };
 }
 
 async function ensureProfile(db: DbClient, authUser: { id: string; email?: string }, body: Partial<DonorBody>) {

@@ -10,7 +10,7 @@ export async function GET() {
     await requireApiSession(["admin"]);
     const db = await createRouteSupabase();
     const [donors, hospitals, requests, responses] = await Promise.all([
-      readTable(db, "donors", "id,full_name,email,phone,blood_type,province,municipality,total_donations"),
+      readTable(db, "donors", "id,user_id,blood_type,province,municipality,available,points,created_at"),
       readTable(db, "hospitals", "id,name,type,province,municipality,phone,email,verified"),
       readTable(db, "blood_requests", "id,hospital_id,blood_type,units_needed,urgency,status,province,municipality,created_at"),
       readTable(db, "donor_responses", "id,donor_id,blood_request_id,hospital_id,status,eta_minutes,created_at")

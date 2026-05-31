@@ -97,12 +97,12 @@ export const mockProvider: DataProvider = {
     available: true,
     birthDate: input.birthDate,
     email: input.email,
-    eligibilityStatus: input.eligibilityStatus ?? "Elegível",
+    eligibilityStatus: "Elegível",
     gender: input.gender,
     lastDonation: "",
     phone: input.phone,
     points: 0,
-    totalDonations: input.totalDonations ?? 0
+    totalDonations: 0
   }),
   listHospitals: mockRepositories.hospital.listHospitals,
   listNotifications: mockRepositories.notification.listNotifications,
