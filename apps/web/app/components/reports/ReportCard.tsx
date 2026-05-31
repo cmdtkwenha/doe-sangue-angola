@@ -1,6 +1,6 @@
 import { ReportExportButtons } from "./ReportExportButtons";
 import { ReportTable } from "./ReportTable";
-import type { ReportDefinition } from "./reportsData";
+import type { ReportDefinition } from "./reportTypes";
 import styles from "./reports.module.css";
 
 export function ReportCard({ report }: { report: ReportDefinition }) {

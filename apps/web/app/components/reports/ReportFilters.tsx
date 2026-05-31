@@ -1,46 +1,56 @@
 "use client";
 
 import { bloodTypes } from "@doe-sangue-angola/shared-services";
-import { useState } from "react";
+import type { ReportFilterState } from "./reportTypes";
 import styles from "./reports.module.css";
 
-const provinces = ["Todas", "Luanda", "Huambo", "Benguela", "Uíge"];
+const statuses = ["", "Aberto", "Doador a Caminho", "PIN Validado", "Concluído", "Cancelado", "accepted", "completed", "cancelled"];
 
-export function ReportFilters() {
-  const [status, setStatus] = useState("Filtros prontos.");
+export function ReportFilters({
+  filters,
+  onChange
+}: {
+  filters: ReportFilterState;
+  onChange: (filters: ReportFilterState) => void;
+}) {
+  function set(key: keyof ReportFilterState, value: string) {
+    onChange({ ...filters, [key]: value });
+  }
 
   return (
     <section aria-label="Filtros de relatórios" className={styles.filters}>
-      <label className={styles.field}>
-        <span className="eyebrow">Data inicial</span>
-        <input defaultValue="2026-05-01" onChange={() => setStatus("Filtro aplicado.")} type="date" />
-      </label>
-      <label className={styles.field}>
-        <span className="eyebrow">Data final</span>
-        <input defaultValue="2026-05-13" onChange={() => setStatus("Filtro aplicado.")} type="date" />
-      </label>
-      <label className={styles.field}>
-        <span className="eyebrow">Província</span>
-        <select defaultValue="Todas" onChange={() => setStatus("Filtro aplicado.")}>
-          {provinces.map((item) => <option key={item}>{item}</option>)}
-        </select>
-      </label>
+      <Field label="Data inicial" type="date" value={filters.dateFrom} onChange={(value) => set("dateFrom", value)} />
+      <Field label="Data final" type="date" value={filters.dateTo} onChange={(value) => set("dateTo", value)} />
+      <Field label="Província" value={filters.province} onChange={(value) => set("province", value)} />
+      <Field label="Município" value={filters.municipality} onChange={(value) => set("municipality", value)} />
+      <Field label="Hospital" value={filters.hospital} onChange={(value) => set("hospital", value)} />
       <label className={styles.field}>
         <span className="eyebrow">Tipo sanguíneo</span>
-        <select defaultValue="Todos" onChange={() => setStatus("Filtro aplicado.")}>
-          <option>Todos</option>
+        <select value={filters.bloodType} onChange={(event) => set("bloodType", event.target.value)}>
+          <option value="">Todos</option>
           {bloodTypes.map((item) => <option key={item}>{item}</option>)}
         </select>
       </label>
       <label className={styles.field}>
         <span className="eyebrow">Estado</span>
-        <select defaultValue="Todos" onChange={() => setStatus("Filtro aplicado.")}>
-          {["Todos", "Aberto", "Agendado", "Concluído", "Crítico"].map((item) => (
-            <option key={item}>{item}</option>
-          ))}
+        <select value={filters.status} onChange={(event) => set("status", event.target.value)}>
+          {statuses.map((item) => <option key={item || "all"} value={item}>{item || "Todos"}</option>)}
         </select>
       </label>
-      <span className="muted">{status}</span>
     </section>
+  );
+}
+
+function Field({ label, onChange, type = "text", value }: {
+  label: string;
+  onChange: (value: string) => void;
+  type?: string;
+  value: string;
+}) {
+  return (
+    <label className={styles.field}>
+      <span className="eyebrow">{label}</span>
+      <input onChange={(event) => onChange(event.target.value)} type={type} value={value} />
+    </label>
   );
 }

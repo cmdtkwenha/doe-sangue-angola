@@ -1,7 +1,11 @@
+import { EmptyState } from "../ui/EmptyState";
 import styles from "./reports.module.css";
 
 export function ReportTable({ rows }: { rows: Record<string, string>[] }) {
   const headers = Object.keys(rows[0] ?? {});
+  if (!rows.length) {
+    return <EmptyState title="Sem dados para este relatório" message="Ajuste os filtros ou aguarde novos registos reais." />;
+  }
 
   return (
     <div className={styles.tableWrap}>

@@ -1,9 +1,7 @@
 import Link from "next/link";
 import { getRedirectForRole } from "@doe-sangue-angola/shared-services";
-import { ReportCard } from "./ReportCard";
-import { ReportFilters } from "./ReportFilters";
 import type { ReportRole } from "./reportsData";
-import { reportsByRole } from "./reportsData";
+import { OperationalReports } from "./OperationalReports";
 import styles from "./reports.module.css";
 
 const copy = {
@@ -32,12 +30,7 @@ export function ReportsShell({ role }: { role: ReportRole }) {
           Voltar ao painel
         </Link>
       </header>
-      <ReportFilters />
-      <section className={styles.grid}>
-        {reportsByRole[role].map((report) => (
-          <ReportCard key={report.id} report={report} />
-        ))}
-      </section>
+      <OperationalReports role={role} />
     </main>
   );
 }
