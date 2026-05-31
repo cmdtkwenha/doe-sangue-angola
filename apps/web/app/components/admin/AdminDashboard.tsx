@@ -6,6 +6,7 @@ import { AdminSidebar } from "./AdminSidebar";
 import { BloodInventoryTable } from "./BloodInventoryTable";
 import { LiveRequestsPanel } from "./LiveRequestsPanel";
 import { LoadingSkeleton } from "../ui/LoadingSkeleton";
+import { NationalOperationsCenter } from "./national/NationalOperationsCenter";
 import { ProvinceHeatMap } from "./ProvinceHeatMap";
 import { RealtimeStatusStrip } from "../realtime/RealtimeStatusStrip";
 
@@ -49,6 +50,7 @@ export function AdminDashboard() {
           <SupportIssuesPanel />
           <RealtimeStatusStrip />
           <RequestStatusTimeline />
+          <NationalOperationsCenter />
           <AdminMetrics />
           <section className={styles.mainGrid}>
             <ProvinceHeatMap />

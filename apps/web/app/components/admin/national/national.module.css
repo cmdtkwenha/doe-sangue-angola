@@ -1,0 +1,184 @@
+.shell {
+  display: grid;
+  gap: 16px;
+}
+
+.hero,
+.panel {
+  background: white;
+  border: 1px solid #e3e7ee;
+  border-radius: 14px;
+  box-shadow: 0 14px 36px rgba(25, 35, 45, 0.06);
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px;
+}
+
+.hero h2 {
+  margin: 4px 0;
+  font-size: 26px;
+}
+
+.metrics,
+.gridTwo,
+.gridThree {
+  display: grid;
+  gap: 14px;
+}
+
+.metrics {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.gridTwo {
+  grid-template-columns: 1.1fr 0.9fr;
+}
+
+.gridThree {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.panel {
+  padding: 18px;
+}
+
+.panelHead,
+.bloodTop {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.exports,
+.segmented {
+  display: flex;
+  gap: 8px;
+}
+
+.exports button,
+.segmented button {
+  border: 1px solid #dfe5ec;
+  border-radius: 10px;
+  background: #fff;
+  color: #151923;
+  cursor: pointer;
+  font-weight: 800;
+  min-height: 38px;
+  padding: 9px 12px;
+}
+
+.exports button:first-child,
+.active {
+  background: #b10f1f !important;
+  border-color: #b10f1f !important;
+  color: white !important;
+}
+
+.areaGrid,
+.bloodGrid,
+.list {
+  display: grid;
+  gap: 10px;
+}
+
+.areaGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.areaCard,
+.bloodCard,
+.row,
+.rankRow {
+  border: 1px solid #edf0f4;
+  border-radius: 12px;
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+}
+
+.bloodGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.stockBar {
+  background: #edf0f4;
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.stockBar span {
+  background: linear-gradient(90deg, #d01424, #f6a623);
+  display: block;
+  height: 100%;
+}
+
+.critical,
+.warning,
+.stable,
+.surplus {
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 8px;
+}
+
+.critical {
+  background: #fff0f1;
+  color: #b10f1f;
+}
+
+.warning {
+  background: #fff6dc;
+  color: #946200;
+}
+
+.stable {
+  background: #e9fff3;
+  color: #087443;
+}
+
+.surplus {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.areaCard.critical,
+.areaCard.warning,
+.areaCard.stable,
+.areaCard.surplus {
+  font-size: inherit;
+  font-weight: inherit;
+  padding: 12px;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+@media (max-width: 1280px) {
+  .metrics,
+  .gridTwo,
+  .gridThree {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .hero {
+    display: grid;
+  }
+  .areaGrid,
+  .bloodGrid {
+    grid-template-columns: 1fr;
+  }
+}
