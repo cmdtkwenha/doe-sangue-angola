@@ -77,6 +77,7 @@ function buildPayload(input: SaveDonorInput) {
     gender: input.gender,
     medical_disclaimer_version: input.consentVersion,
     municipality: input.municipality,
+    phone: input.phone,
     privacy_policy_version: input.consentVersion,
     province: input.province,
     user_id: input.userId
@@ -90,6 +91,7 @@ export const donorColumns = [
   "blood_type",
   "province",
   "municipality",
+  "phone",
   "gender",
   "available",
   "birth_date",

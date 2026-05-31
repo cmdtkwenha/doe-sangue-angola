@@ -1,10 +1,10 @@
 import { RouteGuard } from "../../components/auth/RouteGuard";
-import { SettingsShell } from "../../components/settings";
+import { DonorSettingsEditor } from "../../components/mobile/DonorSettingsEditor";
 
 export default function DonorSettingsPage() {
   return (
     <RouteGuard allowed={["donor"]}>
-      <SettingsShell role="donor" />
+      <DonorSettingsEditor />
     </RouteGuard>
   );
 }

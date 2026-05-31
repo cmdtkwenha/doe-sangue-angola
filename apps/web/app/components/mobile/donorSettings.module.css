@@ -1,0 +1,79 @@
+.header,
+.panel {
+  background: white;
+  border: 1px solid #e7eaf0;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(25, 35, 45, 0.06);
+}
+
+.header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+}
+
+.panel {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 14px;
+}
+
+.grid {
+  display: grid;
+  gap: 10px;
+}
+
+.field,
+.readOnly {
+  border: 1px solid #edf0f4;
+  border-radius: 12px;
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+}
+
+.field span,
+.readOnly small {
+  color: #697386;
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.field input,
+.field select {
+  border: 1px solid #dfe5ee;
+  border-radius: 10px;
+  min-height: 40px;
+  padding: 0 10px;
+}
+
+.toggles {
+  display: grid;
+  gap: 8px;
+}
+
+.toggle {
+  align-items: center;
+  border: 1px solid #edf0f4;
+  border-radius: 12px;
+  display: flex;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px;
+}
+
+.save {
+  background: linear-gradient(135deg, #d71920, #a90f1c);
+  border: 0;
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  font-weight: 900;
+  margin-top: 12px;
+  min-height: 48px;
+  width: 100%;
+}

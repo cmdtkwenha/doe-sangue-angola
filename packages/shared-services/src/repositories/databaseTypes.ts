@@ -17,6 +17,7 @@ export type DonorRow = {
   blood_type: BloodType;
   province: string;
   municipality: string;
+  phone?: string | null;
   available: boolean;
   birth_date?: string | null;
   consent_accepted_at?: string | null;
@@ -119,6 +120,7 @@ export function mapDonor(row: DonorRow): Donor {
     bloodType: row.blood_type,
     province: row.province,
     municipality: row.municipality,
+    phone: row.phone ?? undefined,
     available: row.available,
     birthDate: row.birth_date ?? undefined,
     consentAcceptedAt: row.consent_accepted_at ?? undefined,
