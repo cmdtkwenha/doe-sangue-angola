@@ -72,6 +72,8 @@ export type RequestRow = {
   notes?: string | null;
   status: RequestStatus;
   created_at: string;
+  request_source?: "hospital" | "family" | null;
+  family_request_id?: string | null;
   hospitals?: { municipality?: string | null; name?: string | null; province?: string | null; latitude?: number | null; longitude?: number | null } | null;
 };
 
@@ -184,6 +186,8 @@ export function mapRequest(row: RequestRow): BloodRequest {
     status: row.status,
     createdBy: row.created_by ?? undefined,
     createdAt: row.created_at,
+    requestSource: row.request_source ?? "hospital",
+    familyRequestId: row.family_request_id ?? undefined,
     hospitalName: row.hospitals?.name ?? undefined,
     hospitalLocation: formatHospitalLocation(row)
   };

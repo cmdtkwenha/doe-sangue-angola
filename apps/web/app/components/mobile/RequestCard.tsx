@@ -38,6 +38,7 @@ export function RequestCard({
         <span className={styles.requestTop}>
         <span>
           <strong className={textTone}>{request.urgency}</strong>
+          {request.requestSource === "family" ? <em className="pill gold">Pedido Familiar</em> : null}
           <br />
           <span className={`${styles.blood} ${textTone}`}>{request.bloodType}</span>
         </span>

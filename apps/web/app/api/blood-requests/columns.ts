@@ -12,6 +12,8 @@ export const requestColumns = [
   "urgency",
   "status",
   "created_at",
+  "request_source",
+  "family_request_id",
   "hospitals(name,municipality,province)"
 ].join(",");
 

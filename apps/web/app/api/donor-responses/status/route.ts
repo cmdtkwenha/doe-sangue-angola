@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     const responseId = assertString(body.responseId, "Resposta do dador");
     const { data: existing, error } = await db
       .from("donor_responses")
-      .select("id,blood_request_id,donor_id,hospital_id,confirmation_pin,failed_pin_attempts,pin_expires_at,pin_locked_until,status")
+      .select("id,blood_request_id,donor_id,hospital_id,confirmation_pin,failed_pin_attempts,pin_expires_at,pin_locked_until,status,blood_requests(family_request_id)")
       .eq("id", responseId)
       .single();
     if (error) throw supabaseError("Não foi possível carregar a resposta do dador", error);
@@ -51,6 +51,7 @@ export async function POST(request: Request) {
     if (status === "pin_validated") await clearPinFailures(db, responseId);
     await applyOperationalEffects(db, responseId, existing.donor_id, status);
     await syncRequest(db, existing.blood_request_id, status);
+    await syncFamilyRequest(db, familyId(existing), status);
     await notifyDonor(db, existing.donor_id, status);
     if (status === "completed" || status === "cancelled") {
       await notifyAdmins(db, workflowTitle(status), workflowMessage(status), status);
@@ -58,6 +59,24 @@ export async function POST(request: Request) {
     await auditApiAction(principal, auditMessage(status, responseId));
     return data;
   });
+}
+
+async function syncFamilyRequest(
+  db: Awaited<ReturnType<typeof createRouteSupabase>>,
+  familyRequestId: string | undefined,
+  status: ResponseStatus
+) {
+  if (!familyRequestId || !["completed", "cancelled"].includes(status)) return;
+  const next = status === "completed" ? "fulfilled" : "cancelled";
+  await db.from("family_emergency_requests").update({
+    status: next,
+    updated_at: new Date().toISOString()
+  }).eq("id", familyRequestId);
+}
+
+function familyId(row: { blood_requests?: unknown }) {
+  const request = Array.isArray(row.blood_requests) ? row.blood_requests[0] : row.blood_requests;
+  return (request as { family_request_id?: string | null } | undefined)?.family_request_id ?? undefined;
 }
 
 async function applyOperationalEffects(
@@ -226,10 +245,6 @@ async function syncRequest(
   if (error) throw supabaseError("Não foi possível atualizar o pedido de sangue", error);
 }
 
-function supabaseError(label: string, error: {
-  code?: string;
-  details?: string;
-  message: string;
-}) {
+function supabaseError(label: string, error: { message: string }) {
   return new Error(`${label}. ${error.message}`);
 }

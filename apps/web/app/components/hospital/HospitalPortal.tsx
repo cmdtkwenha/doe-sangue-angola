@@ -31,6 +31,9 @@ const DonorArrivalCard = dynamic(() =>
 const ExpiringUnitsPanel = dynamic(() =>
   import("./ExpiringUnitsPanel").then((module) => module.ExpiringUnitsPanel),
 { loading: load("A carregar unidades a vencer") });
+const FamilyRequestsAdoptionPanel = dynamic(() =>
+  import("./FamilyRequestsAdoptionPanel").then((module) => module.FamilyRequestsAdoptionPanel),
+{ loading: load("A carregar pedidos familiares") });
 const HospitalPerformancePanel = dynamic(() =>
   import("./HospitalPerformancePanel").then((module) => module.HospitalPerformancePanel),
 { loading: load("A carregar desempenho hospitalar") });
@@ -91,6 +94,7 @@ export function HospitalPortal() {
           </section>
           <section className={advanced.balancedGrid}>
             <CompletionFlow />
+            <FamilyRequestsAdoptionPanel />
           </section>
           <section className={advanced.advancedGrid}>
             <PinValidationCard />

@@ -108,6 +108,8 @@ export type BloodRequest = {
   etaMinutes?: number;
   hospitalName?: string;
   hospitalLocation?: string;
+  requestSource?: "hospital" | "family";
+  familyRequestId?: string;
 };
 
 export type Appointment = {

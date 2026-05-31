@@ -35,6 +35,14 @@
   color: #111820;
 }
 
+.field input,
+.field select {
+  border: 1px solid #dfe5ee;
+  border-radius: 10px;
+  min-height: 40px;
+  padding: 0 10px;
+}
+
 .card {
   margin-top: 12px;
   overflow: hidden;

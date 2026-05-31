@@ -34,7 +34,7 @@ Do not patch runtime errors by adding frontend-only fields.
 ### blood_requests
 `id`, `created_by`, `hospital_id`, `patient_code`, `blood_type`, `units`,
 `units_needed`, `province`, `municipality`, `notes`, `urgency`, `status`,
-`created_at`
+`created_at`, `request_source`, `family_request_id`
 
 ### clinics
 `id`, `name`, `province`, `municipality`, `address`, `contact`, `email`,
@@ -56,6 +56,12 @@ Do not patch runtime errors by adding frontend-only fields.
 `medical_disclaimer_version`, `emergency_contact_name`,
 `emergency_contact_phone`, `gender`, `birth_date`, `latitude`, `longitude`,
 `location_permission_status`, `last_donation_date`
+
+### family_emergency_requests
+`id`, `patient_name`, `contact_name`, `contact_phone`, `relationship`,
+`hospital_name`, `hospital_id`, `province`, `municipality`, `blood_type`,
+`units_needed`, `urgency`, `status`, `review_note`, `blood_request_id`,
+`share_token`, `created_at`, `updated_at`
 
 ### fraud_reviews
 `id`, `blood_request_id`, `donor_id`, `risk`, `status`, `created_at`
