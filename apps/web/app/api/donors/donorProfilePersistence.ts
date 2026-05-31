@@ -31,7 +31,11 @@ export async function saveDonor(db: DbClient, input: SaveDonorInput): Promise<Do
     .upsert(buildPayload(input), { onConflict: "user_id" });
   const { data, error } = await query.select(donorColumns).single();
   if (error) throw new Error(formatSupabaseError(error));
-  await recordConsent(db, input);
+  await recordConsent(db, input).catch((error) => {
+    if (process.env.NODE_ENV !== "production") {
+      console.info("[donor] Consentimento legal não bloqueou onboarding", error);
+    }
+  });
   return mapDonor(data as unknown as DonorRow);
 }
 
