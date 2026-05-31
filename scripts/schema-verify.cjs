@@ -2,10 +2,12 @@ const { createClient } = require("@supabase/supabase-js");
 const { readdirSync, readFileSync } = require("node:fs");
 const { join } = require("node:path");
 const { schemaContract } = require("./schema-contract.cjs");
+const { checkSupabaseReferences } = require("./schema-reference-check.cjs");
 
 const root = join(__dirname, "..");
 
 async function main() {
+  verifyAppReferences();
   const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -27,6 +29,15 @@ async function main() {
     process.exit(1);
   }
   console.log("schema:verify passed against Supabase.");
+}
+
+function verifyAppReferences() {
+  const problems = checkSupabaseReferences();
+  if (problems.length) {
+    console.error("schema:verify app reference check failed:");
+    problems.forEach((item) => console.error(`- ${item}`));
+    process.exit(1);
+  }
 }
 
 function verifyMigrationCoverage() {

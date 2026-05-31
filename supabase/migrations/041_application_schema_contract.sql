@@ -35,6 +35,7 @@ add column if not exists role text not null default 'donor',
 add column if not exists linked_entity_id uuid,
 add column if not exists name text,
 add column if not exists email text,
+add column if not exists phone text,
 add column if not exists created_at timestamptz not null default now();
 
 alter table public.hospitals
@@ -99,6 +100,7 @@ add column if not exists completed_at timestamptz,
 add column if not exists donation_completed_at timestamptz,
 add column if not exists pin_expires_at timestamptz,
 add column if not exists pin_locked_until timestamptz,
+add column if not exists last_pin_attempt_at timestamptz,
 add column if not exists failed_pin_attempts integer not null default 0,
 add column if not exists reward_accepted_at timestamptz,
 add column if not exists reward_arrived_at timestamptz,

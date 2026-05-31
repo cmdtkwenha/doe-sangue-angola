@@ -3,6 +3,24 @@
 Doe Sangue Angola usa Supabase Postgres. As migrations ficam em
 `supabase/migrations`.
 
+## Schema Lock
+
+O contrato de produção está em `DATABASE_SCHEMA_LOCK.md` e em
+`scripts/schema-contract.cjs`.
+
+Regra obrigatória: nenhum campo pode ser adicionado no frontend, mobile,
+serviços ou APIs sem uma migration Supabase correspondente.
+
+Antes de usar uma nova coluna:
+
+1. Criar migration segura com `add column if not exists`.
+2. Atualizar `scripts/schema-contract.cjs`.
+3. Executar `npm run schema:verify`.
+4. Executar `npm run typecheck` e `npm run build`.
+
+O comando `npm run schema:verify` falha se encontrar referências literais a
+colunas Supabase que não estejam no contrato bloqueado.
+
 ## Tabelas Principais
 
 ### `users`
