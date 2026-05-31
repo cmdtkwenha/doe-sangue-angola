@@ -74,6 +74,8 @@ function buildPayload(input: SaveDonorInput) {
     blood_type: input.bloodType,
     consent_accepted_at: new Date().toISOString(),
     consent_version: input.consentVersion,
+    medical_disclaimer_version: input.consentVersion,
+    privacy_policy_version: input.consentVersion,
     eligibility_status: "Elegível",
     email: input.email,
     emergency_contact_name: input.emergencyContactName,

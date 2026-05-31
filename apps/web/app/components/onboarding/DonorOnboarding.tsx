@@ -45,6 +45,10 @@ export function DonorOnboarding() {
       setMessage("O dador deve ter pelo menos 18 anos e uma data válida.");
       return;
     }
+    if (!form.consentAccepted) {
+      setMessage("Aceite os Termos de Uso, a Política de Privacidade e o Aviso Médico para continuar.");
+      return;
+    }
     setSaving(true);
     setMessage("A guardar perfil...");
     try {
