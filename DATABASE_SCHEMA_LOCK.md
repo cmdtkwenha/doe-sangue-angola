@@ -70,6 +70,13 @@ Do not patch runtime errors by adding frontend-only fields.
 `id`, `hospital_id`, `blood_type`, `units_available`, `daily_usage_estimate`,
 `safe_minimum`, `minimum_threshold`, `critical_threshold`, `updated_at`
 
+### hospital_notification_preferences
+`id`, `hospital_id`, `preferences`, `created_at`, `updated_at`
+
+### hospital_staff
+`id`, `hospital_id`, `auth_user_id`, `name`, `email`, `staff_role`, `status`,
+`invited_by`, `last_activity_at`, `created_at`, `updated_at`
+
 ### inventory_movements
 `id`, `hospital_id`, `blood_type`, `movement_type`, `units`, `note`,
 `created_by`, `created_at`
@@ -77,7 +84,9 @@ Do not patch runtime errors by adding frontend-only fields.
 ### hospitals
 `id`, `name`, `province`, `municipality`, `verified`, `verification_status`,
 `rejection_reason`, `capacity`, `contact`, `created_at`, `address`, `email`,
-`facility_type`, `license_number`, `phone`, `latitude`, `longitude`
+`facility_type`, `license_number`, `phone`, `latitude`, `longitude`,
+`main_contact_person`, `operational_phone`, `operational_email`,
+`emergency_contact`, `operating_hours`
 
 ### legal_consents
 `id`, `user_id`, `role`, `consent_type`, `version`, `page`, `accepted_at`
