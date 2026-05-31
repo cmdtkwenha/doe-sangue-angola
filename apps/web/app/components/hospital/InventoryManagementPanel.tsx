@@ -10,19 +10,22 @@ import { useCurrentHospital } from "./useCurrentHospital";
 
 type InventoryRow = {
   bloodType: string;
+  criticalThreshold: number;
   daysRemaining: number;
+  minimumThreshold: number;
   safeMinimum: number;
   status: "Adequado" | "Baixo" | "Crítico";
   trend: string;
   units: number;
 };
-type Movement = "donation_received" | "stock_added" | "stock_consumed" | "stock_expired";
+type Movement = "donation_received" | "stock_added" | "stock_consumed" | "stock_expired" | "manual_adjustment";
 
 const movementLabels: Record<Movement, string> = {
   donation_received: "Doação recebida",
   stock_added: "Stock adicionado",
   stock_consumed: "Stock consumido",
-  stock_expired: "Stock expirado"
+  stock_expired: "Stock expirado",
+  manual_adjustment: "Ajuste manual"
 };
 
 export function InventoryManagementPanel() {
@@ -75,7 +78,7 @@ export function InventoryManagementPanel() {
             <article className={styles.inventoryRow} key={item.bloodType}>
               <strong>{item.bloodType}</strong>
               <span>{item.units} unidades</span>
-              <span>{item.safeMinimum} mínimo</span>
+              <span>Mín. {item.minimumThreshold} · Crít. {item.criticalThreshold}</span>
               <span className={item.status === "Crítico" ? "pill red" : "pill gold"}>{item.status}</span>
               <button disabled={busyType === item.bloodType} onClick={() => submit(item.bloodType)} type="button">
                 {busyType === item.bloodType ? "A guardar..." : "Registar"}
@@ -84,6 +87,28 @@ export function InventoryManagementPanel() {
           ))}
         </div>
       )}
+      <ShortageSuggestions items={inventory} />
     </section>
+  );
+}
+
+function ShortageSuggestions({ items }: { items: InventoryRow[] }) {
+  const low = items.filter((item) => item.units < item.minimumThreshold);
+  if (!low.length) return null;
+  return (
+    <div className={styles.table}>
+      {low.map((item) => {
+        const urgency = item.units <= item.criticalThreshold ? "Critica" : "Alta";
+        const href = `/hospital/new-request?bloodType=${encodeURIComponent(item.bloodType)}&urgency=${urgency}`;
+        return (
+          <article className={styles.inventoryRow} key={`suggest-${item.bloodType}`}>
+            <strong>Sugestão {item.bloodType}</strong>
+            <span>{item.status}: criar pedido</span>
+            <span>Urgência {urgency}</span>
+            <a className="button" href={href}>Criar pedido</a>
+          </article>
+        );
+      })}
+    </div>
   );
 }

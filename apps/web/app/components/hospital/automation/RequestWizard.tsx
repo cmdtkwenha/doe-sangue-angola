@@ -6,7 +6,7 @@ import {
 } from "@doe-sangue-angola/shared-services";
 import type { BloodType, Urgency } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createRequestAction } from "../../workflow/workflowActions";
 import { useCurrentHospital } from "../useCurrentHospital";
 import styles from "./hospitalAutomation.module.css";
@@ -24,6 +24,16 @@ export function RequestWizard() {
   const [urgency, setUrgency] = useState<Urgency>("Critica");
   const [notes, setNotes] = useState("");
   const [message, setMessage] = useState("Pronto para criar pedido.");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const nextBloodType = params.get("bloodType") as BloodType | null;
+    const nextUrgency = params.get("urgency") as Urgency | null;
+    if (nextBloodType && bloodTypes.includes(nextBloodType)) setBloodType(nextBloodType);
+    if (nextUrgency && ["Desastre", "Critica", "Alta", "Media", "Normal"].includes(nextUrgency)) {
+      setUrgency(nextUrgency);
+    }
+  }, []);
 
   return (
     <section className={styles.panel}>

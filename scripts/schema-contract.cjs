@@ -8,7 +8,7 @@ const schemaContract = {
   donors: ["id", "user_id", "blood_type", "province", "municipality", "available", "eligibility_status", "last_donation", "points", "preferred_hospital_id", "created_at", "reliability_score", "response_speed_minutes", "next_eligible_donation_date", "consent_accepted_at", "consent_version", "privacy_policy_version", "medical_disclaimer_version", "emergency_contact_name", "emergency_contact_phone", "gender", "birth_date", "latitude", "longitude", "location_permission_status", "last_donation_date"],
   family_emergency_requests: ["id", "patient_name", "contact_name", "contact_phone", "relationship", "hospital_name", "hospital_id", "province", "municipality", "blood_type", "units_needed", "urgency", "status", "review_note", "blood_request_id", "share_token", "created_at", "updated_at"],
   fraud_reviews: ["id", "blood_request_id", "donor_id", "risk", "status", "created_at"],
-  hospital_inventory: ["id", "hospital_id", "blood_type", "units_available", "daily_usage_estimate", "safe_minimum", "updated_at"],
+  hospital_inventory: ["id", "hospital_id", "blood_type", "units_available", "daily_usage_estimate", "safe_minimum", "minimum_threshold", "critical_threshold", "updated_at"],
   inventory_movements: ["id", "hospital_id", "blood_type", "movement_type", "units", "note", "created_by", "created_at"],
   hospitals: ["id", "name", "province", "municipality", "verified", "verification_status", "rejection_reason", "capacity", "contact", "created_at", "address", "email", "facility_type", "license_number", "phone", "latitude", "longitude"],
   legal_consents: ["id", "user_id", "role", "consent_type", "version", "page", "accepted_at"],

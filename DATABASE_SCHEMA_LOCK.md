@@ -68,7 +68,7 @@ Do not patch runtime errors by adding frontend-only fields.
 
 ### hospital_inventory
 `id`, `hospital_id`, `blood_type`, `units_available`, `daily_usage_estimate`,
-`safe_minimum`, `updated_at`
+`safe_minimum`, `minimum_threshold`, `critical_threshold`, `updated_at`
 
 ### inventory_movements
 `id`, `hospital_id`, `blood_type`, `movement_type`, `units`, `note`,

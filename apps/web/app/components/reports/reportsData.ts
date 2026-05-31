@@ -22,6 +22,9 @@ export const reportsByRole: Record<ReportRole, ReportDefinition[]> = {
     report("hospitals", "Relatório de atividade hospitalar", "Hospitais reais, capacidade e pedidos recentes."),
     report("donors", "Relatório de atividade dos dadores", "Dadores reais, disponibilidade e elegibilidade."),
     report("shortage", "Relatório de escassez", "Escassez real a partir do inventário hospitalar."),
+    report("inventory-history", "Histórico de inventário", "Movimentos de doação, consumo, expiração e ajuste manual."),
+    report("stock-trends", "Tendências de stock", "Evolução de stock por tipo sanguíneo e hospital."),
+    report("blood-demand", "Procura por tipo sanguíneo", "Demanda real cruzando pedidos e inventário."),
     report("family", "Relatório de pedidos familiares", "Pedidos familiares por província e pedidos resolvidos."),
     report("fraud", "Relatório de fraude", "Revisões reais registadas pelo sistema."),
     report("audit", "Relatório de auditoria", "Ações reais de administradores, hospitais e dadores.")

@@ -7,7 +7,9 @@ import { assertBloodType, assertString, assertUnits, optionalString } from "../.
 
 export type InventoryRow = {
   bloodType: string;
+  criticalThreshold: number;
   daysRemaining: number;
+  minimumThreshold: number;
   safeMinimum: number;
   status: "Adequado" | "Baixo" | "Crítico";
   trend: string;
@@ -16,7 +18,7 @@ export type InventoryRow = {
 
 type MovementBody = {
   bloodType: BloodType;
-  movementType: "donation_received" | "stock_added" | "stock_consumed" | "stock_expired";
+  movementType: "donation_received" | "stock_added" | "stock_consumed" | "stock_expired" | "manual_adjustment";
   note?: string;
   units: number;
 };
@@ -30,7 +32,7 @@ export async function GET(request: Request) {
     const db = await createRouteSupabase();
     const { data, error } = await db
       .from("hospital_inventory")
-      .select("blood_type,units_available,daily_usage_estimate,safe_minimum,updated_at")
+      .select("blood_type,units_available,daily_usage_estimate,safe_minimum,minimum_threshold,critical_threshold,updated_at")
       .eq("hospital_id", hospitalId)
       .order("blood_type", { ascending: true });
     if (error) throw new Error(`Inventário indisponível. ${error.message}`);
@@ -38,12 +40,16 @@ export async function GET(request: Request) {
     return bloodTypes.map((bloodType) => {
       const item = byType.get(bloodType);
       const units = item?.units_available ?? 0;
+      const minimum = item?.minimum_threshold ?? item?.safe_minimum ?? minimumStockByType[bloodType];
+      const critical = item?.critical_threshold ?? Math.max(1, Math.floor(minimum / 2));
       const days = Math.floor(units / Math.max(Number(item?.daily_usage_estimate ?? 1), 1));
       return {
         bloodType,
+        criticalThreshold: critical,
         daysRemaining: days,
-        safeMinimum: item?.safe_minimum ?? minimumStockByType[bloodType],
-        status: statusFor(units, item?.safe_minimum ?? minimumStockByType[bloodType]),
+        minimumThreshold: minimum,
+        safeMinimum: minimum,
+        status: statusFor(units, minimum, critical),
         trend: days <= 2 ? "queda prevista" : "estável",
         units
       } satisfies InventoryRow;
@@ -66,8 +72,9 @@ export async function POST(request: Request) {
     const nextUnits = calculateNextUnits(current?.units_available ?? 0, units, movementType);
     await saveInventory(db, {
       bloodType,
+      criticalThreshold: current?.critical_threshold ?? criticalFor(current?.minimum_threshold ?? current?.safe_minimum ?? minimumStockByType[bloodType]),
       hospitalId,
-      safeMinimum: current?.safe_minimum ?? minimumStockByType[bloodType],
+      minimumThreshold: current?.minimum_threshold ?? current?.safe_minimum ?? minimumStockByType[bloodType],
       units: nextUnits
     });
     const { error: movementError } = await db.from("inventory_movements").insert({
@@ -84,28 +91,29 @@ export async function POST(request: Request) {
   });
 }
 
-function statusFor(units: number, minimum: number): InventoryRow["status"] {
-  if (units <= Math.max(1, Math.floor(minimum / 2))) return "Crítico";
+function statusFor(units: number, minimum: number, critical: number): InventoryRow["status"] {
+  if (units <= critical) return "Crítico";
   if (units < minimum) return "Baixo";
   return "Adequado";
 }
 
 function assertMovement(value: unknown): MovementBody["movementType"] {
   const movement = assertString(value, "Movimento");
-  const allowed = ["donation_received", "stock_added", "stock_consumed", "stock_expired"];
+  const allowed = ["donation_received", "stock_added", "stock_consumed", "stock_expired", "manual_adjustment"];
   if (!allowed.includes(movement)) throw new ApiError(400, "Tipo de movimento inválido.");
   return movement as MovementBody["movementType"];
 }
 
 function calculateNextUnits(current: number, units: number, movement: MovementBody["movementType"]) {
   const delta = ["stock_consumed", "stock_expired"].includes(movement) ? -units : units;
+  if (movement === "manual_adjustment") return units;
   return Math.max(0, current + delta);
 }
 
 async function findInventory(db: Awaited<ReturnType<typeof createRouteSupabase>>, hospitalId: string, bloodType: BloodType) {
   const { data, error } = await db
     .from("hospital_inventory")
-    .select("id,units_available,safe_minimum")
+    .select("id,units_available,safe_minimum,minimum_threshold,critical_threshold")
     .eq("hospital_id", hospitalId)
     .eq("blood_type", bloodType)
     .maybeSingle();
@@ -115,12 +123,14 @@ async function findInventory(db: Awaited<ReturnType<typeof createRouteSupabase>>
 
 async function saveInventory(
   db: Awaited<ReturnType<typeof createRouteSupabase>>,
-  input: { bloodType: BloodType; hospitalId: string; safeMinimum: number; units: number }
+  input: { bloodType: BloodType; criticalThreshold: number; hospitalId: string; minimumThreshold: number; units: number }
 ) {
   const { error } = await db.from("hospital_inventory").upsert({
     blood_type: input.bloodType,
+    critical_threshold: input.criticalThreshold,
     hospital_id: input.hospitalId,
-    safe_minimum: input.safeMinimum,
+    minimum_threshold: input.minimumThreshold,
+    safe_minimum: input.minimumThreshold,
     units_available: input.units,
     updated_at: new Date().toISOString()
   }, { onConflict: "hospital_id,blood_type" });
@@ -132,6 +142,11 @@ function movementLabel(movement: MovementBody["movementType"]) {
     donation_received: "Recebeu doação no inventário",
     stock_added: "Adicionou stock ao inventário",
     stock_consumed: "Consumiu stock do inventário",
-    stock_expired: "Expirou stock do inventário"
+    stock_expired: "Expirou stock do inventário",
+    manual_adjustment: "Ajustou manualmente o inventário"
   }[movement];
+}
+
+function criticalFor(minimum: number) {
+  return Math.max(1, Math.floor(minimum / 2));
 }

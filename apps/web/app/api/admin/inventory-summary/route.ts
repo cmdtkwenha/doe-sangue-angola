@@ -3,7 +3,9 @@ import { createRouteSupabase, requireApiSession } from "../../_utils/security";
 
 type InventoryRow = {
   blood_type: string;
+  critical_threshold: number | null;
   hospital_id: string | null;
+  minimum_threshold: number | null;
   safe_minimum: number | null;
   units_available: number | null;
 };
@@ -16,7 +18,7 @@ export async function GET() {
     const [{ data, error }, { data: hospitals, error: hospitalError }] = await Promise.all([
       db
       .from("hospital_inventory")
-      .select("hospital_id,blood_type,units_available,safe_minimum")
+      .select("hospital_id,blood_type,units_available,safe_minimum,minimum_threshold,critical_threshold")
       .order("blood_type", { ascending: true }),
       db.from("hospitals").select("id,province")
     ]);
@@ -26,7 +28,7 @@ export async function GET() {
     const totals = new Map<string, { safeMinimum: number; units: number }>();
     ((data ?? []) as InventoryRow[]).forEach((row) => {
       const current = totals.get(row.blood_type) ?? { safeMinimum: 0, units: 0 };
-      current.safeMinimum += Number(row.safe_minimum ?? 0);
+      current.safeMinimum += Number(row.minimum_threshold ?? row.safe_minimum ?? 0);
       current.units += Number(row.units_available ?? 0);
       totals.set(row.blood_type, current);
     });
@@ -51,8 +53,9 @@ function buildShortagesByProvince(rows: InventoryRow[], hospitals: HospitalRow[]
     const province = provinceByHospital.get(row.hospital_id ?? "") ?? "Sem província";
     const item = totals.get(province) ?? { critical: 0, low: 0 };
     const units = Number(row.units_available ?? 0);
-    const minimum = Number(row.safe_minimum ?? 1);
-    if (units <= Math.max(1, Math.floor(minimum / 2))) item.critical += 1;
+    const minimum = Number(row.minimum_threshold ?? row.safe_minimum ?? 1);
+    const critical = Number(row.critical_threshold ?? Math.max(1, Math.floor(minimum / 2)));
+    if (units <= critical) item.critical += 1;
     else if (units < minimum) item.low += 1;
     totals.set(province, item);
   });
