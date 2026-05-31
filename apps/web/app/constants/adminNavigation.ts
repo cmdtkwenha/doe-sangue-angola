@@ -1,6 +1,7 @@
 export const adminNavigation = [
   { label: "Visão Geral", href: "/admin" },
   { label: "Pedidos de Sangue", href: "/admin/requests" },
+  { label: "Analítica", href: "/admin/analytics" },
   { label: "Hospitais & Clínicas", href: "/admin/hospitals" },
   { label: "Utilizadores", href: "/admin/users" },
   { label: "Importar Dados", href: "/admin/imports" },
