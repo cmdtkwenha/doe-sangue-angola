@@ -5,6 +5,7 @@ import { analyticsEvents } from "@doe-sangue-angola/shared-services";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "../auth/useAuth";
+import { ConfirmationModal } from "../ui/ConfirmationModal";
 import { DonorBirthDateSelect, isEligibleBirthDate } from "./DonorBirthDateSelect";
 import { OnboardingShell } from "./OnboardingShell";
 import styles from "./onboarding.module.css";
@@ -28,12 +29,20 @@ export function DonorOnboarding() {
     province: "Luanda"
   });
   const [saving, setSaving] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const [message, setMessage] = useState("Preencha os dados reais do dador.");
   const [loaded, setLoaded] = useState(false);
   const missingFormFields = requiredFields(form);
-  const formReady = missingFormFields.length === 0 &&
-    isEligibleBirthDate(form.birthDate) &&
-    form.consentAccepted;
+
+  function reviewBeforeSave() {
+    const missing = validationErrors(form);
+    if (missing.length) {
+      setMessage(`Complete antes de guardar: ${missing.join(", ")}.`);
+      return;
+    }
+    setMessage("Confirme os dados para guardar o perfil.");
+    setConfirming(true);
+  }
 
   useEffect(() => {
     async function loadExistingProfile() {
@@ -66,7 +75,7 @@ export function DonorOnboarding() {
 
   async function save() {
     if (!session?.user.id) return setMessage("Sessão inválida. Entre novamente.");
-    const missing = requiredFields(form);
+    const missing = validationErrors(form);
     if (missing.length) {
       setMessage(`Complete: ${missing.join(", ")}.`);
       return;
@@ -101,6 +110,7 @@ export function DonorOnboarding() {
       analyticsEvents.onboardingCompleted("donor");
       setMessage("Perfil guardado com sucesso. A abrir a aplicação...");
       void refreshSession();
+      setConfirming(false);
       router.replace("/mobile");
       window.location.assign("/mobile");
     } catch (error) {
@@ -140,7 +150,7 @@ export function DonorOnboarding() {
         <Field required label="Telefone de emergência" value={form.emergencyContactPhone} onChange={(emergencyContactPhone) =>
           setForm({ ...form, emergencyContactPhone })} />
         <label className="eyebrow">Data de nascimento *</label>
-        <DonorBirthDateSelect onChange={(birthDate) => setForm({ ...form, birthDate })} />
+        <DonorBirthDateSelect value={form.birthDate} onChange={(birthDate) => setForm({ ...form, birthDate })} />
         <label className={styles.consentBox}>
           <input
             checked={form.consentAccepted}
@@ -157,26 +167,48 @@ export function DonorOnboarding() {
           <small className="muted">Campos em falta: {missingFormFields.join(", ")}.</small>
         ) : null}
         {!form.consentAccepted ? <small className="muted">Consentimento obrigatório para continuar.</small> : null}
-        <button className="button" disabled={saving || !formReady} onClick={save} type="button">
+        <button className="button" disabled={saving} onClick={reviewBeforeSave} type="button">
           {saving ? "A guardar..." : "Guardar perfil"}
         </button>
         <span className="muted">{message}</span>
+        <ConfirmationModal
+          confirmLabel="Confirmar e guardar"
+          loading={saving}
+          message="Confirma que os dados introduzidos estão corretos e que aceita os Termos de Uso, Política de Privacidade e Aviso Médico?"
+          onClose={() => !saving && setConfirming(false)}
+          onConfirm={() => void save()}
+          open={confirming}
+          title="Confirmar perfil de dador"
+        />
       </aside>
     </OnboardingShell>
   );
 }
 
-function requiredFields(form: {
+function validationErrors(form: DonorForm) {
+  const missing = requiredFields(form);
+  if (form.birthDate && !isEligibleBirthDate(form.birthDate)) {
+    missing.push("data de nascimento válida com idade mínima de 18 anos");
+  }
+  if (!form.consentAccepted) missing.push("consentimento");
+  return [...new Set(missing)];
+}
+
+type DonorForm = {
   birthDate: string;
   consentAccepted?: boolean;
+  bloodType: string;
   gender: string;
   municipality: string;
   phone: string;
   province: string;
   emergencyContactName: string;
   emergencyContactPhone: string;
-}) {
+};
+
+function requiredFields(form: DonorForm) {
   const fields = [
+    ["tipo sanguíneo", form.bloodType],
     ["província", form.province],
     ["município", form.municipality],
     ["telefone", form.phone],

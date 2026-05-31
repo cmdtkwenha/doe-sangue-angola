@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./onboarding.module.css";
 
 const months = [
@@ -12,9 +12,17 @@ const oldestYear = 1900;
 
 export const maxBirthDate = eligibleBirthDate();
 
-export function DonorBirthDateSelect({ onChange }: { onChange: (value: string) => void }) {
+export function DonorBirthDateSelect({ onChange, value = "" }: {
+  onChange: (value: string) => void;
+  value?: string;
+}) {
   const [parts, setParts] = useState({ day: "", month: "", year: "" });
   const dayCount = daysInMonth(Number(parts.year), Number(parts.month));
+
+  useEffect(() => {
+    const [year, month, day] = value.split("-");
+    if (year && month && day) setParts({ day: String(Number(day)), month: String(Number(month)), year });
+  }, [value]);
 
   function update(next: typeof parts) {
     const day = Number(next.day);
