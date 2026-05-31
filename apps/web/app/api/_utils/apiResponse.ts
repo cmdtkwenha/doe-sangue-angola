@@ -22,7 +22,7 @@ export async function apiResponse<T>(handler: Handler<T>) {
     reportError(error, { feature: "api.route" });
     trackApiRequest("api.route", 500, Date.now() - started);
     const message = error instanceof Error
-      ? error.message
+      ? friendlyDatabaseMessage(error.message)
       : "A sincronização não foi concluída. Tente novamente.";
     return Response.json(
       {
@@ -32,6 +32,13 @@ export async function apiResponse<T>(handler: Handler<T>) {
       { status: 500 }
     );
   }
+}
+
+function friendlyDatabaseMessage(message: string) {
+  if (/schema cache|Could not find (the )?(table|column)|does not exist/i.test(message)) {
+    return "Configuração da base de dados incompleta. Execute as migrations e volte a tentar.";
+  }
+  return message;
 }
 
 export async function readJson<T extends object>(request: Request) {

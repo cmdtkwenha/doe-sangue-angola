@@ -16,6 +16,7 @@
     "lint": "node scripts/project-audit.cjs --lint",
     "deploy:check": "node scripts/deployment-check.cjs",
     "smoke": "node scripts/smoke-routes.cjs",
+    "schema:verify": "node scripts/schema-verify.cjs",
     "test": "node scripts/run-tests.cjs",
     "typecheck": "npm --workspace apps/web run build && npm --workspace apps/mobile exec -- tsc --noEmit",
     "import:hospitals": "node --experimental-strip-types scripts/import-hospitals.ts"
