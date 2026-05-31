@@ -12,6 +12,7 @@ export type AcceptedDonor = {
   donorPhone: string;
   emergencyContactName?: string;
   emergencyContactPhone?: string;
+  eligibilityStatus?: string;
   eta: string;
   gender?: string;
   hospitalId?: string;

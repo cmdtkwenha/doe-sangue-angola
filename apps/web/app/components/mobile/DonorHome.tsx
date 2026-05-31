@@ -11,6 +11,7 @@ import { shortcuts } from "./mobileMock";
 import { MobileHeader } from "./MobileHeader";
 import { MobileShell } from "./MobileShell";
 import { DonorPinCard } from "./DonorPinCard";
+import { EligibilityStatusCard } from "./EligibilityStatusCard";
 import { isDonorProfileComplete, useCurrentDonor } from "./useCurrentDonor";
 import { useAuth } from "../auth/useAuth";
 
@@ -70,14 +71,7 @@ export function DonorHome() {
         ))}
       </section>
       <p className="muted" role="status">{message}</p>
-      <article className={styles.card}>
-        <strong>Elegibilidade</strong>
-        <p className="muted">
-          {eligibilityText(donor.nextEligibleDonationDate, donor.eligibilityStatus)}
-          {" · "}{donor.totalDonations ?? 0} doações registadas
-        </p>
-        <progress className={styles.progress} max="2000" value={donor.points} />
-      </article>
+      <EligibilityStatusCard donor={donor} />
       <DonorPinCard />
       <article className={styles.card}>
         <strong>Necessidades urgentes na sua área</strong>
@@ -95,11 +89,4 @@ export function DonorHome() {
       </article>
     </MobileShell>
   );
-}
-
-function eligibilityText(nextDate?: string, fallback?: string) {
-  if (!nextDate) return fallback ?? "Pendente";
-  const next = new Date(nextDate);
-  if (Number.isNaN(next.getTime()) || next.getTime() <= Date.now()) return "Elegível para doar";
-  return `Próxima doação elegível em ${next.toLocaleDateString("pt-AO")}`;
 }

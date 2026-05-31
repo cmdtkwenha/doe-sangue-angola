@@ -31,6 +31,7 @@ export type DonorRow = {
   consent_version?: string | null;
   emergency_contact_name?: string | null;
   emergency_contact_phone?: string | null;
+  eligibility_status?: string | null;
   gender?: string | null;
   last_donation: string | null;
   last_donation_date?: string | null;
@@ -134,7 +135,7 @@ export function mapDonor(row: DonorRow): Donor {
     consentVersion: row.consent_version ?? undefined,
     emergencyContactName: row.emergency_contact_name ?? undefined,
     emergencyContactPhone: row.emergency_contact_phone ?? undefined,
-    eligibilityStatus: "Pendente",
+    eligibilityStatus: normalizeEligibility(row.eligibility_status),
     gender: row.gender ?? undefined,
     lastDonation: row.last_donation_date ?? row.last_donation ?? "",
     latitude: row.latitude ?? undefined,
@@ -147,6 +148,12 @@ export function mapDonor(row: DonorRow): Donor {
     totalDonations: 0,
     preferredHospitalId: row.preferred_hospital_id ?? undefined
   };
+}
+
+function normalizeEligibility(value?: string | null) {
+  const valid = ["eligible", "temporarily_deferred", "permanently_deferred", "needs_review"];
+  if (valid.includes(value ?? "")) return value as Donor["eligibilityStatus"];
+  return ["Pendente", "Revisão", "Em revisão"].includes(value ?? "") ? "needs_review" : "eligible";
 }
 
 export function mapHospital(row: HospitalRow): Hospital {

@@ -22,6 +22,7 @@ export const donorColumns = [
   "province",
   "municipality",
   "available",
+  "eligibility_status",
   "birth_date",
   "gender",
   "last_donation",

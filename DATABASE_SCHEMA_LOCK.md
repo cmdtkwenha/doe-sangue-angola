@@ -50,7 +50,7 @@ Do not patch runtime errors by adding frontend-only fields.
 
 ### donors
 `id`, `user_id`, `blood_type`, `province`, `municipality`, `available`,
-`last_donation`, `points`, `preferred_hospital_id`, `created_at`,
+`eligibility_status`, `last_donation`, `points`, `preferred_hospital_id`, `created_at`,
 `reliability_score`, `response_speed_minutes`, `next_eligible_donation_date`,
 `consent_accepted_at`, `consent_version`, `privacy_policy_version`,
 `medical_disclaimer_version`, `emergency_contact_name`,

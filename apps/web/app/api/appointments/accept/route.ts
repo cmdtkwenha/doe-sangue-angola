@@ -1,4 +1,3 @@
-import type { Appointment } from "@doe-sangue-angola/shared-types";
 import { ApiError, apiResponse, readJson } from "../../_utils/apiResponse";
 import { auditApiAction } from "../../_utils/audit";
 import { createRouteSupabase, requireApiSession, requireSameOrigin } from "../../_utils/security";
@@ -6,6 +5,7 @@ import { donorBlocked } from "../../_utils/donorEligibility";
 import { notifyHospitalUsers, notifyUser } from "../../_utils/notifications";
 import { assertTableRateLimit } from "../../_utils/rateLimit";
 import { assertString } from "../../_utils/validation";
+import { createAppointment } from "./appointmentHelpers";
 
 export async function POST(request: Request) {
   requireSameOrigin(request);
@@ -17,11 +17,17 @@ export async function POST(request: Request) {
     const db = await createRouteSupabase();
     const { data: donor, error } = await db
       .from("donors")
-      .select("id,user_id,available,next_eligible_donation_date")
+      .select("id,user_id,available,eligibility_status,next_eligible_donation_date")
       .eq("id", donorId)
       .maybeSingle();
     if (error) throw supabaseError("Não foi possível carregar o dador", error);
-    const donorRow = donor as unknown as { available?: boolean; id: string; next_eligible_donation_date?: string | null; user_id?: string } | null;
+    const donorRow = donor as unknown as {
+      available?: boolean;
+      eligibility_status?: string | null;
+      id: string;
+      next_eligible_donation_date?: string | null;
+      user_id?: string;
+    } | null;
     if (!donorRow?.id) throw new ApiError(404, "Perfil de dador não encontrado.");
     if (
       principal.role !== "admin" &&
@@ -31,7 +37,7 @@ export async function POST(request: Request) {
       throw new ApiError(403, "Acesso negado a este dador.");
     }
     if (donorBlocked(donorRow)) {
-      throw new ApiError(409, `Ainda não pode doar. Próxima data elegível: ${donorRow.next_eligible_donation_date}.`);
+      throw new ApiError(409, eligibilityBlockMessage(donorRow));
     }
     await assertTableRateLimit(db, {
       column: "donor_id",
@@ -53,10 +59,10 @@ export async function POST(request: Request) {
     if (["Agendado", "Cancelado", "Concluído", "Concluido", "Doador a Caminho"].includes(requestRow.status)) {
       const existing = await findDonorResponse(db, donorId, requestRow.id);
       if (!existing?.id) throw new ApiError(409, "Este pedido já não está disponível.");
-      return createAppointment(db, donorId, requestRow.id, requestRow.hospital_id, existing.confirmation_pin);
+      return createAppointment(db, donorId, requestRow.id, requestRow.hospital_id, existing.confirmation_pin, supabaseError);
     }
     const response = await createDonorResponse(db, donorId, requestRow.id, requestRow.hospital_id);
-    const appointment = await createAppointment(db, donorId, requestRow.id, requestRow.hospital_id, response.confirmation_pin);
+    const appointment = await createAppointment(db, donorId, requestRow.id, requestRow.hospital_id, response.confirmation_pin, supabaseError);
     const { error: statusError } = await db
       .from("blood_requests")
       .update({ status: "Doador a Caminho" })
@@ -80,6 +86,22 @@ export async function POST(request: Request) {
     await auditApiAction(principal, `Aceitou pedido de sangue ${body.requestId}.`);
     return appointment;
   });
+}
+
+function eligibilityBlockMessage(donor: {
+  eligibility_status?: string | null;
+  next_eligible_donation_date?: string | null;
+}) {
+  const labels: Record<string, string> = {
+    needs_review: "Elegibilidade em revisão pela equipa.",
+    permanently_deferred: "Dador permanentemente diferido.",
+    temporarily_deferred: "Dador temporariamente diferido."
+  };
+  const status = donor.eligibility_status ?? "";
+  const next = donor.next_eligible_donation_date
+    ? ` Próxima data elegível: ${new Date(donor.next_eligible_donation_date).toLocaleDateString("pt-AO")}.`
+    : "";
+  return `${labels[status] ?? "Ainda não pode doar."}${next}`;
 }
 
 async function createDonorResponse(
@@ -151,89 +173,8 @@ async function findDonorResponse(
   return data;
 }
 
-async function createAppointment(
-  db: Awaited<ReturnType<typeof createRouteSupabase>>,
-  donorId: string,
-  requestId: string,
-  hospitalId: string,
-  pin: string
-): Promise<Appointment> {
-  const { data: existing, error: existingError } = await db
-    .from("appointments")
-    .select("id,donor_id,hospital_id,blood_request_id,created_at,date,time,pin,status")
-    .eq("donor_id", donorId)
-    .eq("blood_request_id", requestId)
-    .maybeSingle();
-  if (existingError) throw supabaseError("Não foi possível verificar agendamento", existingError);
-  if (existing?.id) {
-    if (existing.pin !== pin) {
-      const { data: updated, error } = await db
-        .from("appointments")
-        .update({ pin })
-        .eq("id", existing.id)
-        .select("id,donor_id,hospital_id,blood_request_id,created_at,date,time,pin,status")
-        .single();
-      if (error) throw supabaseError("Não foi possível sincronizar o PIN", error);
-      return mapAppointment(updated);
-    }
-    return mapAppointment(existing);
-  }
-
-  const when = nextAppointmentSlot();
-  const { data, error } = await db
-    .from("appointments")
-    .insert({
-      blood_request_id: requestId,
-      date: when.date,
-      donor_id: donorId,
-      hospital_id: hospitalId,
-      pin,
-      status: "Pendente",
-      time: when.time
-    })
-    .select("id,donor_id,hospital_id,blood_request_id,created_at,date,time,pin,status")
-    .single();
-  if (error) throw supabaseError("Não foi possível criar agendamento", error);
-  return mapAppointment(data);
-}
-
-function mapAppointment(row: {
-  date: string;
-  donor_id: string;
-  hospital_id: string;
-  id: string;
-  pin: string;
-  status: Appointment["status"];
-  time: string;
-  blood_request_id?: string | null;
-  created_at?: string | null;
-}): Appointment {
-  return {
-    bloodRequestId: row.blood_request_id ?? undefined,
-    createdAt: row.created_at ?? undefined,
-    date: row.date,
-    donorId: row.donor_id,
-    hospitalId: row.hospital_id,
-    id: row.id,
-    pin: row.pin,
-    status: row.status,
-    time: row.time
-  };
-}
-
 function createPin() {
   return String(Math.floor(1000 + Math.random() * 9000));
-}
-
-function nextAppointmentSlot() {
-  const date = new Date();
-  date.setDate(date.getDate() + 1);
-  date.setMinutes(0, 0, 0);
-  date.setHours(Math.max(9, Math.min(16, date.getHours() + 2)));
-  return {
-    date: date.toISOString().slice(0, 10),
-    time: date.toTimeString().slice(0, 5)
-  };
 }
 
 function supabaseError(label: string, error: {

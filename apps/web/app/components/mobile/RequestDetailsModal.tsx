@@ -5,6 +5,7 @@ import { matchReasons } from "./mobileMock";
 
 export function RequestDetailsModal({
   accepting,
+  canAccept = true,
   onAccept,
   onClose,
   onReject,
@@ -12,6 +13,7 @@ export function RequestDetailsModal({
   request
 }: {
   accepting?: boolean;
+  canAccept?: boolean;
   onAccept?: () => void;
   onClose?: () => void;
   onReject?: () => void;
@@ -61,12 +63,12 @@ export function RequestDetailsModal({
         ))}
         <button
           className={styles.accept}
-          disabled={accepting}
+          disabled={accepting || !canAccept}
           onClick={onAccept}
           style={{ width: "100%", marginTop: 18 }}
           type="button"
         >
-          {accepting ? "A PROCESSAR..." : "ACEITAR PEDIDO"}
+          {accepting ? "A PROCESSAR..." : canAccept ? "ACEITAR PEDIDO" : "ELEGIBILIDADE BLOQUEADA"}
         </button>
         <button
           className={styles.cancel}

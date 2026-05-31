@@ -5,12 +5,14 @@ import { ContextualTooltip } from "../support";
 export function RequestCard({
   accepted,
   accepting,
+  canAccept = true,
   onAccept,
   onOpen,
   request
 }: {
   accepted?: boolean;
   accepting?: boolean;
+  canAccept?: boolean;
   onAccept?: (request: BloodRequest) => void;
   onOpen?: (request: BloodRequest) => void;
   request: BloodRequest;
@@ -60,11 +62,11 @@ export function RequestCard({
         <button
           aria-label={`Aceitar pedido ${request.bloodType} para ${request.units} bolsas`}
           className={styles.accept}
-          disabled={accepted || accepting}
-          onClick={() => !accepted && !accepting && onAccept?.(request)}
+          disabled={accepted || accepting || !canAccept}
+          onClick={() => !accepted && !accepting && canAccept && onAccept?.(request)}
           type="button"
         >
-          {accepted ? "ACEITE" : accepting ? "A PROCESSAR" : "ACEITAR"}
+          {accepted ? "ACEITE" : accepting ? "A PROCESSAR" : canAccept ? "ACEITAR" : "BLOQUEADO"}
         </button>
       </div>
     </article>

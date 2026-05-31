@@ -95,6 +95,7 @@ async function updateCooldown(db: Awaited<ReturnType<typeof createRouteSupabase>
   next.setDate(next.getDate() + days);
   await db.from("donors").update({
     available: false,
+    eligibility_status: "temporarily_deferred",
     last_donation_date: new Date().toISOString().slice(0, 10),
     next_eligible_donation_date: next.toISOString()
   }).eq("id", donorId);

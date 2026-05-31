@@ -49,7 +49,7 @@ export function HospitalDonorDetailsModal({ donor, onAction, onClose, saving }: 
           </InfoSection>
 
           <InfoSection title="Elegibilidade">
-            <Field label="Estado" value={eligibleLabel(donor.nextEligibleDate)} />
+            <Field label="Estado" value={eligibleLabel(donor.eligibilityStatus, donor.nextEligibleDate)} />
             <Field label="Última doação" value={formatDate(donor.lastDonationDate)} />
             <Field label="Próxima elegível" value={formatDate(donor.nextEligibleDate)} />
           </InfoSection>
@@ -112,7 +112,14 @@ function formatDateTime(value?: string) {
   return new Date(value).toLocaleString("pt-AO", { dateStyle: "short", timeStyle: "short" });
 }
 
-function eligibleLabel(nextEligibleDate?: string) {
+function eligibleLabel(status = "eligible", nextEligibleDate?: string) {
+  const labels: Record<string, string> = {
+    eligible: "Elegível",
+    needs_review: "Requer revisão",
+    permanently_deferred: "Diferido permanente",
+    temporarily_deferred: "Diferido temporário"
+  };
+  if (status !== "eligible") return labels[status] ?? "Requer revisão";
   if (!nextEligibleDate) return "Elegível";
   return new Date(nextEligibleDate).getTime() > Date.now() ? "Em pausa temporária" : "Elegível";
 }

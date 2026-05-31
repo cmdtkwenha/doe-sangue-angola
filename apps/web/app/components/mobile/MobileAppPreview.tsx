@@ -17,6 +17,7 @@ import { RequestDetailsModal } from "./RequestDetailsModal";
 import { RequestList } from "./RequestList";
 import { acceptRequestAction } from "../workflow/workflowActions";
 import { useCurrentDonor } from "./useCurrentDonor";
+import { canDonorAcceptRequest, eligibilityState } from "./EligibilityStatusCard";
 import { OnboardingCompletionTracker, OperationalWalkthrough } from "../support";
 
 const load = (label: string) => () => <LoadingSkeleton label={label} />;
@@ -62,6 +63,11 @@ export function MobileAppPreview() {
   );
   const acceptedIds = [...new Set([...responses.map((item) => item.bloodRequestId), ...optimisticAccepted])];
   const askAccept = (request: BloodRequest) => {
+    const state = eligibilityState(donor);
+    if (!state.canAccept) {
+      showToast(`${state.label}: ${state.reason}`, "error");
+      return;
+    }
     setSelected(null);
     setPendingAccept(request);
   };
@@ -69,6 +75,12 @@ export function MobileAppPreview() {
     if (!pendingAccept) return;
     if (!donor) {
       showToast("Complete o perfil de dador antes de aceitar pedidos.", "error");
+      return;
+    }
+    if (!canDonorAcceptRequest(donor)) {
+      const state = eligibilityState(donor);
+      showToast(`${state.label}: ${state.reason}`, "error");
+      setPendingAccept(null);
       return;
     }
     if (acceptedIds.includes(pendingAccept.id)) {
@@ -125,6 +137,7 @@ export function MobileAppPreview() {
           {accepting ? <p className="muted">A criar compromisso de doação...</p> : null}
           <RequestDetailsModal
             accepting={accepting}
+            canAccept={canDonorAcceptRequest(donor)}
             onAccept={() => selected && askAccept(selected)}
             onClose={() => setSelected(null)}
             onReject={() => selected && reject(selected)}

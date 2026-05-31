@@ -14,6 +14,7 @@ import {
   useCurrentDonor
 } from "./useCurrentDonor";
 import { useAuth } from "../auth/useAuth";
+import { canDonorAcceptRequest, eligibilityState } from "./EligibilityStatusCard";
 
 export function RequestList({
   acceptedRequestIds = [],
@@ -33,6 +34,7 @@ export function RequestList({
   const { data: donor } = useCurrentDonor();
   const userId = session?.user.authUserId ?? session?.user.id;
   const donorReady = isDonorProfileComplete(donor, userId);
+  const eligibility = eligibilityState(donor);
   const donorId = donorReady ? donor.id : "";
   const { data: requests, error, loading } = useApiData<BloodRequest[]>(
     donorId ? `/api/blood-requests?donorId=${donorId}` : "/api/blood-requests?donorId=missing",
@@ -67,6 +69,12 @@ export function RequestList({
       <p className="muted">{locationMessage}</p>
       {loading ? <LoadingSkeleton label="A sincronizar pedidos compatíveis" /> : null}
       {error ? <p className="muted">{error}</p> : null}
+      {!canDonorAcceptRequest(donor) && donorReady ? (
+        <article className={styles.card}>
+          <strong>{eligibility.label}</strong>
+          <p className="muted">{eligibility.reason}</p>
+        </article>
+      ) : null}
       {requests.length === 0 ? (
         <article className={styles.card}>
           <strong>Sem pedidos compatíveis</strong>
@@ -80,6 +88,7 @@ export function RequestList({
         <RequestCard
           accepted={acceptedRequestIds.includes(request.id)}
           accepting={acceptingRequestId === request.id}
+          canAccept={canDonorAcceptRequest(donor)}
           key={request.id}
           onAccept={onAccept}
           onOpen={onOpen}

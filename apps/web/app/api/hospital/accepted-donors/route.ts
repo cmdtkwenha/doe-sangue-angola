@@ -14,6 +14,7 @@ export type AcceptedDonorRow = {
   donorPhone: string;
   emergencyContactName?: string;
   emergencyContactPhone?: string;
+  eligibilityStatus?: string;
   eta: string;
   gender?: string;
   hospitalId: string;
@@ -51,7 +52,7 @@ export async function GET() {
     const requestIds = unique(responses.map((item) => item.blood_request_id));
     const [{ data: donors, error: donorError }, { data: requests, error: requestError }, hospital] =
       await Promise.all([
-        db.from("donors").select("id,user_id,blood_type,birth_date,gender,emergency_contact_name,emergency_contact_phone,last_donation,last_donation_date,next_eligible_donation_date,reliability_score").in("id", donorIds),
+        db.from("donors").select("id,user_id,blood_type,birth_date,gender,emergency_contact_name,emergency_contact_phone,eligibility_status,last_donation,last_donation_date,next_eligible_donation_date,reliability_score").in("id", donorIds),
         db.from("blood_requests").select("id,blood_type,status").in("id", requestIds),
         getHospital(db, hospitalId ?? "")
       ]);
@@ -77,6 +78,7 @@ export async function GET() {
         donorPhone: user?.phone ?? "por completar",
         emergencyContactName: donor?.emergency_contact_name ?? undefined,
         emergencyContactPhone: donor?.emergency_contact_phone ?? undefined,
+        eligibilityStatus: donor?.eligibility_status ?? "eligible",
         eta: `${item.eta_minutes ?? 30} min`,
         gender: donor?.gender ?? undefined,
         hospitalId: item.hospital_id,

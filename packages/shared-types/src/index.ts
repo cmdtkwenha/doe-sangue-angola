@@ -32,6 +32,12 @@ export type DonorResponseStatus =
   | "completed"
   | "cancelled";
 
+export type DonorEligibilityStatus =
+  | "eligible"
+  | "temporarily_deferred"
+  | "permanently_deferred"
+  | "needs_review";
+
 export type Donor = {
   id: string;
   userId?: string;
@@ -51,7 +57,7 @@ export type Donor = {
   reliabilityScore?: number;
   responseSpeedMinutes?: number;
   totalDonations?: number;
-  eligibilityStatus?: string;
+  eligibilityStatus?: DonorEligibilityStatus;
   birthDate?: string;
   email?: string;
   emergencyContactName?: string;
