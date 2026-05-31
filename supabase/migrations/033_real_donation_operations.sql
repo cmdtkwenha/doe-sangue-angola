@@ -11,6 +11,19 @@ alter table public.donor_responses
   add column if not exists reward_arrived_at timestamptz,
   add column if not exists reward_completed_at timestamptz;
 
+alter table public.users
+  add column if not exists linked_entity_id uuid;
+
+alter table public.profiles
+  add column if not exists linked_entity_id uuid;
+
+update public.users u
+set linked_entity_id = p.linked_entity_id
+from public.profiles p
+where u.auth_user_id = p.auth_user_id
+  and u.linked_entity_id is null
+  and p.linked_entity_id is not null;
+
 alter table public.blood_requests
   drop constraint if exists blood_requests_urgency_check;
 
@@ -35,9 +48,14 @@ drop policy if exists "Hospital inventory own read" on public.hospital_inventory
 create policy "Hospital inventory own read" on public.hospital_inventory
 for select using (
   exists (
+    select 1 from public.profiles p
+    where p.auth_user_id = auth.uid()
+      and (p.role = 'admin' or p.linked_entity_id = hospital_inventory.hospital_id)
+  )
+  or exists (
     select 1 from public.users u
     where u.auth_user_id = auth.uid()
-      and (u.role = 'admin' or u.linked_entity_id = hospital_id)
+      and (u.role = 'admin' or u.linked_entity_id = hospital_inventory.hospital_id)
   )
 );
 
@@ -45,16 +63,26 @@ drop policy if exists "Hospital inventory own write" on public.hospital_inventor
 create policy "Hospital inventory own write" on public.hospital_inventory
 for all using (
   exists (
+    select 1 from public.profiles p
+    where p.auth_user_id = auth.uid()
+      and (p.role = 'admin' or p.linked_entity_id = hospital_inventory.hospital_id)
+  )
+  or exists (
     select 1 from public.users u
     where u.auth_user_id = auth.uid()
-      and (u.role = 'admin' or u.linked_entity_id = hospital_id)
+      and (u.role = 'admin' or u.linked_entity_id = hospital_inventory.hospital_id)
   )
 )
 with check (
   exists (
+    select 1 from public.profiles p
+    where p.auth_user_id = auth.uid()
+      and (p.role = 'admin' or p.linked_entity_id = hospital_inventory.hospital_id)
+  )
+  or exists (
     select 1 from public.users u
     where u.auth_user_id = auth.uid()
-      and (u.role = 'admin' or u.linked_entity_id = hospital_id)
+      and (u.role = 'admin' or u.linked_entity_id = hospital_inventory.hospital_id)
   )
 );
 
@@ -77,20 +105,20 @@ create policy "Hospitals update completed donor operations" on public.donors
 for update using (
   exists (
     select 1
-    from public.users u
-    join public.donor_responses dr on dr.hospital_id = u.linked_entity_id
-    where u.auth_user_id = auth.uid()
-      and u.role = 'hospital'
+    from public.profiles p
+    join public.donor_responses dr on dr.hospital_id = p.linked_entity_id
+    where p.auth_user_id = auth.uid()
+      and p.role = 'hospital'
       and dr.donor_id = donors.id
   )
 )
 with check (
   exists (
     select 1
-    from public.users u
-    join public.donor_responses dr on dr.hospital_id = u.linked_entity_id
-    where u.auth_user_id = auth.uid()
-      and u.role = 'hospital'
+    from public.profiles p
+    join public.donor_responses dr on dr.hospital_id = p.linked_entity_id
+    where p.auth_user_id = auth.uid()
+      and p.role = 'hospital'
       and dr.donor_id = donors.id
   )
 );
