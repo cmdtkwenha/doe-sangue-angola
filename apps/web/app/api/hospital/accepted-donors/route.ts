@@ -1,4 +1,5 @@
 import type { DonorResponseStatus } from "@doe-sangue-angola/shared-types";
+import { createClient } from "@supabase/supabase-js";
 import { ApiError, apiResponse } from "../../_utils/apiResponse";
 import { createRouteSupabase, requireApiSession } from "../../_utils/security";
 
@@ -9,6 +10,12 @@ export type AcceptedDonorRow = {
   completedDonations?: number;
   createdAt?: string;
   donorBloodType: string;
+  donorDebug?: {
+    data_source: string;
+    donor_id: string;
+    donor_user_id?: string;
+    resolved_user_name: string;
+  };
   donorId: string;
   donorName: string;
   donorPhone: string;
@@ -58,14 +65,16 @@ export async function GET() {
       ]);
     if (donorError) throw supabaseError("Não foi possível carregar dados dos dadores", donorError);
     if (requestError) throw supabaseError("Não foi possível carregar pedidos de sangue", requestError);
-    const users = await getUsers(db, unique((donors ?? []).map((item) => item.user_id)));
+    const { dataSource, users } = await getUsers(db, unique((donors ?? []).map((item) => item.user_id)));
     const metrics = await getDonationMetrics(db, donorIds);
+    const dev = process.env.NODE_ENV !== "production";
 
     return responses.map((item) => {
       const donor = donors?.find((row) => row.id === item.donor_id);
       const user = users.find((row) => row.id === donor?.user_id);
       const request = requests?.find((row) => row.id === item.blood_request_id);
       const completed = metrics.get(item.donor_id) ?? 0;
+      const donorName = cleanName(user?.name, user?.email);
       return {
         acceptedAt: item.accepted_at ?? item.created_at ?? undefined,
         age: ageFromBirthDate(donor?.birth_date),
@@ -73,8 +82,14 @@ export async function GET() {
         completedDonations: completed,
         createdAt: item.created_at ?? undefined,
         donorBloodType: donor?.blood_type ?? "-",
+        donorDebug: dev ? {
+          data_source: dataSource,
+          donor_id: item.donor_id,
+          donor_user_id: donor?.user_id ?? undefined,
+          resolved_user_name: donorName
+        } : undefined,
         donorId: item.donor_id,
-        donorName: cleanName(user?.name, user?.email),
+        donorName,
         donorPhone: user?.phone ?? "por completar",
         emergencyContactName: donor?.emergency_contact_name ?? undefined,
         emergencyContactPhone: donor?.emergency_contact_phone ?? undefined,
@@ -124,13 +139,25 @@ function ageFromBirthDate(value?: string | null) {
 }
 
 async function getUsers(db: Awaited<ReturnType<typeof createRouteSupabase>>, ids: string[]) {
-  if (!ids.length) return [] as Array<{ email: string | null; id: string; name: string | null; phone: string | null }>;
-  const { data, error } = await db
+  type UserRow = { email: string | null; id: string; name: string | null; phone: string | null };
+  if (!ids.length) return { dataSource: "empty", users: [] as UserRow[] };
+  const userDb = createPrivilegedSupabase() ?? db;
+  const { data, error } = await userDb
     .from("users")
     .select("id,name,email,phone")
     .in("id", ids);
   if (error) throw supabaseError("Não foi possível carregar contactos dos dadores", error);
-  return data ?? [];
+  return {
+    dataSource: userDb === db ? "session_rls" : "service_role",
+    users: data ?? []
+  };
+}
+
+function createPrivilegedSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key, { auth: { persistSession: false } });
 }
 
 function normalizeStatus(status?: string | null): DonorResponseStatus {

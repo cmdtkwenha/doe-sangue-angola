@@ -37,6 +37,7 @@ export function HospitalDonorDetailsModal({ donor, onAction, onClose, saving }: 
               <h2>{donorName}</h2>
               <DonorResponseStatusBadge status={status} />
               <p className={styles.summary}>{summary || donor.donorBloodType}</p>
+              <DonorDebug donor={donor} />
             </div>
           </div>
           <button className={styles.close} onClick={onClose} type="button">Fechar</button>
@@ -83,6 +84,15 @@ export function HospitalDonorDetailsModal({ donor, onAction, onClose, saving }: 
         <p className={styles.privacy}>Dados sensíveis, autenticação, BI completo, consentimentos legais e dados administrativos não são apresentados neste painel.</p>
       </section>
     </div>
+  );
+}
+
+function DonorDebug({ donor }: { donor: AcceptedDonor }) {
+  if (process.env.NODE_ENV === "production" || !donor.donorDebug) return null;
+  return (
+    <p className={styles.debug}>
+      donor_id: {donor.donorDebug.donor_id} · donor_user_id: {donor.donorDebug.donor_user_id ?? "-"} · resolved_user_name: {donor.donorDebug.resolved_user_name} · data_source: {donor.donorDebug.data_source}
+    </p>
   );
 }
 
