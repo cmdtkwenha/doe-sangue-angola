@@ -19,6 +19,13 @@ type HistoryPayload = {
   donorVerifications: Array<VerificationRow & { donor_id: string }>;
   hospitalVerifications: Array<VerificationRow & { hospital_id: string }>;
 };
+type QueuePayload = {
+  dataSource: string;
+  donorStatusField: string;
+  donors: Donor[];
+  hospitalStatusField: string;
+  hospitals: Hospital[];
+};
 
 const tabs: Array<{ id: Tab; label: string }> = [
   { id: "hospitals", label: "Hospitais Pendentes" },
@@ -35,27 +42,32 @@ export function VerificationWorkbench() {
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
   const live = useSupabaseRealtimeVersion(["hospitals", "donors"]);
-  const { data: hospitals, error: hospitalError, loading: loadingHospitals } =
-    useApiData<Hospital[]>("/api/hospitals", [], live + refresh);
-  const { data: donors, error: donorError, loading: loadingDonors } =
-    useApiData<Donor[]>("/api/donors", [], live + refresh);
+  const { data: queue, error: queueError, loading } = useApiData<QueuePayload>(
+    "/api/admin/verification/queues",
+    {
+      dataSource: "Supabase",
+      donorStatusField: "eligibility_status",
+      donors: [],
+      hospitalStatusField: "verification_status",
+      hospitals: []
+    },
+    live + refresh
+  );
   const { data: history } = useApiData<HistoryPayload>(
     "/api/admin/verification",
     { donorVerifications: [], hospitalVerifications: [] },
     refresh
   );
-  const pendingHospitals = hospitals
+  const pendingHospitals = queue.hospitals
     .filter((item) => ["pending", "needs_review"].includes(hospitalStatus(item)))
     .filter((item) => !resolved.hospitals.includes(item.id));
-  const pendingDonors = donors
+  const pendingDonors = queue.donors
     .filter((item) => ["needs_review", "pending_verification"].includes(String(item.eligibilityStatus)))
     .filter((item) => !resolved.donors.includes(item.id));
   const cases: Array<{ id: string; label: string; status: string; type: string }> = [];
-  const loading = loadingHospitals || loadingDonors;
-  const error = hospitalError || donorError;
 
   if (loading) return <LoadingSkeleton label="A carregar casos de verificação" />;
-  if (error) return <EmptyState title="Falha ao carregar verificação" message={error} />;
+  if (queueError) return <EmptyState title="Falha ao carregar verificação" message={queueError} />;
 
   return (
     <section className={styles.panel}>
@@ -75,6 +87,11 @@ export function VerificationWorkbench() {
           ))}
         </div>
       </div>
+      {process.env.NODE_ENV !== "production" ? (
+        <p className="muted">
+          Debug: data source {queue.dataSource}; hospital status {queue.hospitalStatusField}; donor status {queue.donorStatusField}
+        </p>
+      ) : null}
       {message ? <p className="muted" role="status">{message}</p> : null}
       {active === "hospitals" ? (
         <HospitalList
