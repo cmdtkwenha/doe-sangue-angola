@@ -24,7 +24,8 @@
         "expo-notifications",
         {
           "color": "#d71920",
-          "defaultChannel": "blood-alerts"
+          "defaultChannel": "blood-alerts",
+          "icon": "./assets/notification-icon.png"
         }
       ]
     ],

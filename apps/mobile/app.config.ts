@@ -2,6 +2,7 @@ import type { ExpoConfig } from "expo/config";
 
 const easProjectId = process.env.EXPO_PUBLIC_EAS_PROJECT_ID ??
   "1673a331-7f7e-4a57-af56-d59bc3850b27";
+const androidVersionCode = Number(process.env.EXPO_PUBLIC_ANDROID_VERSION_CODE ?? 1);
 
 const config: ExpoConfig = {
   owner: "kwenha",
@@ -28,7 +29,8 @@ const config: ExpoConfig = {
       "expo-notifications",
       {
         color: "#d71920",
-        defaultChannel: "blood-alerts"
+        defaultChannel: "blood-alerts",
+        icon: "./assets/notification-icon.png"
       }
     ]
   ],
@@ -43,7 +45,7 @@ const config: ExpoConfig = {
   },
   android: {
     package: "ao.doesangue.app",
-    versionCode: 1,
+    versionCode: androidVersionCode,
     permissions: ["POST_NOTIFICATIONS"],
     adaptiveIcon: {
       backgroundColor: "#d71920",
