@@ -26,6 +26,11 @@ export default async function HomePage() {
           <p className="pill gold" style={{ marginTop: 24 }}>
             Backend: {backend.message}
           </p>
+          {summary.error ? (
+            <p className="pill red" style={{ marginTop: 12 }}>
+              {summary.error}
+            </p>
+          ) : null}
         </div>
       </section>
     </main>
@@ -41,16 +46,26 @@ async function loadRealSummary() {
       hospitals: "-"
     };
   }
-  const [hospitals, donors, requests] = await Promise.all([
-    dataProvider.listHospitals(),
-    dataProvider.listDonors(),
-    dataProvider.listRequests()
-  ]) as [Hospital[], Donor[], BloodRequest[]];
-  const active = requests.filter((request) => !["Cancelado", "Concluído", "Concluido"].includes(request.status));
-  return {
-    activeRequests: active.length,
-    availableDonors: donors.filter((donor) => donor.available).length,
-    criticalRequests: active.filter((request) => request.urgency === "Critica").length,
-    hospitals: hospitals.filter((hospital) => hospital.verified).length
-  };
+  try {
+    const [hospitals, donors, requests] = await Promise.all([
+      dataProvider.listHospitals(),
+      dataProvider.listDonors(),
+      dataProvider.listRequests()
+    ]) as [Hospital[], Donor[], BloodRequest[]];
+    const active = requests.filter((request) => !["Cancelado", "Concluído", "Concluido"].includes(request.status));
+    return {
+      activeRequests: active.length,
+      availableDonors: donors.filter((donor) => donor.available).length,
+      criticalRequests: active.filter((request) => request.urgency === "Critica").length,
+      hospitals: hospitals.filter((hospital) => hospital.verified).length
+    };
+  } catch {
+    return {
+      activeRequests: "-",
+      availableDonors: "-",
+      criticalRequests: "-",
+      error: "Configuração da base de dados incompleta. Aplique as migrações Supabase mais recentes.",
+      hospitals: "-"
+    };
+  }
 }

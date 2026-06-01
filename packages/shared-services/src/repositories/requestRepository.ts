@@ -7,25 +7,28 @@ import { mapAppointment, mapRequest, type AppointmentRow, type RequestRow } from
 
 type CreateRequestInput = Omit<BloodRequest, "createdAt" | "id" | "status">;
 type UpdateRequestInput = Partial<CreateRequestInput> & { status?: BloodRequest["status"] };
+type SelectResult = { data: unknown; error: { message?: string; code?: string } | null };
 
 export const requestRepository = {
   async listRequests() {
-    const { data, error } = await getDatabaseClient()
+    const result = await getDatabaseClient()
       .from("blood_requests")
       .select(requestColumns)
       .order("created_at", { ascending: false });
 
+    const { data, error } = await retryWithoutQuotaColumns(result);
     if (error) throw error;
     return (data as unknown as RequestRow[]).map(mapRequest);
   },
 
   async listRequestsForHospital(hospitalId: string) {
-    const { data, error } = await getDatabaseClient()
+    const result = await getDatabaseClient()
       .from("blood_requests")
       .select(requestColumns)
       .eq("hospital_id", hospitalId)
       .order("created_at", { ascending: false });
 
+    const { data, error } = await retryWithoutQuotaColumns(result, hospitalId);
     if (error) throw error;
     return (data as unknown as RequestRow[]).map(mapRequest);
   },
@@ -177,6 +180,11 @@ const requestColumns = [
   "created_at"
 ].join(",");
 
+const legacyRequestColumns = requestColumns
+  .split(",")
+  .filter((column) => !["accepted_count", "remaining_slots"].includes(column))
+  .join(",");
+
 function removeUndefined<T extends Record<string, unknown>>(input: T) {
   return Object.fromEntries(
     Object.entries(input).filter(([, value]) => value !== undefined)
@@ -184,14 +192,33 @@ function removeUndefined<T extends Record<string, unknown>>(input: T) {
 }
 
 async function findRequest(id: string) {
-  const { data, error } = await getDatabaseClient()
+  const result = await getDatabaseClient()
     .from("blood_requests")
     .select(requestColumns)
     .eq("id", id)
     .single();
 
+  const { data, error } = isMissingQuotaColumn(result.error)
+    ? await getDatabaseClient().from("blood_requests").select(legacyRequestColumns).eq("id", id).single()
+    : result;
   if (error) throw error;
   return mapRequest(data as unknown as RequestRow);
+}
+
+async function retryWithoutQuotaColumns(
+  result: SelectResult,
+  hospitalId?: string
+) {
+  if (!isMissingQuotaColumn(result.error)) return result;
+  let query = getDatabaseClient()
+    .from("blood_requests")
+    .select(legacyRequestColumns);
+  if (hospitalId) query = query.eq("hospital_id", hospitalId);
+  return query.order("created_at", { ascending: false });
+}
+
+function isMissingQuotaColumn(error?: { code?: string; message?: string } | null) {
+  return Boolean(error?.message?.includes("accepted_count") || error?.message?.includes("remaining_slots"));
 }
 
 async function findAppointment(donorId: string, requestId: string) {
