@@ -64,6 +64,7 @@ export async function GET(request: Request) {
       return (data as unknown as RequestRow[])
         .map((item) => enrichRequest(item, donorRecord))
         .filter((item) => !closedStatuses.includes(item.status))
+        .filter((item) => item.remainingSlots == null || item.remainingSlots > 0)
         .filter((item) => nearDonor(item, donorRecord))
         .filter((item) => canDonorDonateToRequest(donorRecord.bloodType, item.bloodType))
         .filter((item) =>
@@ -140,7 +141,9 @@ export async function POST(request: Request) {
         notes: input.notes,
         patient_code: input.patientCode,
         province: input.province,
-        status: "Aberto",
+        accepted_count: 0,
+        remaining_slots: input.units,
+        status: "OPEN",
         units: input.units,
         units_needed: input.units,
         urgency: input.urgency
@@ -194,7 +197,17 @@ function nearDonor(request: BloodRequest, donor: ReturnType<typeof mapDonor>) {
     && (!request.municipality || request.municipality === donor.municipality || request.urgency === "Critica");
 }
 
-const closedStatuses = ["Agendado", "Cancelado", "Concluído", "Concluido", "Doador a Caminho", "PIN Validado"];
+const closedStatuses = [
+  "Agendado",
+  "Cancelado",
+  "CANCELLED",
+  "COMPLETED",
+  "Concluído",
+  "Concluido",
+  "Doador a Caminho",
+  "FULFILLED",
+  "PIN Validado"
+];
 
 function formatSupabaseError(error: {
   code?: string;

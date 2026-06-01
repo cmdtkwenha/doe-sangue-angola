@@ -2,7 +2,7 @@ const schemaContract = {
   appointments: ["id", "donor_id", "hospital_id", "blood_request_id", "created_at", "date", "time", "pin", "status"],
   audit_logs: ["id", "actor_label", "action", "created_at"],
   blood_banks: ["id", "name", "province", "municipality", "address", "contact", "email", "facility_type", "license_number", "verified"],
-  blood_requests: ["id", "created_by", "hospital_id", "patient_code", "blood_type", "units", "units_needed", "province", "municipality", "notes", "urgency", "status", "created_at", "request_source", "family_request_id"],
+  blood_requests: ["id", "created_by", "hospital_id", "patient_code", "blood_type", "units", "units_needed", "accepted_count", "remaining_slots", "province", "municipality", "notes", "urgency", "status", "created_at", "request_source", "family_request_id"],
   clinics: ["id", "name", "province", "municipality", "address", "contact", "email", "facility_type", "license_number", "verified"],
   donor_responses: ["id", "donor_id", "hospital_id", "blood_request_id", "created_at", "eta_minutes", "confirmation_pin", "status", "accepted_at", "arrived_at", "pin_validated_at", "cancelled_at", "completed_at", "donation_completed_at", "pin_expires_at", "pin_locked_until", "last_pin_attempt_at", "failed_pin_attempts", "reward_accepted_at", "reward_arrived_at", "reward_completed_at"],
   donor_verifications: ["id", "donor_id", "verified_by", "status", "notes", "created_at", "updated_at"],
@@ -24,6 +24,7 @@ const schemaContract = {
   provinces: ["id", "name"],
   push_tokens: ["id", "donor_id", "platform", "token", "active", "created_at"],
   referrals: ["id", "referrer_donor_id", "invited_name", "status", "reward_points", "created_at"],
+  request_acceptances: ["id", "request_id", "donor_id", "hospital_id", "pin", "status", "accepted_at", "arrived_at", "completed_at", "cancelled_at", "created_at", "updated_at"],
   rewards: ["id", "donor_id", "points", "reason", "tier", "created_at"],
   support_issues: ["id", "user_id", "role", "page", "action", "type", "severity", "message", "status", "created_at"],
   users: ["id", "auth_user_id", "role", "name", "email", "phone", "linked_entity_id", "account_status", "last_activity_at", "password_reset_requested_at", "created_at", "updated_at"]

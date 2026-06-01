@@ -4,6 +4,10 @@ import { ApiError } from "./apiResponse";
 const bloodTypes: BloodType[] = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"];
 const urgencies: Urgency[] = ["Desastre", "Critica", "Alta", "Media", "Normal"];
 const statuses: RequestStatus[] = [
+  "OPEN",
+  "FULFILLED",
+  "COMPLETED",
+  "CANCELLED",
   "Aberto",
   "Em Correspondência",
   "Agendado",

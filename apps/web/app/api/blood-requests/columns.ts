@@ -6,6 +6,8 @@ export const requestColumns = [
   "blood_type",
   "units",
   "units_needed",
+  "accepted_count",
+  "remaining_slots",
   "province",
   "municipality",
   "notes",

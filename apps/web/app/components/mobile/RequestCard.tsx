@@ -27,6 +27,9 @@ export function RequestCard({
     : tone === "warning"
       ? styles.warningText
       : styles.stableText;
+  const remaining = request.remainingSlots ?? request.units;
+  const acceptedCount = request.acceptedCount ?? Math.max(request.units - remaining, 0);
+  const filled = request.status === "FULFILLED" || request.status === "COMPLETED" || remaining <= 0;
 
   return (
     <article className={`${styles.request} ${styles[tone]}`}>
@@ -56,6 +59,11 @@ export function RequestCard({
       <div className={styles.requestMeta}>
         <small>{request.bloodType} · {request.units} bolsas</small>
         <small>{request.urgency} · {request.createdAt.slice(11, 16)} · {etaLabel(request)}</small>
+        <small>
+          {filled
+            ? "Pedido preenchido."
+            : `${acceptedCount} de ${request.units} dadores confirmados · ${remaining} vaga${remaining === 1 ? "" : "s"} restante${remaining === 1 ? "" : "s"}`}
+        </small>
         <ContextualTooltip
           title="Aceitar pedido"
           text="Confirme hospital e disponibilidade. Ao aceitar, o sistema gera o seu PIN de doação."
@@ -63,11 +71,11 @@ export function RequestCard({
         <button
           aria-label={`Aceitar pedido ${request.bloodType} para ${request.units} bolsas`}
           className={styles.accept}
-          disabled={accepted || accepting || !canAccept}
-          onClick={() => !accepted && !accepting && canAccept && onAccept?.(request)}
+          disabled={accepted || accepting || !canAccept || filled}
+          onClick={() => !accepted && !accepting && canAccept && !filled && onAccept?.(request)}
           type="button"
         >
-          {accepted ? "ACEITE" : accepting ? "A PROCESSAR" : canAccept ? "ACEITAR" : "BLOQUEADO"}
+          {filled ? "PREENCHIDO" : accepted ? "ACEITE" : accepting ? "A PROCESSAR" : canAccept ? "ACEITAR" : "BLOQUEADO"}
         </button>
       </div>
     </article>

@@ -74,6 +74,8 @@ function normalizeStatus(status?: string | null): DonorResponseStatus {
     completed: "completed",
     Concluido: "completed",
     "Concluído": "completed",
+    no_show: "no_show",
+    NO_SHOW: "no_show",
     pin_validated: "pin_validated",
     "PIN Validado": "pin_validated"
   };
@@ -82,7 +84,7 @@ function normalizeStatus(status?: string | null): DonorResponseStatus {
 
 function isOldStatus(status?: string | null) {
   const normalized = normalizeStatus(status);
-  return normalized === "completed" || normalized === "cancelled";
+  return normalized === "completed" || normalized === "cancelled" || normalized === "no_show";
 }
 
 function locationLabel(hospital?: { municipality?: string | null; province?: string | null } | null) {

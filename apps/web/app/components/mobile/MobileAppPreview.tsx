@@ -35,11 +35,15 @@ export function MobileAppPreview() {
   const { data: requests, error: requestsError, loading: requestsLoading } =
     useApiData<BloodRequest[]>(requestPath, [], version + liveVersion);
   const { data: responses } = useApiData<DonorPin[]>("/api/donor/responses", [], version + liveVersion);
-  const acceptedIds = [...new Set([...responses.map((item) => item.bloodRequestId), ...optimisticAccepted])];
+  const acceptedIds = [...new Set([
+    ...responses.filter((item) => isActiveResponse(item.status)).map((item) => item.bloodRequestId),
+    ...optimisticAccepted
+  ])];
 
   const askAccept = (request: BloodRequest) => {
     const state = eligibilityState(donor);
     if (!state.canAccept) return showToast(`${state.label}: ${state.reason}`, "error");
+    if (isFilled(request)) return showToast("Pedido preenchido.", "error");
     if (!canDonorDonateToRequest(donor?.bloodType, request.bloodType)) {
       return showToast("Este pedido não é compatível com o seu tipo sanguíneo.", "error");
     }
@@ -56,6 +60,11 @@ export function MobileAppPreview() {
     }
     if (!canDonorDonateToRequest(donor.bloodType, pendingAccept.bloodType)) {
       showToast("Este pedido não é compatível com o seu tipo sanguíneo.", "error");
+      setPendingAccept(null);
+      return;
+    }
+    if (isFilled(pendingAccept)) {
+      showToast("Pedido preenchido.", "error");
       setPendingAccept(null);
       return;
     }
@@ -129,4 +138,12 @@ export function MobileAppPreview() {
       </DonorEntityGate>
     </main>
   );
+}
+
+function isActiveResponse(status: DonorPin["status"]) {
+  return status !== "completed" && status !== "cancelled" && status !== "no_show";
+}
+
+function isFilled(request: BloodRequest) {
+  return request.status === "FULFILLED" || request.status === "COMPLETED" || (request.remainingSlots ?? 1) <= 0;
 }

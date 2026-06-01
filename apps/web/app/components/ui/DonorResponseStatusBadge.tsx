@@ -5,6 +5,7 @@ export const donorResponseLabels: Record<DonorResponseStatus, string> = {
   arrived: "Chegou",
   cancelled: "Cancelado",
   completed: "Doação concluída",
+  no_show: "Não compareceu",
   pin_validated: "PIN Validado"
 };
 
@@ -18,6 +19,9 @@ export function normalizeDonorResponseStatus(status?: string | null): DonorRespo
     completed: "completed",
     Concluido: "completed",
     "Concluído": "completed",
+    no_show: "no_show",
+    NO_SHOW: "no_show",
+    "Não compareceu": "no_show",
     pin_validated: "pin_validated",
     "PIN Validado": "pin_validated"
   };
@@ -31,6 +35,7 @@ export function canMoveDonorResponse(current: DonorResponseStatus, next: DonorRe
     arrived: ["pin_validated"],
     cancelled: [],
     completed: [],
+    no_show: [],
     pin_validated: ["completed"]
   };
   return flow[current].includes(next);
@@ -40,7 +45,7 @@ export function DonorResponseStatusBadge({ status }: { status?: string | null })
   const normalized = normalizeDonorResponseStatus(status);
   const tone = normalized === "completed"
     ? "pill green"
-    : normalized === "cancelled"
+    : normalized === "cancelled" || normalized === "no_show"
       ? "pill red"
       : "pill gold";
   return <span className={tone}>{donorResponseLabels[normalized]}</span>;

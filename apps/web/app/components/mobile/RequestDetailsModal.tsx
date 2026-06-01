@@ -21,6 +21,9 @@ export function RequestDetailsModal({
   request: BloodRequest | null;
 }) {
   if (!open || !request) return null;
+  const remaining = request.remainingSlots ?? request.units;
+  const accepted = request.acceptedCount ?? Math.max(request.units - remaining, 0);
+  const filled = request.status === "FULFILLED" || request.status === "COMPLETED" || remaining <= 0;
 
   return (
     <AccessibleModal onClose={onClose} title="Detalhes do pedido">
@@ -48,6 +51,9 @@ export function RequestDetailsModal({
             : "ETA calculado por província/município"}
         </p>
         <p>Precisam de {request.units} bolsas · Pedido {request.patientCode}</p>
+        <p className="muted">
+          {filled ? "Pedido preenchido." : `${accepted} de ${request.units} dadores confirmados · ${remaining} vaga${remaining === 1 ? "" : "s"} restante${remaining === 1 ? "" : "s"}`}
+        </p>
         <div className={styles.modalMeta}>
           <small>Tipo<br /><strong>{request.bloodType}</strong></small>
           <small>Criado<br /><strong>{request.createdAt.slice(11, 16)}</strong></small>
@@ -63,12 +69,12 @@ export function RequestDetailsModal({
         ))}
         <button
           className={styles.accept}
-          disabled={accepting || !canAccept}
+          disabled={accepting || !canAccept || filled}
           onClick={onAccept}
           style={{ width: "100%", marginTop: 18 }}
           type="button"
         >
-          {accepting ? "A PROCESSAR..." : canAccept ? "ACEITAR PEDIDO" : "ELEGIBILIDADE BLOQUEADA"}
+          {filled ? "PEDIDO PREENCHIDO" : accepting ? "A PROCESSAR..." : canAccept ? "ACEITAR PEDIDO" : "ELEGIBILIDADE BLOQUEADA"}
         </button>
         <button
           className={styles.cancel}

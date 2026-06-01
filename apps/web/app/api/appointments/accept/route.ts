@@ -53,30 +53,26 @@ export async function POST(request: Request) {
     const requestId = assertString(body.requestId, "Pedido");
     const { data: bloodRequest, error: requestError } = await db
       .from("blood_requests")
-      .select("id,hospital_id,blood_type,status")
+      .select("id,hospital_id,blood_type,status,remaining_slots")
       .eq("id", requestId)
       .maybeSingle();
     if (requestError) throw supabaseError("Não foi possível carregar o pedido de sangue", requestError);
-    const requestRow = bloodRequest as { blood_type?: BloodType | null; hospital_id: string; id: string; status: string } | null;
+    const requestRow = bloodRequest as {
+      blood_type?: BloodType | null;
+      hospital_id: string;
+      id: string;
+      remaining_slots?: number | null;
+      status: string;
+    } | null;
     if (!requestRow?.id) throw new ApiError(404, "Pedido de sangue não encontrado.");
     if (!canDonorDonateToRequest(donorRow.blood_type, requestRow.blood_type)) {
       throw new ApiError(409, "Este pedido não é compatível com o seu tipo sanguíneo.");
     }
-    if (["Agendado", "Cancelado", "Concluído", "Concluido", "Doador a Caminho"].includes(requestRow.status)) {
-      const existing = await findDonorResponse(db, donorId, requestRow.id);
-      if (!existing?.id) throw new ApiError(409, "Este pedido já não está disponível.");
-      return createAppointment(db, donorId, requestRow.id, requestRow.hospital_id, existing.confirmation_pin, supabaseError);
-    }
-    const response = await createDonorResponse(db, donorId, requestRow.id, requestRow.hospital_id);
-    const appointment = await createAppointment(db, donorId, requestRow.id, requestRow.hospital_id, response.confirmation_pin, supabaseError);
-    const { error: statusError } = await db
-      .from("blood_requests")
-      .update({ status: "Doador a Caminho" })
-      .eq("id", requestRow.id);
-    if (statusError) throw supabaseError("Não foi possível atualizar o pedido de sangue", statusError);
+    const response = await acceptWithQuota(db, donorId, requestRow.id);
+    const appointment = await createAppointment(db, donorId, requestRow.id, response.hospital_id, response.confirmation_pin, supabaseError);
     await notifyHospitalUsers(
       db,
-      requestRow.hospital_id,
+      response.hospital_id,
       "Dador aceitou pedido",
       "Um dador compatível aceitou o pedido e está a caminho.",
       "accepted"
@@ -110,36 +106,25 @@ function eligibilityBlockMessage(donor: {
   return `${labels[status] ?? "Ainda não pode doar."}${next}`;
 }
 
-async function createDonorResponse(
+async function acceptWithQuota(
   db: Awaited<ReturnType<typeof createRouteSupabase>>,
   donorId: string,
-  requestId: string,
-  hospitalId: string
+  requestId: string
 ) {
-  const existing = await findDonorResponse(db, donorId, requestId);
-  if (existing?.id) return existing;
-  const pin = createPin();
-  const pinExpiresAt = new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString();
-  const { data, error } = await db
-    .from("donor_responses")
-    .insert({
-      blood_request_id: requestId,
-      confirmation_pin: pin,
-      donor_id: donorId,
-      eta_minutes: 15,
-      hospital_id: hospitalId,
-      accepted_at: new Date().toISOString(),
-      pin_expires_at: pinExpiresAt,
-      status: "accepted"
-    })
-    .select("id,confirmation_pin")
-    .single();
-  if (error?.code === "23505") {
-    const current = await findDonorResponse(db, donorId, requestId);
-    if (current?.id) return current;
-  }
+  const { data, error } = await db.rpc("accept_blood_request_quota", {
+    p_donor_id: donorId,
+    p_request_id: requestId
+  });
   if (error) throw supabaseError("Não foi possível aceitar o pedido", error);
-  return data;
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row?.response_id || !row.confirmation_pin || !row.hospital_id) {
+    throw new ApiError(500, "Aceitação não devolveu dados completos.");
+  }
+  return {
+    confirmation_pin: row.confirmation_pin as string,
+    hospital_id: row.hospital_id as string,
+    id: row.response_id as string
+  };
 }
 
 async function addReward(
@@ -160,27 +145,6 @@ async function addReward(
     .from("donor_responses")
     .update({ reward_accepted_at: new Date().toISOString() })
     .eq("id", responseId);
-}
-
-async function findDonorResponse(
-  db: Awaited<ReturnType<typeof createRouteSupabase>>,
-  donorId: string,
-  requestId: string
-) {
-  const { data, error } = await db
-    .from("donor_responses")
-    .select("id,confirmation_pin")
-    .eq("donor_id", donorId)
-    .eq("blood_request_id", requestId)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (error) throw supabaseError("Não foi possível verificar aceitação existente", error);
-  return data;
-}
-
-function createPin() {
-  return String(Math.floor(1000 + Math.random() * 9000));
 }
 
 function supabaseError(label: string, error: {

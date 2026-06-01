@@ -55,7 +55,7 @@ export function ActiveRequestsTable() {
     if (!closing) return;
     setSaving(true);
     setClosedIds((items) => [...new Set([...items, closing.id])]);
-    const result = await updateStatusAction(closing.id, "Cancelado");
+    const result = await updateStatusAction(closing.id, "CANCELLED");
     const message = result.ok ? "Pedido fechado com sucesso." : result.message;
     showToast(message, result.ok ? "success" : "error");
     if (result.ok) setClosing(null);
@@ -104,7 +104,9 @@ export function ActiveRequestsTable() {
           <article className={styles.requestRow} key={request.id}>
             <div>
               <strong style={{ color: "#d01424", fontSize: 24 }}>{request.bloodType}</strong>
-              <div className={styles.rowMuted}>{request.units} bolsas</div>
+              <div className={styles.rowMuted}>
+                {request.units} bolsas · {quotaLabel(request)}
+              </div>
             </div>
             <span>ID: #{request.id}<br /><span className={styles.rowMuted}>UTI Geral</span></span>
             <span className={styles.rowMuted}>Criado<br /><strong>{request.createdAt.slice(11, 16)}</strong></span>
@@ -202,11 +204,18 @@ function groupDonorsByRequest(donors: AcceptedDonor[]) {
 }
 
 function statusTone(status: string) {
-  if (status === "Aberto") return "pill red";
+  if (status === "Aberto" || status === "OPEN") return "pill red";
   if (isCompletedRequest(status)) return "pill green";
   return "pill gold";
 }
 
 function statusLabel(status: string) {
   return getRequestStatusLabel(status);
+}
+
+function quotaLabel(request: BloodRequest) {
+  const required = request.units;
+  const accepted = request.acceptedCount ?? 0;
+  const remaining = request.remainingSlots ?? Math.max(required - accepted, 0);
+  return `${required} necessárias · ${accepted} aceites · ${remaining} restantes`;
 }

@@ -11,7 +11,6 @@ export type UserRow = {
   phone: string | null;
   created_at: string;
 };
-
 export type DonorRow = {
   id: string;
   blood_type: BloodType;
@@ -38,7 +37,6 @@ export type DonorRow = {
   response_speed_minutes?: number | null;
   user_id?: string | null;
 };
-
 export type HospitalRow = {
   id: string;
   address?: string | null;
@@ -58,7 +56,6 @@ export type HospitalRow = {
   latitude?: number | null;
   longitude?: number | null;
 };
-
 export type RequestRow = {
   id: string;
   created_by?: string | null;
@@ -67,6 +64,8 @@ export type RequestRow = {
   blood_type: BloodType;
   units?: number | null;
   units_needed?: number | null;
+  accepted_count?: number | null;
+  remaining_slots?: number | null;
   urgency: Urgency;
   province?: string | null;
   municipality?: string | null;
@@ -188,10 +187,12 @@ export function mapRequest(row: RequestRow): BloodRequest {
     status: row.status,
     createdBy: row.created_by ?? undefined,
     createdAt: row.created_at,
+    acceptedCount: row.accepted_count ?? 0,
     requestSource: row.request_source ?? "hospital",
     familyRequestId: row.family_request_id ?? undefined,
     hospitalName: row.hospitals?.name ?? undefined,
-    hospitalLocation: formatHospitalLocation(row)
+    hospitalLocation: formatHospitalLocation(row),
+    remainingSlots: row.remaining_slots ?? Math.max((row.units_needed ?? row.units ?? 1) - (row.accepted_count ?? 0), 0)
   };
 }
 

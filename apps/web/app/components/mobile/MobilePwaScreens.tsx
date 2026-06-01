@@ -132,6 +132,7 @@ function statusLabel(status: DonorResponseStatus) {
     arrived: "Chegou",
     cancelled: "Cancelado",
     completed: "Doação concluída",
+    no_show: "Não compareceu",
     pin_validated: "PIN Validado"
   };
   return labels[status] ?? status;

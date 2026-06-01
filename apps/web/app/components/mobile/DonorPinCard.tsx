@@ -4,6 +4,7 @@ import type { DonorResponseStatus } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
+import { useState } from "react";
 import { LoadingSkeleton } from "../ui/LoadingSkeleton";
 import styles from "./mobileApp.module.css";
 
@@ -21,6 +22,8 @@ type DonorPin = {
 export function DonorPinCard() {
   const version = useRealtimeVersion();
   const liveVersion = useSupabaseRealtimeVersion(["donor_responses", "blood_requests", "donors"]);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
   const { data, error, loading } = useApiData<DonorPin[]>(
     "/api/donor/responses",
     [],
@@ -55,6 +58,17 @@ export function DonorPinCard() {
             <span><small>ETA</small><strong>{current.etaMinutes} min</strong></span>
             <span><small>Estado</small><strong>{statusLabel(current.status)}</strong></span>
           </div>
+          {canCancel(current.status) ? (
+            <button
+              className={styles.cancel}
+              disabled={saving}
+              onClick={() => void cancelAcceptance(current.responseId, setSaving, setMessage)}
+              type="button"
+            >
+              {saving ? "A cancelar..." : "Cancelar Aceitação"}
+            </button>
+          ) : null}
+          {message ? <p className="muted">{message}</p> : null}
         </div>
       )}
     </article>
@@ -62,7 +76,11 @@ export function DonorPinCard() {
 }
 
 function isActive(status: DonorResponseStatus) {
-  return status !== "completed" && status !== "cancelled";
+  return status !== "completed" && status !== "cancelled" && status !== "no_show";
+}
+
+function canCancel(status: DonorResponseStatus) {
+  return status === "accepted" || status === "arrived" || status === "pin_validated";
 }
 
 function statusLabel(status: DonorResponseStatus) {
@@ -71,7 +89,26 @@ function statusLabel(status: DonorResponseStatus) {
     arrived: "Chegou",
     cancelled: "Cancelado",
     completed: "Doação concluída",
+    no_show: "Não compareceu",
     pin_validated: "PIN Validado"
   };
   return labels[status] ?? status;
+}
+
+async function cancelAcceptance(
+  responseId: string,
+  setSaving: (value: boolean) => void,
+  setMessage: (value: string) => void
+) {
+  if (!window.confirm("Deseja cancelar esta aceitação? A vaga será reaberta para outro dador.")) return;
+  setSaving(true);
+  setMessage("");
+  const response = await fetch("/api/donor-responses/cancel", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ responseId })
+  });
+  const payload = await response.json().catch(() => null);
+  setMessage(payload?.ok ? "Aceitação cancelada. A vaga foi reaberta." : payload?.message ?? "Não foi possível cancelar.");
+  setSaving(false);
 }

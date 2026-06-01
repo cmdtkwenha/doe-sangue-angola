@@ -44,7 +44,9 @@ export const requestRepository = {
         municipality: input.municipality,
         notes: input.notes,
         urgency: input.urgency,
-        status: "Aberto"
+        accepted_count: 0,
+        remaining_slots: input.units,
+        status: "OPEN"
       })
       .select(requestColumns)
       .single();
@@ -79,7 +81,7 @@ export const requestRepository = {
   },
 
   closeRequest(id: string) {
-    return this.updateRequestStatus(id, "Cancelado");
+    return this.updateRequestStatus(id, "CANCELLED");
   },
 
   async updateRequestStatus(id: string, status: BloodRequest["status"]) {
@@ -103,7 +105,7 @@ export const requestRepository = {
     if (error) throw error;
 
     await donorRepository.addRewardPoints(donorId, 120);
-    return this.updateRequestStatus(requestId, "Concluído");
+    return this.updateRequestStatus(requestId, "COMPLETED");
   },
 
   async acceptRequest(donorId: string, requestId: string) {
@@ -165,6 +167,8 @@ const requestColumns = [
   "blood_type",
   "units",
   "units_needed",
+  "accepted_count",
+  "remaining_slots",
   "province",
   "municipality",
   "notes",

@@ -157,6 +157,8 @@ function normalizeStatus(status?: string | null): DonorResponseStatus {
     completed: "completed",
     Concluido: "completed",
     "Concluído": "completed",
+    no_show: "no_show",
+    NO_SHOW: "no_show",
     pin_validated: "pin_validated",
     "PIN Validado": "pin_validated"
   };

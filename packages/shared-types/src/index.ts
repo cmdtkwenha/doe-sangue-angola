@@ -15,10 +15,15 @@ export type UserRole = "admin" | "hospital" | "donor" | "support" | "viewer";
 export type Urgency = "Desastre" | "Critica" | "Alta" | "Media" | "Normal";
 
 export type RequestStatus =
+  | "OPEN"
+  | "FULFILLED"
+  | "COMPLETED"
+  | "CANCELLED"
   | "Aberto"
   | "Em Correspondência"
   | "Agendado"
   | "Doador a Caminho"
+  | "Pedido preenchido"
   | "PIN Validado"
   | "Concluído"
   | "Cancelado"
@@ -30,7 +35,8 @@ export type DonorResponseStatus =
   | "arrived"
   | "pin_validated"
   | "completed"
-  | "cancelled";
+  | "cancelled"
+  | "no_show";
 
 export type DonorEligibilityStatus =
   | "eligible"
@@ -106,10 +112,12 @@ export type BloodRequest = {
   status: RequestStatus;
   createdBy?: string;
   createdAt: string;
+  acceptedCount?: number;
   distanceKm?: number;
   etaMinutes?: number;
   hospitalName?: string;
   hospitalLocation?: string;
+  remainingSlots?: number;
   requestSource?: "hospital" | "family";
   familyRequestId?: string;
 };

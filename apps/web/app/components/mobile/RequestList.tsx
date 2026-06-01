@@ -82,9 +82,7 @@ export function RequestList({
             Não há pedidos próximos para o seu tipo sanguíneo neste momento.
           </p>
         </article>
-      ) : requests
-        .filter((request) => !donorReady || request.bloodType === donor.bloodType)
-        .map((request) => (
+      ) : requests.map((request) => (
         <RequestCard
           accepted={acceptedRequestIds.includes(request.id)}
           accepting={acceptingRequestId === request.id}

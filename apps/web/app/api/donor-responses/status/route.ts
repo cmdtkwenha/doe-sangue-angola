@@ -1,14 +1,23 @@
-import type { DonorResponseStatus } from "@doe-sangue-angola/shared-types";
 import { ApiError, apiResponse, readJson } from "../../_utils/apiResponse";
 import { auditApiAction } from "../../_utils/audit";
 import { createRouteSupabase, requireApiSession, requireEntityAccess, requireSameOrigin } from "../../_utils/security";
 import { notifyAdmins, notifyUser } from "../../_utils/notifications";
 import { assertPin, assertString, optionalString } from "../../_utils/validation";
 import { assertPinRate, clearPinFailures, recordFailedPin } from "../pinSecurity";
+import {
+  acceptanceStatus,
+  assertTransition,
+  auditMessage,
+  normalizeActionStatus,
+  normalizeCurrentStatus,
+  statusPayload,
+  type ResponseStatus,
+  workflowMessage,
+  workflowTitle
+} from "./statusHelpers";
 
-type ResponseStatus = Exclude<DonorResponseStatus, "accepted">;
 type StatusBody = { confirmationPin?: string; responseId: string; status: string };
-const allowed: ResponseStatus[] = ["arrived", "cancelled", "completed", "pin_validated"];
+const allowed: ResponseStatus[] = ["arrived", "cancelled", "completed", "no_show", "pin_validated"];
 
 export async function POST(request: Request) {
   requireSameOrigin(request);
@@ -49,11 +58,12 @@ export async function POST(request: Request) {
       .single();
     if (updateError) throw supabaseError("Não foi possível atualizar o estado do dador", updateError);
     if (status === "pin_validated") await clearPinFailures(db, responseId);
+    await syncAcceptance(db, existing, status);
     await applyOperationalEffects(db, responseId, existing.donor_id, status);
     await syncRequest(db, existing.blood_request_id, status);
     await syncFamilyRequest(db, familyId(existing), status);
     await notifyDonor(db, existing.donor_id, status);
-    if (status === "completed" || status === "cancelled") {
+  if (status === "completed" || status === "cancelled" || status === "no_show") {
       await notifyAdmins(db, workflowTitle(status), workflowMessage(status), status);
     }
     await auditApiAction(principal, auditMessage(status, responseId));
@@ -141,108 +151,31 @@ async function notifyDonor(
   });
 }
 
-function workflowTitle(status: ResponseStatus) {
-  const titles: Record<ResponseStatus, string> = {
-    arrived: "Chegada confirmada",
-    cancelled: "Pedido cancelado",
-    completed: "Doação concluída",
-    pin_validated: "PIN validado"
-  };
-  return titles[status];
-}
-
-function workflowMessage(status: ResponseStatus) {
-  const messages: Record<ResponseStatus, string> = {
-    arrived: "O hospital marcou a sua chegada. Aguarde a validação do PIN.",
-    cancelled: "A resposta ao pedido foi cancelada.",
-    completed: "Obrigado. A doação foi concluída com sucesso.",
-    pin_validated: "O seu PIN foi validado pelo hospital."
-  };
-  return messages[status];
-}
-
-function auditMessage(status: ResponseStatus, responseId: string) {
-  const actions: Record<ResponseStatus, string> = {
-    arrived: "Confirmou chegada do dador",
-    cancelled: "Cancelou resposta do dador",
-    completed: "Concluiu doação",
-    pin_validated: "Validou PIN do dador"
-  };
-  return `${actions[status]} (${responseId}).`;
-}
-
-function normalizeActionStatus(status?: string): ResponseStatus | null {
-  const oldValues: Record<string, ResponseStatus> = {
-    arrived: "arrived",
-    cancelled: "cancelled",
-    Cancelado: "cancelled",
-    Chegou: "arrived",
-    completed: "completed",
-    Concluido: "completed",
-    "Concluído": "completed",
-    pin_validated: "pin_validated",
-    "PIN Validado": "pin_validated"
-  };
-  return oldValues[status ?? ""] ?? null;
-}
-
-function normalizeCurrentStatus(status?: string): DonorResponseStatus {
-  return normalizeActionStatus(status) ?? (status === "accepted" ? "accepted" : "accepted");
-}
-
-function assertTransition(current: DonorResponseStatus, next: ResponseStatus) {
-  if (current === "completed") throw new ApiError(409, "Doação já concluída.");
-  if (current === "cancelled") throw new ApiError(409, "Resposta do dador já cancelada.");
-  if (next === "cancelled") return;
-  const validNext: Record<DonorResponseStatus, DonorResponseStatus[]> = {
-    accepted: ["arrived"],
-    arrived: ["pin_validated"],
-    cancelled: [],
-    completed: [],
-    pin_validated: ["completed"]
-  };
-  if (!validNext[current].includes(next)) {
-    throw new ApiError(409, transitionMessage(current, next));
-  }
-}
-
-function transitionMessage(current: DonorResponseStatus, next: ResponseStatus) {
-  const labels: Record<DonorResponseStatus, string> = {
-    accepted: "Dador a Caminho",
-    arrived: "Chegou",
-    cancelled: "Cancelado",
-    completed: "Doação concluída",
-    pin_validated: "PIN Validado"
-  };
-  return `Ação inválida: ${labels[current]} não pode passar diretamente para ${labels[next]}.`;
-}
-
-function statusPayload(status: ResponseStatus) {
-  const now = new Date().toISOString();
-  return {
-    arrived_at: status === "arrived" || status === "pin_validated" ? now : undefined,
-    cancelled_at: status === "cancelled" ? now : undefined,
-    completed_at: status === "completed" ? now : undefined,
-    donation_completed_at: status === "completed" ? now : undefined,
-    pin_validated_at: status === "pin_validated" ? now : undefined,
-    status
-  };
-}
-
 async function syncRequest(
   db: Awaited<ReturnType<typeof createRouteSupabase>>,
   requestId: string,
   status: ResponseStatus
 ) {
-  const next = status === "completed"
-    ? "Concluído"
-    : status === "cancelled"
-      ? "Cancelado"
-      : status === "pin_validated"
-        ? "PIN Validado"
-        : "Doador a Caminho";
-  const { error } = await db.from("blood_requests").update({ status: next }).eq("id", requestId);
+  const { error } = await db.rpc("recompute_request_quota", { p_request_id: requestId });
   if (error) throw supabaseError("Não foi possível atualizar o pedido de sangue", error);
+}
+
+async function syncAcceptance(
+  db: Awaited<ReturnType<typeof createRouteSupabase>>,
+  existing: { blood_request_id: string; donor_id: string },
+  status: ResponseStatus
+) {
+  const payload = {
+    arrived_at: status === "arrived" || status === "pin_validated" ? new Date().toISOString() : undefined,
+    cancelled_at: status === "cancelled" || status === "no_show" ? new Date().toISOString() : undefined,
+    completed_at: status === "completed" ? new Date().toISOString() : undefined,
+    status: acceptanceStatus(status),
+    updated_at: new Date().toISOString()
+  };
+  await db.from("request_acceptances")
+    .update(payload)
+    .eq("request_id", existing.blood_request_id)
+    .eq("donor_id", existing.donor_id);
 }
 
 function supabaseError(label: string, error: { message: string }) {

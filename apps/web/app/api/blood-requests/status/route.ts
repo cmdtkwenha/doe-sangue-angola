@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       .select(requestColumns)
       .single();
     if (error) throw error;
-    if (status === "Cancelado") {
+    if (status === "Cancelado" || status === "CANCELLED") {
       await notifyHospitalUsers(db, existing.hospital_id, "Pedido fechado", "O pedido foi marcado como cancelado.", "cancelled");
       await notifyAdmins(db, "Pedido cancelado", `Pedido ${requestId} foi cancelado.`, "cancelled");
     }
@@ -54,6 +54,8 @@ const requestColumns = [
   "blood_type",
   "units",
   "units_needed",
+  "accepted_count",
+  "remaining_slots",
   "province",
   "municipality",
   "notes",
