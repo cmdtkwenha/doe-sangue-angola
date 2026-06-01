@@ -7,12 +7,6 @@ export type AcceptedDonor = {
   completedDonations?: number;
   createdAt?: string;
   donorBloodType: string;
-  donorDebug?: {
-    data_source: string;
-    donor_id: string;
-    donor_user_id?: string;
-    resolved_user_name: string;
-  };
   donorId: string;
   donorName: string;
   donorPhone: string;

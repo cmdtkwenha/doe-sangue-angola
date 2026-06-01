@@ -10,12 +10,6 @@ export type AcceptedDonorRow = {
   completedDonations?: number;
   createdAt?: string;
   donorBloodType: string;
-  donorDebug?: {
-    data_source: string;
-    donor_id: string;
-    donor_user_id?: string;
-    resolved_user_name: string;
-  };
   donorId: string;
   donorName: string;
   donorPhone: string;
@@ -65,9 +59,8 @@ export async function GET() {
       ]);
     if (donorError) throw supabaseError("Não foi possível carregar dados dos dadores", donorError);
     if (requestError) throw supabaseError("Não foi possível carregar pedidos de sangue", requestError);
-    const { dataSource, users } = await getUsers(db, unique((donors ?? []).map((item) => item.user_id)));
+    const { users } = await getUsers(db, unique((donors ?? []).map((item) => item.user_id)));
     const metrics = await getDonationMetrics(db, donorIds);
-    const dev = process.env.NODE_ENV !== "production";
 
     return responses.map((item) => {
       const donor = donors?.find((row) => row.id === item.donor_id);
@@ -82,12 +75,6 @@ export async function GET() {
         completedDonations: completed,
         createdAt: item.created_at ?? undefined,
         donorBloodType: donor?.blood_type ?? "-",
-        donorDebug: dev ? {
-          data_source: dataSource,
-          donor_id: item.donor_id,
-          donor_user_id: donor?.user_id ?? undefined,
-          resolved_user_name: donorName
-        } : undefined,
         donorId: item.donor_id,
         donorName,
         donorPhone: user?.phone ?? "por completar",

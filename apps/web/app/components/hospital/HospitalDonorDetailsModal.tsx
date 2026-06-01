@@ -20,7 +20,7 @@ type Props = {
 export function HospitalDonorDetailsModal({ donor, onAction, onClose, saving }: Props) {
   if (!donor) return null;
   const status = normalizeDonorResponseStatus(donor.status);
-  const donorName = donor.donorName?.trim() || "Nome não disponível";
+  const donorName = resolveDonorName(donor);
   const summary = [
     donor.donorBloodType,
     donor.gender,
@@ -37,7 +37,6 @@ export function HospitalDonorDetailsModal({ donor, onAction, onClose, saving }: 
               <h2>{donorName}</h2>
               <DonorResponseStatusBadge status={status} />
               <p className={styles.summary}>{summary || donor.donorBloodType}</p>
-              <DonorDebug donor={donor} />
             </div>
           </div>
           <button className={styles.close} onClick={onClose} type="button">Fechar</button>
@@ -87,15 +86,6 @@ export function HospitalDonorDetailsModal({ donor, onAction, onClose, saving }: 
   );
 }
 
-function DonorDebug({ donor }: { donor: AcceptedDonor }) {
-  if (process.env.NODE_ENV === "production" || !donor.donorDebug) return null;
-  return (
-    <p className={styles.debug}>
-      donor_id: {donor.donorDebug.donor_id} · donor_user_id: {donor.donorDebug.donor_user_id ?? "-"} · resolved_user_name: {donor.donorDebug.resolved_user_name} · data_source: {donor.donorDebug.data_source}
-    </p>
-  );
-}
-
 function InfoSection({ children, title }: { children: ReactNode; title: string }) {
   return (
     <section className={styles.section}>
@@ -103,6 +93,28 @@ function InfoSection({ children, title }: { children: ReactNode; title: string }
       <div className={styles.grid}>{children}</div>
     </section>
   );
+}
+
+function resolveDonorName(donor: AcceptedDonor) {
+  const source = donor as AcceptedDonor & {
+    fullName?: string;
+    full_name?: string;
+    name?: string;
+    profile?: { name?: string };
+    user?: { email?: string; name?: string };
+    users?: { email?: string; name?: string };
+  };
+  return [
+    donor.donorName,
+    source.fullName,
+    source.full_name,
+    source.name,
+    source.user?.name,
+    source.users?.name,
+    source.profile?.name,
+    source.user?.email,
+    source.users?.email
+  ].find((value) => value?.trim())?.trim() ?? "Nome não disponível";
 }
 
 function Field({ label, value }: { label: string; value: ReactNode }) {

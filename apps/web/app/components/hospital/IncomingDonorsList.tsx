@@ -4,7 +4,7 @@ import type { DonorResponseStatus } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ActionToast } from "../ui/ActionToast";
 import {
   canMoveDonorResponse,
@@ -43,11 +43,17 @@ export function IncomingDonorsList() {
     [],
     version + liveVersion
   );
-  const displayRows = rows.map((row) => ({
+  const displayRows = useMemo(() => rows.map((row) => ({
     ...row,
     status: optimistic[row.responseId] ?? normalizeDonorResponseStatus(row.status)
-  }));
+  })), [optimistic, rows]);
   const { activeRows, historyRows } = splitRows(displayRows);
+
+  useEffect(() => {
+    if (!selected) return;
+    const updated = displayRows.find((row) => row.responseId === selected.responseId);
+    if (updated && updated !== selected) setSelected(updated);
+  }, [displayRows, selected]);
 
   function ask(row: AcceptedDonor, status: WorkflowStatus) {
     const current = normalizeDonorResponseStatus(row.status);
@@ -117,7 +123,6 @@ export function IncomingDonorsList() {
               <span className={styles.rowMuted}>
                 {row.donorBloodType} · Tel. {row.donorPhone}
               </span>
-              <DonorDebug row={row} />
               <br />
               <span className={styles.rowMuted}>
                 Pedido {row.requestBloodType} · {row.requestStatus} · {formatTime(row.createdAt)}
@@ -158,7 +163,6 @@ export function IncomingDonorsList() {
                 <span className={styles.rowMuted}>
                   Pedido {row.requestBloodType} · {formatTime(row.createdAt)}
                 </span>
-                <DonorDebug row={row} />
               </span>
               <span>{row.eta}</span>
               <DonorResponseStatusBadge status={row.status} />
@@ -191,15 +195,6 @@ export function IncomingDonorsList() {
       />
       <a className={styles.footerLink} href="/hospital/donors">Ver todos os dadores</a>
     </section>
-  );
-}
-
-function DonorDebug({ row }: { row: AcceptedDonor }) {
-  if (process.env.NODE_ENV === "production" || !row.donorDebug) return null;
-  return (
-    <span className={styles.rowMuted}>
-      donor_id: {row.donorDebug.donor_id} · donor_user_id: {row.donorDebug.donor_user_id ?? "-"} · resolved_user_name: {row.donorDebug.resolved_user_name} · data_source: {row.donorDebug.data_source}
-    </span>
   );
 }
 
