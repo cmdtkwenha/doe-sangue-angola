@@ -8,6 +8,8 @@ import type { BloodType, Urgency } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
 import { useEffect, useState } from "react";
 import { createRequestAction } from "../../workflow/workflowActions";
+import { ActionToast } from "../../ui/ActionToast";
+import { BloodRequestConfirmationModal, type BloodRequestConfirmation } from "../BloodRequestConfirmationModal";
 import { useCurrentHospital } from "../useCurrentHospital";
 import styles from "./hospitalAutomation.module.css";
 
@@ -24,6 +26,12 @@ export function RequestWizard() {
   const [urgency, setUrgency] = useState<Urgency>("Critica");
   const [notes, setNotes] = useState("");
   const [message, setMessage] = useState("Pronto para criar pedido.");
+  const [confirming, setConfirming] = useState<BloodRequestConfirmation | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<{ message: string; tone: "error" | "success" }>({
+    message: "",
+    tone: "success"
+  });
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -34,6 +42,30 @@ export function RequestWizard() {
       setUrgency(nextUrgency);
     }
   }, []);
+
+  async function confirmRequest() {
+    if (!confirming || !hospital?.id) return;
+    setSaving(true);
+    const result = await createRequestAction({
+      bloodType: confirming.bloodType,
+      hospitalId: hospital.id,
+      municipality: hospital.municipality,
+      notes: confirming.notes,
+      province: hospital.province,
+      units: confirming.units,
+      urgency: confirming.urgency
+    });
+    const text = result.ok ? "Pedido criado e dadores notificados." : result.message ?? "Falha ao criar pedido.";
+    setMessage(text);
+    showToast(text, result.ok ? "success" : "error");
+    if (result.ok) setConfirming(null);
+    setSaving(false);
+  }
+
+  function showToast(message: string, tone: "error" | "success") {
+    setToast({ message, tone });
+    window.setTimeout(() => setToast({ message: "", tone: "success" }), 3200);
+  }
 
   return (
     <section className={styles.panel}>
@@ -53,16 +85,14 @@ export function RequestWizard() {
           setMessage(validation.errors.join(" "));
           return;
         }
-        const result = await createRequestAction({
+        setConfirming({
           bloodType,
-          hospitalId,
-          municipality: hospital?.municipality,
+          currentStock: currentStock?.units ?? 0,
+          minimumStock: currentStock?.safeMinimum ?? 0,
           notes,
-          province: hospital?.province,
           units,
           urgency
         });
-        setMessage(result.ok ? "Pedido criado e dadores notificados." : result.message ?? "Falha ao criar pedido.");
       }}>
         <select className={styles.select} onChange={(event) => setBloodType(event.target.value as BloodType)} value={bloodType}>
           {bloodTypes.map((type) => <option key={type}>{type}</option>)}
@@ -82,6 +112,13 @@ export function RequestWizard() {
         <button className={styles.button} disabled={hospital?.verificationStatus !== "verified"} type="submit">Criar e notificar dadores</button>
       </form>
       <p className="muted">{message}</p>
+      <BloodRequestConfirmationModal
+        loading={saving}
+        onCancel={() => !saving && setConfirming(null)}
+        onConfirm={() => void confirmRequest()}
+        request={confirming}
+      />
+      <ActionToast message={toast.message} tone={toast.tone} />
     </section>
   );
 }
