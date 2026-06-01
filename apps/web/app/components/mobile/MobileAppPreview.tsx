@@ -1,5 +1,6 @@
 "use client";
 
+import { canDonorDonateToRequest } from "@doe-sangue-angola/agents";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { useState } from "react";
 import { useApiData } from "@hooks/useApiData";
@@ -39,6 +40,9 @@ export function MobileAppPreview() {
   const askAccept = (request: BloodRequest) => {
     const state = eligibilityState(donor);
     if (!state.canAccept) return showToast(`${state.label}: ${state.reason}`, "error");
+    if (!canDonorDonateToRequest(donor?.bloodType, request.bloodType)) {
+      return showToast("Este pedido não é compatível com o seu tipo sanguíneo.", "error");
+    }
     setSelected(null);
     setPendingAccept(request);
   };
@@ -47,6 +51,11 @@ export function MobileAppPreview() {
     if (!canDonorAcceptRequest(donor)) {
       const state = eligibilityState(donor);
       showToast(`${state.label}: ${state.reason}`, "error");
+      setPendingAccept(null);
+      return;
+    }
+    if (!canDonorDonateToRequest(donor.bloodType, pendingAccept.bloodType)) {
+      showToast("Este pedido não é compatível com o seu tipo sanguíneo.", "error");
       setPendingAccept(null);
       return;
     }

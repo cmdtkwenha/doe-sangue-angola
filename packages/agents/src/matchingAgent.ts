@@ -5,16 +5,24 @@ import type {
   MatchResult
 } from "@doe-sangue-angola/shared-types";
 
-const compatible: Record<BloodType, BloodType[]> = {
-  "O-": ["O-"],
-  "O+": ["O-", "O+"],
-  "A-": ["O-", "A-"],
-  "A+": ["O-", "O+", "A-", "A+"],
-  "B-": ["O-", "B-"],
-  "B+": ["O-", "O+", "B-", "B+"],
-  "AB-": ["O-", "A-", "B-", "AB-"],
-  "AB+": ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"]
+const donationCompatibility: Record<BloodType, BloodType[]> = {
+  "O-": ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"],
+  "O+": ["O+", "A+", "B+", "AB+"],
+  "A-": ["A-", "A+", "AB-", "AB+"],
+  "A+": ["A+", "AB+"],
+  "B-": ["B-", "B+", "AB-", "AB+"],
+  "B+": ["B+", "AB+"],
+  "AB-": ["AB-", "AB+"],
+  "AB+": ["AB+"]
 };
+
+export function canDonorDonateToRequest(
+  donorBloodType: BloodType | null | undefined,
+  requestBloodType: BloodType | null | undefined
+) {
+  if (!donorBloodType || !requestBloodType) return false;
+  return donationCompatibility[donorBloodType]?.includes(requestBloodType) ?? false;
+}
 
 export function matchingAgent(request: BloodRequest | undefined, donors: Donor[]): MatchResult[] {
   if (!request?.id) return [];
@@ -29,7 +37,7 @@ function scoreDonor(request: BloodRequest, donor: Donor): MatchResult {
   let score = 0;
   const critical = request.urgency === "Critica" || request.urgency === "Desastre";
 
-  if (compatible[request.bloodType].includes(donor.bloodType)) {
+  if (canDonorDonateToRequest(donor.bloodType, request.bloodType)) {
     score += 55;
     reasons.push("Tipo sanguineo compativel");
   }

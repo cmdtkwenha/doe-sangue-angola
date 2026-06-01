@@ -7,7 +7,7 @@ import {
   type RequestRow,
   type CreateRequestInput
 } from "@doe-sangue-angola/shared-services";
-import { matchingAgent } from "@doe-sangue-angola/agents";
+import { canDonorDonateToRequest, matchingAgent } from "@doe-sangue-angola/agents";
 import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { auditApiAction } from "../_utils/audit";
 import { ApiError, apiResponse, readJson } from "../_utils/apiResponse";
@@ -65,6 +65,7 @@ export async function GET(request: Request) {
         .map((item) => enrichRequest(item, donorRecord))
         .filter((item) => !closedStatuses.includes(item.status))
         .filter((item) => nearDonor(item, donorRecord))
+        .filter((item) => canDonorDonateToRequest(donorRecord.bloodType, item.bloodType))
         .filter((item) =>
           matchingAgent(item, [donorRecord]).some((match) =>
             match.donor.id === donorRecord.id && match.score >= 55

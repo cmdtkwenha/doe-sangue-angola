@@ -1,5 +1,6 @@
 import { eligibilityAgent } from "@doe-sangue-angola/agents";
 import { fraudAgent } from "@doe-sangue-angola/agents";
+import { canDonorDonateToRequest } from "@doe-sangue-angola/agents";
 import { matchingAgent } from "@doe-sangue-angola/agents";
 import { rewardAgent } from "@doe-sangue-angola/agents";
 import { schedulingAgent } from "@doe-sangue-angola/agents";
@@ -55,6 +56,30 @@ test("compatibilidade sanguínea favorece dador O- para pedido O-", () => {
 
   assert.equal(best.donor.name, "Maria João Santos");
   assert.ok(best.reasons.includes("Tipo sanguineo compativel"));
+});
+
+test("canDonorDonateToRequest cobre todos os pares sanguíneos permitidos", () => {
+  const rules: Record<BloodRequest["bloodType"], BloodRequest["bloodType"][]> = {
+    "O-": ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"],
+    "O+": ["O+", "A+", "B+", "AB+"],
+    "A-": ["A-", "A+", "AB-", "AB+"],
+    "A+": ["A+", "AB+"],
+    "B-": ["B-", "B+", "AB-", "AB+"],
+    "B+": ["B+", "AB+"],
+    "AB-": ["AB-", "AB+"],
+    "AB+": ["AB+"]
+  };
+  const allTypes = Object.keys(rules) as BloodRequest["bloodType"][];
+
+  for (const donorType of allTypes) {
+    for (const requestType of allTypes) {
+      assert.equal(
+        canDonorDonateToRequest(donorType, requestType),
+        rules[donorType].includes(requestType),
+        `${donorType} -> ${requestType}`
+      );
+    }
+  }
 });
 
 test("matchingAgent calcula prioridade inteligente para Maria", () => {

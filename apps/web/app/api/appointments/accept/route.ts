@@ -1,3 +1,5 @@
+import { canDonorDonateToRequest } from "@doe-sangue-angola/agents";
+import type { BloodType } from "@doe-sangue-angola/shared-types";
 import { ApiError, apiResponse, readJson } from "../../_utils/apiResponse";
 import { auditApiAction } from "../../_utils/audit";
 import { createRouteSupabase, requireApiSession, requireSameOrigin } from "../../_utils/security";
@@ -17,12 +19,13 @@ export async function POST(request: Request) {
     const db = await createRouteSupabase();
     const { data: donor, error } = await db
       .from("donors")
-      .select("id,user_id,available,eligibility_status,next_eligible_donation_date")
+      .select("id,user_id,blood_type,available,eligibility_status,next_eligible_donation_date")
       .eq("id", donorId)
       .maybeSingle();
     if (error) throw supabaseError("Não foi possível carregar o dador", error);
     const donorRow = donor as unknown as {
       available?: boolean;
+      blood_type?: BloodType | null;
       eligibility_status?: string | null;
       id: string;
       next_eligible_donation_date?: string | null;
@@ -50,12 +53,15 @@ export async function POST(request: Request) {
     const requestId = assertString(body.requestId, "Pedido");
     const { data: bloodRequest, error: requestError } = await db
       .from("blood_requests")
-      .select("id,hospital_id,status")
+      .select("id,hospital_id,blood_type,status")
       .eq("id", requestId)
       .maybeSingle();
     if (requestError) throw supabaseError("Não foi possível carregar o pedido de sangue", requestError);
-    const requestRow = bloodRequest as { hospital_id: string; id: string; status: string } | null;
+    const requestRow = bloodRequest as { blood_type?: BloodType | null; hospital_id: string; id: string; status: string } | null;
     if (!requestRow?.id) throw new ApiError(404, "Pedido de sangue não encontrado.");
+    if (!canDonorDonateToRequest(donorRow.blood_type, requestRow.blood_type)) {
+      throw new ApiError(409, "Este pedido não é compatível com o seu tipo sanguíneo.");
+    }
     if (["Agendado", "Cancelado", "Concluído", "Concluido", "Doador a Caminho"].includes(requestRow.status)) {
       const existing = await findDonorResponse(db, donorId, requestRow.id);
       if (!existing?.id) throw new ApiError(409, "Este pedido já não está disponível.");
