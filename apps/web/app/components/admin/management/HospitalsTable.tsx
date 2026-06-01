@@ -1,9 +1,11 @@
 "use client";
 
 import { hospitalActions } from "@constants/adminActions";
-import type { Hospital } from "@doe-sangue-angola/shared-types";
+import type { BloodRequest, Hospital } from "@doe-sangue-angola/shared-types";
 import { useEffect, useState } from "react";
+import { useApiData } from "../../../hooks/useApiData";
 import { supabase } from "../../../../lib/supabaseClient";
+import { ConfirmationModal } from "../../ui/ConfirmationModal";
 import { ManagementTable } from "./ManagementTable";
 import styles from "./management.module.css";
 
@@ -24,11 +26,18 @@ type HospitalRow = {
   verified?: boolean | null;
   verification_status?: string | null;
 };
+type UserRow = { id: string; linked_entity_id?: string | null; name?: string; role: string };
+type UsersPayload = { users: UserRow[] };
+type Pending = { action: string; email?: string; hospital: Hospital; title: string } | null;
 
 export function HospitalsTable() {
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const { data: requests } = useApiData<BloodRequest[]>("/api/blood-requests", [], hospitals.length);
+  const { data: usersPayload } = useApiData<UsersPayload>("/api/admin/users", { users: [] }, hospitals.length);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [pending, setPending] = useState<Pending>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!supabase) {
@@ -63,7 +72,7 @@ export function HospitalsTable() {
         disableFilters
         title="Hospitais e Clínicas"
         exportName="hospitais.csv"
-        columns={["Hospital", "Tipo", "Província", "Município", "Licença", "Contacto", "Motivo"]}
+        columns={["Hospital", "Tipo", "Província", "Município", "Licença", "Utilizadores", "Pedidos"]}
         rows={hospitals.map((hospital) => ({
           id: hospital.id,
           status: statusLabel(hospital),
@@ -73,27 +82,41 @@ export function HospitalsTable() {
             Província: hospital.province,
             Município: hospital.municipality,
             Licença: hospital.licenseNumber ?? "",
-            Contacto: hospital.contact,
-            Motivo: hospital.rejectionReason ?? ""
+            Utilizadores: linkedUsers(usersPayload.users, hospital.id),
+            Pedidos: String(requests.filter((item) => item.hospitalId === hospital.id).length)
           },
           actions: hospitalActions,
-          onAction: (action) => void handleAction(hospital, action)
+          onAction: (action) => queueAction(hospital, action)
         }))}
+      />
+      <ConfirmationModal
+        confirmLabel="Confirmar"
+        loading={saving}
+        message={pending ? `Confirmar "${pending.action}" para ${pending.hospital.name}?` : ""}
+        onClose={() => setPending(null)}
+        onConfirm={() => void runPending()}
+        open={Boolean(pending)}
+        title={pending?.title ?? "Confirmar ação"}
+        tone="danger"
       />
     </>
   );
 
-  async function handleAction(hospital: Hospital, action: string) {
-    const apiAction = actionMap[action];
+  async function runPending() {
+    if (!pending) return;
+    const apiAction = actionMap[pending.action];
     if (!apiAction) return;
     const reason = reasonFor(apiAction);
     if (reason === null) return;
+    setSaving(true);
     setMessage("A atualizar verificação do hospital...");
-    const response = await fetch("/api/hospitals/verification", {
-      method: "POST",
+    const response = await fetch("/api/admin/verification", {
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: apiAction, hospitalId: hospital.id, reason })
+      body: JSON.stringify({ action: apiAction, email: pending.email, hospitalId: pending.hospital.id, reason })
     });
+    setSaving(false);
+    setPending(null);
     const payload = await response.json().catch(() => null);
     if (!response.ok || payload?.ok === false) {
       setMessage(payload?.message ?? "Não foi possível atualizar o hospital.");
@@ -103,17 +126,30 @@ export function HospitalsTable() {
     const data = await loadSupabaseHospitals();
     setHospitals(data);
   }
+
+  function queueAction(hospital: Hospital, action: string) {
+    if (action === "Ligar utilizador" || action === "Desligar utilizador") {
+      const email = window.prompt("Email do utilizador hospitalar:")?.trim();
+      if (!email) return;
+      setPending({ action, email, hospital, title: action });
+      return;
+    }
+    setPending({ action, hospital, title: action });
+  }
 }
 
-const actionMap: Record<string, "approve" | "reject" | "suspend" | "reactivate"> = {
-  "Aprovar hospital": "approve",
-  "Reativar hospital": "reactivate",
-  "Rejeitar hospital": "reject",
-  "Suspender hospital": "suspend"
+const actionMap: Record<string, string> = {
+  "Aprovar hospital": "approve_hospital",
+  "Pedir revisão": "review_hospital",
+  "Reativar hospital": "reactivate_hospital",
+  "Rejeitar hospital": "reject_hospital",
+  "Suspender hospital": "suspend_hospital",
+  "Ligar utilizador": "link_hospital_user",
+  "Desligar utilizador": "unlink_hospital_user"
 };
 
-function reasonFor(action: "approve" | "reject" | "suspend" | "reactivate") {
-  if (action === "approve" || action === "reactivate") return undefined;
+function reasonFor(action: string) {
+  if (action === "approve_hospital" || action === "reactivate_hospital") return undefined;
   return window.prompt("Informe o motivo para o hospital:")?.trim() || null;
 }
 
@@ -121,10 +157,16 @@ function statusLabel(hospital: Hospital) {
   const labels: Record<string, string> = {
     pending: "Pendente",
     rejected: "Rejeitado",
+    needs_review: "Revisão necessária",
     suspended: "Suspenso",
     verified: "Verificado"
   };
-  return labels[hospital.verificationStatus ?? (hospital.verified ? "verified" : "pending")];
+  return labels[String(hospital.verificationStatus ?? (hospital.verified ? "verified" : "pending"))];
+}
+
+function linkedUsers(users: UserRow[], hospitalId: string) {
+  const linked = users.filter((user) => user.role === "hospital" && user.linked_entity_id === hospitalId);
+  return linked.map((user) => user.name ?? "Utilizador").join(", ") || "Sem ligação";
 }
 
 async function loadSupabaseHospitals() {
@@ -168,6 +210,6 @@ function mapHospital(row: HospitalRow): Hospital {
 
 function normalizeHospitalStatus(row: HospitalRow) {
   const value = row.verification_status;
-  if (value === "pending" || value === "verified" || value === "rejected" || value === "suspended") return value;
+  if (value === "needs_review" || value === "pending" || value === "verified" || value === "rejected" || value === "suspended") return value;
   return row.verified ? "verified" : "pending";
 }

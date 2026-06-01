@@ -1,14 +1,18 @@
 export const hospitalActions = [
   "Aprovar hospital",
   "Rejeitar hospital",
+  "Pedir revisão",
   "Suspender hospital",
-  "Reativar hospital"
+  "Reativar hospital",
+  "Ligar utilizador",
+  "Desligar utilizador"
 ];
 
 export const donorActions = [
-  "Aprovar dador",
-  "Sinalizar atividade",
-  "Enviar mensagem"
+  "Verificar dador",
+  "Necessita revisão",
+  "Suspender dador",
+  "Reativar dador"
 ];
 
 export const requestActions = [

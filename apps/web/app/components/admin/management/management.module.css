@@ -35,6 +35,17 @@
   gap: 10px;
 }
 
+.rowCard {
+  border-top: 1px solid #edf0f4;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.rowCard span {
+  color: #667085;
+}
+
 .input,
 .select {
   background: #f8fafc;

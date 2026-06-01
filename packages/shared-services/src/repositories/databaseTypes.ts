@@ -169,7 +169,7 @@ export function mapHospital(row: HospitalRow): Hospital {
 }
 
 function normalizeHospitalStatus(value?: string | null, verified?: boolean) {
-  const valid = ["pending", "verified", "rejected", "suspended"];
+  const valid = ["needs_review", "pending", "verified", "rejected", "suspended"];
   if (valid.includes(value ?? "")) return value as Hospital["verificationStatus"];
   return verified ? "verified" : "pending";
 }

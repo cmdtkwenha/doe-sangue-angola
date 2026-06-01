@@ -118,6 +118,21 @@
   padding: 20px;
   position: relative;
 }
+.metricLink {
+  display: grid;
+  gap: 10px;
+  min-height: 96px;
+  padding: 18px;
+  border: 1px solid #e3e7ee;
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 14px 36px rgba(25, 35, 45, 0.06);
+  color: #151923;
+}
+.metricLink strong {
+  color: #b10f1f;
+  font-size: 30px;
+}
 .metricIcon {
   position: absolute;
   right: 16px;

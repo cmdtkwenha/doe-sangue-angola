@@ -3,6 +3,7 @@ import styles from "./adminCore.module.css";
 import { AdminHeader } from "./AdminHeader";
 import { AdminMetrics } from "./AdminMetrics";
 import { AdminSidebar } from "./AdminSidebar";
+import { AdminVerificationCounters } from "./AdminVerificationCounters";
 import { BloodInventoryTable } from "./BloodInventoryTable";
 import { LiveRequestsPanel } from "./LiveRequestsPanel";
 import { LoadingSkeleton } from "../ui/LoadingSkeleton";
@@ -55,6 +56,7 @@ export function AdminDashboard() {
           <RealtimeStatusStrip />
           <RequestStatusTimeline />
           <NationalOperationsCenter />
+          <AdminVerificationCounters />
           <AdminMetrics />
           <section className={styles.mainGrid}>
             <ProvinceHeatMap />

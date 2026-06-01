@@ -39,6 +39,7 @@ export type DonorEligibilityStatus =
   | "needs_review";
 
 export type HospitalVerificationStatus =
+  | "needs_review"
   | "pending"
   | "verified"
   | "rejected"
