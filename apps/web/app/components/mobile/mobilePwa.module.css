@@ -1,0 +1,104 @@
+.stage {
+  min-height: 100dvh;
+  background: #f7f8fb;
+}
+.shell {
+  position: relative;
+  width: min(100%, 480px);
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: linear-gradient(180deg, #ffffff, #fbfcfe 42%, #f4f6fa);
+  color: #111820;
+  box-shadow: 0 18px 70px rgba(17, 24, 32, 0.12);
+}
+.top {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 40;
+  display: flex;
+  width: min(100%, 480px);
+  min-height: 72px;
+  transform: translateX(-50%);
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: calc(env(safe-area-inset-top) + 12px) 18px 12px;
+  border-bottom: 1px solid rgba(231, 234, 240, 0.9);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(18px);
+}
+.brand,
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.brand small {
+  display: block;
+  color: #697386;
+  font-size: 11px;
+  font-weight: 800;
+}
+.drop {
+  width: 28px;
+  height: 34px;
+  border-radius: 18px 18px 22px 22px;
+  background: linear-gradient(160deg, #ff5362, #c8102e);
+  transform: rotate(45deg);
+}
+.content {
+  min-height: 100dvh;
+  padding: calc(env(safe-area-inset-top) + 92px) 16px calc(env(safe-area-inset-bottom) + 96px);
+}
+.screen {
+  display: grid;
+  gap: 12px;
+}
+.screen h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.1;
+}
+.nav {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: 40;
+  display: grid;
+  width: min(100%, 480px);
+  grid-template-columns: repeat(5, 1fr);
+  transform: translateX(-50%);
+  padding: 9px 10px calc(env(safe-area-inset-bottom) + 10px);
+  border-top: 1px solid #e7eaf0;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(18px);
+}
+.navItem {
+  display: grid;
+  min-height: 56px;
+  place-items: center;
+  gap: 3px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: #697386;
+  font-weight: 900;
+}
+.navItem span {
+  font-size: 18px;
+  line-height: 1;
+}
+.active {
+  background: #fff0f1;
+  color: #d01424;
+}
+.empty {
+  padding: 18px;
+  border: 1px dashed #d8dee7;
+  border-radius: 14px;
+  background: white;
+  color: #697386;
+  font-weight: 800;
+}
