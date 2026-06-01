@@ -48,6 +48,10 @@ Do not patch runtime errors by adding frontend-only fields.
 `last_pin_attempt_at`, `failed_pin_attempts`, `reward_accepted_at`,
 `reward_arrived_at`, `reward_completed_at`
 
+### donor_verifications
+`id`, `donor_id`, `verified_by`, `status`, `notes`, `created_at`,
+`updated_at`
+
 ### donors
 `id`, `user_id`, `blood_type`, `province`, `municipality`, `phone`, `available`,
 `eligibility_status`, `last_donation`, `points`, `preferred_hospital_id`, `created_at`,
@@ -76,6 +80,10 @@ Do not patch runtime errors by adding frontend-only fields.
 ### hospital_staff
 `id`, `hospital_id`, `auth_user_id`, `name`, `email`, `staff_role`, `status`,
 `invited_by`, `last_activity_at`, `created_at`, `updated_at`
+
+### hospital_verifications
+`id`, `hospital_id`, `verified_by`, `status`, `notes`, `created_at`,
+`updated_at`
 
 ### inventory_movements
 `id`, `hospital_id`, `blood_type`, `movement_type`, `units`, `note`,

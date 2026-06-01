@@ -22,9 +22,24 @@ const actions = [
   "unlink_hospital_user",
   "verify_donor",
   "review_donor",
+  "reject_donor",
   "suspend_donor",
   "reactivate_donor"
 ];
+
+export async function GET() {
+  return apiResponse(async () => {
+    await requireApiSession(["admin"]);
+    const db = await createRouteSupabase();
+    const [donors, hospitals] = await Promise.all([
+      db.from("donor_verifications").select("*").order("created_at", { ascending: false }),
+      db.from("hospital_verifications").select("*").order("created_at", { ascending: false })
+    ]);
+    if (donors.error) throw new Error(`donor_verifications select: ${donors.error.message}`);
+    if (hospitals.error) throw new Error(`hospital_verifications select: ${hospitals.error.message}`);
+    return { donorVerifications: donors.data ?? [], hospitalVerifications: hospitals.data ?? [] };
+  });
+}
 
 export async function PATCH(request: Request) {
   requireSameOrigin(request);
@@ -33,8 +48,13 @@ export async function PATCH(request: Request) {
     const principal = await requireApiSession(["admin"]);
     const action = normalizeAction(body.action);
     const db = await createRouteSupabase();
-    await applyAction(db, action, body);
-    await auditApiAction(principal, `Admin executou ${action}.`);
+    const result = await applyAction(db, action, body, principal.authUserId);
+    if (result) {
+      await auditApiAction(
+        principal,
+        `Verificação ${action}; target=${result.targetType}:${result.targetId}; old=${result.oldStatus}; new=${result.newStatus}; at=${new Date().toISOString()}`
+      );
+    }
     return { updated: true };
   });
 }
@@ -42,34 +62,35 @@ export async function PATCH(request: Request) {
 async function applyAction(
   db: Awaited<ReturnType<typeof createRouteSupabase>>,
   action: string,
-  body: Body
+  body: Body,
+  adminUserId: string
 ) {
   if (action === "approve_hospital") {
-    return updateHospital(db, body.hospitalId, { verified: true, verification_status: "verified" });
+    return updateHospital(db, body.hospitalId, "approved", adminUserId, body.reason, { verified: true, verification_status: "verified" });
   }
   if (action === "reject_hospital") {
-    return updateHospital(db, body.hospitalId, {
+    return updateHospital(db, body.hospitalId, "rejected", adminUserId, body.reason, {
       rejection_reason: body.reason ?? "Rejeitado pela administração.",
       verified: false,
       verification_status: "rejected"
     });
   }
   if (action === "review_hospital") {
-    return updateHospital(db, body.hospitalId, {
+    return updateHospital(db, body.hospitalId, "needs_review", adminUserId, body.reason, {
       rejection_reason: body.reason ?? "Revisão documental solicitada.",
       verified: false,
       verification_status: "needs_review"
     });
   }
   if (action === "suspend_hospital") {
-    return updateHospital(db, body.hospitalId, {
+    return updateHospital(db, body.hospitalId, "suspended", adminUserId, body.reason, {
       rejection_reason: body.reason ?? "Conta suspensa pela administração.",
       verified: false,
       verification_status: "suspended"
     });
   }
   if (action === "reactivate_hospital") {
-    return updateHospital(db, body.hospitalId, { rejection_reason: null, verified: true, verification_status: "verified" });
+    return updateHospital(db, body.hospitalId, "approved", adminUserId, body.reason, { rejection_reason: null, verified: true, verification_status: "verified" });
   }
   if (action === "link_hospital_user") {
     const profileId = body.profileId ?? await profileIdByEmail(db, body.email);
@@ -79,30 +100,62 @@ async function applyAction(
     const profileId = body.profileId ?? await profileIdByEmail(db, body.email);
     return updateProfile(db, profileId, { linked_entity_id: null });
   }
-  if (action === "verify_donor") return updateDonor(db, body.donorId, { available: true, eligibility_status: "eligible" });
-  if (action === "review_donor") return updateDonor(db, body.donorId, { available: false, eligibility_status: "needs_review" });
-  if (action === "suspend_donor") return updateDonor(db, body.donorId, { available: false, eligibility_status: "permanently_deferred" });
-  if (action === "reactivate_donor") return updateDonor(db, body.donorId, { available: true, eligibility_status: "eligible" });
+  if (action === "verify_donor") return updateDonor(db, body.donorId, "verified", adminUserId, body.reason, { available: true, eligibility_status: "eligible" });
+  if (action === "review_donor") return updateDonor(db, body.donorId, "needs_review", adminUserId, body.reason, { available: false, eligibility_status: "needs_review" });
+  if (action === "reject_donor") return updateDonor(db, body.donorId, "rejected", adminUserId, body.reason, { available: false, eligibility_status: "permanently_deferred" });
+  if (action === "suspend_donor") return updateDonor(db, body.donorId, "suspended", adminUserId, body.reason, { available: false, eligibility_status: "permanently_deferred" });
+  if (action === "reactivate_donor") return updateDonor(db, body.donorId, "verified", adminUserId, body.reason, { available: true, eligibility_status: "eligible" });
 }
 
 async function updateHospital(
   db: Awaited<ReturnType<typeof createRouteSupabase>>,
   id: string | undefined,
+  status: string,
+  adminUserId: string,
+  notes: string | undefined,
   patch: Record<string, boolean | null | string>
 ) {
   const hospitalId = assertString(id, "Hospital");
+  const { data: before } = await db.from("hospitals").select("verification_status,verified").eq("id", hospitalId).maybeSingle();
   const { error } = await db.from("hospitals").update(patch).eq("id", hospitalId);
   if (error) throw new Error(`hospitals update: ${error.message}`);
+  await insertVerification(db, "hospital_verifications", { hospital_id: hospitalId, notes, status, verified_by: adminUserId });
+  return {
+    newStatus: status,
+    oldStatus: before?.verification_status ?? (before?.verified ? "approved" : "pending"),
+    targetId: hospitalId,
+    targetType: "hospital"
+  };
 }
 
 async function updateDonor(
   db: Awaited<ReturnType<typeof createRouteSupabase>>,
   id: string | undefined,
+  status: string,
+  adminUserId: string,
+  notes: string | undefined,
   patch: Record<string, boolean | string>
 ) {
   const donorId = assertString(id, "Dador");
+  const { data: before } = await db.from("donors").select("eligibility_status").eq("id", donorId).maybeSingle();
   const { error } = await db.from("donors").update(patch).eq("id", donorId);
   if (error) throw new Error(`donors update: ${error.message}`);
+  await insertVerification(db, "donor_verifications", { donor_id: donorId, notes, status, verified_by: adminUserId });
+  return {
+    newStatus: status,
+    oldStatus: before?.eligibility_status ?? "pending",
+    targetId: donorId,
+    targetType: "donor"
+  };
+}
+
+async function insertVerification(
+  db: Awaited<ReturnType<typeof createRouteSupabase>>,
+  table: "donor_verifications" | "hospital_verifications",
+  payload: Record<string, string | undefined>
+) {
+  const { error } = await db.from(table).insert(payload);
+  if (error) throw new Error(`${table} insert: ${error.message}`);
 }
 
 async function updateProfile(

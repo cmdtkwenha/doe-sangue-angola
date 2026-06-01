@@ -61,6 +61,53 @@
   color: #667085;
 }
 
+.detailCard {
+  display: grid;
+  gap: 14px;
+  width: min(820px, calc(100vw - 24px));
+  max-height: 88vh;
+  overflow: auto;
+  border-radius: 18px;
+  background: white;
+  padding: 20px;
+  box-shadow: 0 28px 80px rgba(12, 18, 28, 0.2);
+}
+
+.detailHead,
+.detailGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.detailHead button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #dfe5ee;
+  border-radius: 10px;
+  background: white;
+}
+
+.detailGrid span,
+.detailPanel {
+  display: grid;
+  gap: 4px;
+  border: 1px solid #edf0f4;
+  border-radius: 12px;
+  background: #fbfcfe;
+  padding: 12px;
+}
+
+.detailGrid span {
+  flex: 1 1 220px;
+}
+
+.historyItem {
+  border-top: 1px solid #edf0f4;
+  padding-top: 10px;
+}
+
 .input,
 .select {
   background: #f8fafc;

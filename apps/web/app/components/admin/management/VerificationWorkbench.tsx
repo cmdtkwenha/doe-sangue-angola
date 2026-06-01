@@ -8,12 +8,17 @@ import { ConfirmationModal } from "../../ui/ConfirmationModal";
 import { EmptyState } from "../../ui/EmptyState";
 import { LoadingSkeleton } from "../../ui/LoadingSkeleton";
 import styles from "./management.module.css";
+import { VerificationDetailsModal, type VerificationDetails, type VerificationRow } from "./VerificationDetailsModal";
 
 type Tab = "hospitals" | "donors" | "cases";
 type Pending =
   | { action: string; donor?: Donor; hospital?: Hospital; title: string }
   | null;
 type Resolved = { donors: string[]; hospitals: string[] };
+type HistoryPayload = {
+  donorVerifications: Array<VerificationRow & { donor_id: string }>;
+  hospitalVerifications: Array<VerificationRow & { hospital_id: string }>;
+};
 
 const tabs: Array<{ id: Tab; label: string }> = [
   { id: "hospitals", label: "Hospitais Pendentes" },
@@ -26,6 +31,7 @@ export function VerificationWorkbench() {
   const [refresh, setRefresh] = useState(0);
   const [pending, setPending] = useState<Pending>(null);
   const [resolved, setResolved] = useState<Resolved>({ donors: [], hospitals: [] });
+  const [details, setDetails] = useState<VerificationDetails | null>(null);
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
   const live = useSupabaseRealtimeVersion(["hospitals", "donors"]);
@@ -33,6 +39,11 @@ export function VerificationWorkbench() {
     useApiData<Hospital[]>("/api/hospitals", [], live + refresh);
   const { data: donors, error: donorError, loading: loadingDonors } =
     useApiData<Donor[]>("/api/donors", [], live + refresh);
+  const { data: history } = useApiData<HistoryPayload>(
+    "/api/admin/verification",
+    { donorVerifications: [], hospitalVerifications: [] },
+    refresh
+  );
   const pendingHospitals = hospitals
     .filter((item) => ["pending", "needs_review"].includes(hospitalStatus(item)))
     .filter((item) => !resolved.hospitals.includes(item.id));
@@ -70,6 +81,13 @@ export function VerificationWorkbench() {
       ) : null}
       {active === "donors" ? <DonorList donors={pendingDonors} onAction={setPending} /> : null}
       {active === "cases" ? <CaseList cases={cases} /> : null}
+      <DetailsLauncher
+        active={active}
+        donors={pendingDonors}
+        history={history}
+        hospitals={pendingHospitals}
+        onOpen={setDetails}
+      />
       <ConfirmationModal
         confirmLabel="Confirmar"
         loading={saving}
@@ -80,6 +98,7 @@ export function VerificationWorkbench() {
         title={pending?.title ?? "Confirmar verificação"}
         tone="danger"
       />
+      {details ? <VerificationDetailsModal details={details} onClose={() => setDetails(null)} /> : null}
     </section>
   );
 
@@ -107,10 +126,63 @@ export function VerificationWorkbench() {
     if (item.hospital && ["approve_hospital", "reject_hospital", "suspend_hospital"].includes(item.action)) {
       setResolved((value) => ({ ...value, hospitals: [...new Set([...value.hospitals, item.hospital!.id])] }));
     }
-    if (item.donor && ["verify_donor", "suspend_donor", "reactivate_donor"].includes(item.action)) {
+    if (item.donor && ["reject_donor", "verify_donor", "suspend_donor", "reactivate_donor"].includes(item.action)) {
       setResolved((value) => ({ ...value, donors: [...new Set([...value.donors, item.donor!.id])] }));
     }
   }
+}
+
+function DetailsLauncher({
+  active,
+  donors,
+  history,
+  hospitals,
+  onOpen
+}: {
+  active: Tab;
+  donors: Donor[];
+  history: HistoryPayload;
+  hospitals: Hospital[];
+  onOpen: (details: VerificationDetails) => void;
+}) {
+  if (active === "hospitals") {
+    return <DetailButtons hospitals={hospitals} history={history} onOpen={onOpen} />;
+  }
+  if (active === "donors") {
+    return <DetailButtons donors={donors} history={history} onOpen={onOpen} />;
+  }
+  return null;
+}
+
+function DetailButtons({
+  donors = [],
+  history,
+  hospitals = [],
+  onOpen
+}: {
+  donors?: Donor[];
+  history: HistoryPayload;
+  hospitals?: Hospital[];
+  onOpen: (details: VerificationDetails) => void;
+}) {
+  return (
+    <div className={styles.controls}>
+      {hospitals.map((hospital) => (
+        <button key={hospital.id} onClick={() => onOpen({
+          histories: history.hospitalVerifications.filter((item) => item.hospital_id === hospital.id),
+          hospital,
+          type: "hospital"
+        })} type="button">Ver detalhes: {hospital.name}</button>
+      ))}
+      {donors.map((donor) => (
+        <button key={donor.id} onClick={() => onOpen({
+          donor,
+          histories: history.donorVerifications.filter((item) => item.donor_id === donor.id),
+          type: "donor"
+        })} type="button">Ver detalhes: {donor.name}</button>
+      ))}
+    </div>
+  );
 }
 
 function HospitalList({ hospitals, onAction }: {
@@ -140,6 +212,7 @@ function DonorList({ donors, onAction }: { donors: Donor[]; onAction: (pending: 
       <div className={styles.controls}>
         <button onClick={() => onAction({ action: "verify_donor", donor, title: "Verificar dador" })} type="button">Verificar</button>
         <button onClick={() => onAction({ action: "review_donor", donor, title: "Manter em revisão" })} type="button">Revisão</button>
+        <button onClick={() => onAction({ action: "reject_donor", donor, title: "Rejeitar dador" })} type="button">Rejeitar</button>
         <button onClick={() => onAction({ action: "suspend_donor", donor, title: "Suspender dador" })} type="button">Suspender</button>
       </div>
     </article>
