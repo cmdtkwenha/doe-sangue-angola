@@ -17,6 +17,7 @@ const schemaContract = {
   municipalities: ["id", "name", "province"],
   notification_preferences: ["id", "donor_id", "preferences", "created_at"],
   notifications: ["id", "user_id", "role", "title", "body", "message", "type", "read", "read_at", "created_at"],
+  pilot_feedback: ["id", "user_id", "role", "page", "issue_type", "severity", "description", "contact", "status", "created_at", "updated_at"],
   profiles: ["id", "auth_user_id", "role", "linked_entity_id", "name", "email", "phone", "account_status", "last_activity_at", "password_reset_requested_at", "created_at", "updated_at"],
   provinces: ["id", "name"],
   push_tokens: ["id", "donor_id", "platform", "token", "active", "created_at"],

@@ -1,0 +1,86 @@
+.button,
+.compact {
+  background: #111827;
+  border: 0;
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 800;
+  min-height: 42px;
+  padding: 0 14px;
+}
+
+.compact {
+  background: #fff5f5;
+  border: 1px solid rgba(177, 15, 31, 0.18);
+  color: #b10f1f;
+}
+
+.backdrop {
+  align-items: center;
+  background: rgba(15, 23, 42, 0.48);
+  display: grid;
+  inset: 0;
+  padding: 18px;
+  position: fixed;
+  z-index: 120;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.28);
+  display: grid;
+  gap: 14px;
+  margin: auto;
+  max-width: 480px;
+  padding: 18px;
+  width: min(100%, 480px);
+}
+
+.modal header,
+.modal footer {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.modal header span,
+.modal label {
+  display: grid;
+  gap: 6px;
+}
+
+.modal small,
+.modal label {
+  color: #64748b;
+}
+
+.modal input,
+.modal select,
+.modal textarea {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  color: #111827;
+  font: inherit;
+  padding: 10px 12px;
+}
+
+.modal button {
+  border: 0;
+  border-radius: 12px;
+  font-weight: 800;
+  min-height: 42px;
+  padding: 0 14px;
+}
+
+.modal footer button:first-child,
+.modal header button {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.modal footer button:last-child {
+  background: #b10f1f;
+  color: #fff;
+}

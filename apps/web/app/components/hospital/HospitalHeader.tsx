@@ -1,6 +1,7 @@
 "use client";
 
 import { NotificationBell } from "../notifications/NotificationBell";
+import { PilotFeedbackButton } from "../feedback/PilotFeedbackButton";
 import styles from "./hospitalPortal.module.css";
 import { useCurrentHospital } from "./useCurrentHospital";
 
@@ -20,6 +21,7 @@ export function HospitalHeader() {
         </div>
       </div>
       <div className={styles.headerActions}>
+        <PilotFeedbackButton compact />
         <NotificationBell />
         <strong>Dr. João Mendes</strong>
       </div>

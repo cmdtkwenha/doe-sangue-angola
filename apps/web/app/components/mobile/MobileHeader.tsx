@@ -1,4 +1,5 @@
 import { NotificationBell } from "../notifications/NotificationBell";
+import { PilotFeedbackButton } from "../feedback/PilotFeedbackButton";
 import styles from "./mobileApp.module.css";
 
 export function MobileHeader({ title, subtitle }: { title: string; subtitle?: string }) {
@@ -11,7 +12,10 @@ export function MobileHeader({ title, subtitle }: { title: string; subtitle?: st
           {subtitle ? <small><br />{subtitle}</small> : null}
         </span>
       </div>
-      <NotificationBell />
+      <span style={{ display: "flex", gap: 8 }}>
+        <PilotFeedbackButton compact />
+        <NotificationBell />
+      </span>
     </header>
   );
 }

@@ -1,4 +1,5 @@
 import { NotificationBell } from "../notifications/NotificationBell";
+import { PilotFeedbackButton } from "../feedback/PilotFeedbackButton";
 import styles from "./adminCore.module.css";
 
 export function AdminHeader() {
@@ -16,6 +17,7 @@ export function AdminHeader() {
         aria-label="Pesquisar"
       />
       <div className={styles.headerTools}>
+        <PilotFeedbackButton compact />
         <NotificationBell all />
         <span className="pill">Português</span>
         <strong>09:42</strong>

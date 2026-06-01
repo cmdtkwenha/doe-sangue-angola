@@ -19,6 +19,7 @@ import { acceptRequestAction } from "../workflow/workflowActions";
 import { useCurrentDonor } from "./useCurrentDonor";
 import { canDonorAcceptRequest, eligibilityState } from "./EligibilityStatusCard";
 import { OnboardingCompletionTracker, OperationalWalkthrough } from "../support";
+import { PilotFeedbackButton } from "../feedback/PilotFeedbackButton";
 
 const load = (label: string) => () => <LoadingSkeleton label={label} />;
 const DonationSuccessScreen = dynamic(() =>
@@ -115,6 +116,7 @@ export function MobileAppPreview() {
       <DonorEntityGate>
       <section className={styles.grid}>
         <DonorHome />
+        <PilotFeedbackButton />
         <OperationalWalkthrough role="donor" />
         <OnboardingCompletionTracker
           title="Perfil de dador"
