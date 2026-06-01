@@ -74,7 +74,7 @@ export async function GET() {
         createdAt: item.created_at ?? undefined,
         donorBloodType: donor?.blood_type ?? "-",
         donorId: item.donor_id,
-        donorName: cleanName(user?.name),
+        donorName: cleanName(user?.name, user?.email),
         donorPhone: user?.phone ?? "por completar",
         emergencyContactName: donor?.emergency_contact_name ?? undefined,
         emergencyContactPhone: donor?.emergency_contact_phone ?? undefined,
@@ -124,10 +124,10 @@ function ageFromBirthDate(value?: string | null) {
 }
 
 async function getUsers(db: Awaited<ReturnType<typeof createRouteSupabase>>, ids: string[]) {
-  if (!ids.length) return [] as Array<{ id: string; name: string | null; phone: string | null }>;
+  if (!ids.length) return [] as Array<{ email: string | null; id: string; name: string | null; phone: string | null }>;
   const { data, error } = await db
     .from("users")
-    .select("id,name,phone")
+    .select("id,name,email,phone")
     .in("id", ids);
   if (error) throw supabaseError("Não foi possível carregar contactos dos dadores", error);
   return data ?? [];
@@ -149,9 +149,9 @@ function normalizeStatus(status?: string | null): DonorResponseStatus {
   return oldValues[status ?? ""] ?? "accepted";
 }
 
-function cleanName(name?: string | null) {
+function cleanName(name?: string | null, email?: string | null) {
   const value = name?.trim();
-  return value || "Nome não disponível";
+  return value || email?.trim() || "Nome não disponível";
 }
 
 async function getHospital(db: Awaited<ReturnType<typeof createRouteSupabase>>, id: string) {
