@@ -77,17 +77,22 @@ export function VerificationWorkbench() {
       </div>
       {message ? <p className="muted" role="status">{message}</p> : null}
       {active === "hospitals" ? (
-        <HospitalList hospitals={pendingHospitals} onAction={setPending} />
+        <HospitalList
+          history={history}
+          hospitals={pendingHospitals}
+          onAction={setPending}
+          onDetails={setDetails}
+        />
       ) : null}
-      {active === "donors" ? <DonorList donors={pendingDonors} onAction={setPending} /> : null}
+      {active === "donors" ? (
+        <DonorList
+          donors={pendingDonors}
+          history={history}
+          onAction={setPending}
+          onDetails={setDetails}
+        />
+      ) : null}
       {active === "cases" ? <CaseList cases={cases} /> : null}
-      <DetailsLauncher
-        active={active}
-        donors={pendingDonors}
-        history={history}
-        hospitals={pendingHospitals}
-        onOpen={setDetails}
-      />
       <ConfirmationModal
         confirmLabel="Confirmar"
         loading={saving}
@@ -132,69 +137,23 @@ export function VerificationWorkbench() {
   }
 }
 
-function DetailsLauncher({
-  active,
-  donors,
-  history,
-  hospitals,
-  onOpen
-}: {
-  active: Tab;
-  donors: Donor[];
+function HospitalList({ history, hospitals, onAction, onDetails }: {
   history: HistoryPayload;
-  hospitals: Hospital[];
-  onOpen: (details: VerificationDetails) => void;
-}) {
-  if (active === "hospitals") {
-    return <DetailButtons hospitals={hospitals} history={history} onOpen={onOpen} />;
-  }
-  if (active === "donors") {
-    return <DetailButtons donors={donors} history={history} onOpen={onOpen} />;
-  }
-  return null;
-}
-
-function DetailButtons({
-  donors = [],
-  history,
-  hospitals = [],
-  onOpen
-}: {
-  donors?: Donor[];
-  history: HistoryPayload;
-  hospitals?: Hospital[];
-  onOpen: (details: VerificationDetails) => void;
-}) {
-  return (
-    <div className={styles.controls}>
-      {hospitals.map((hospital) => (
-        <button key={hospital.id} onClick={() => onOpen({
-          histories: history.hospitalVerifications.filter((item) => item.hospital_id === hospital.id),
-          hospital,
-          type: "hospital"
-        })} type="button">Ver detalhes: {hospital.name}</button>
-      ))}
-      {donors.map((donor) => (
-        <button key={donor.id} onClick={() => onOpen({
-          donor,
-          histories: history.donorVerifications.filter((item) => item.donor_id === donor.id),
-          type: "donor"
-        })} type="button">Ver detalhes: {donor.name}</button>
-      ))}
-    </div>
-  );
-}
-
-function HospitalList({ hospitals, onAction }: {
   hospitals: Hospital[];
   onAction: (pending: Pending) => void;
+  onDetails: (details: VerificationDetails) => void;
 }) {
   if (!hospitals.length) return <EmptyState title="Sem hospitais pendentes." message="Todos os hospitais foram tratados." />;
   return hospitals.map((hospital) => (
     <article className={styles.rowCard} key={hospital.id}>
       <strong>{hospital.name}</strong>
-      <span>{hospital.province} · {hospital.municipality} · {hospitalLabel(hospital)}</span>
+      <span>{hospital.province} · {hospital.municipality} · Licença: {hospital.licenseNumber ?? "sem registo"} · {hospitalLabel(hospital)}</span>
       <div className={styles.controls}>
+        <button onClick={() => onDetails({
+          histories: history.hospitalVerifications.filter((item) => item.hospital_id === hospital.id),
+          hospital,
+          type: "hospital"
+        })} type="button">Ver detalhes</button>
         <button onClick={() => onAction({ action: "approve_hospital", hospital, title: "Aprovar hospital" })} type="button">Aprovar</button>
         <button onClick={() => onAction({ action: "review_hospital", hospital, title: "Pedir revisão" })} type="button">Pedir revisão</button>
         <button onClick={() => onAction({ action: "reject_hospital", hospital, title: "Rejeitar hospital" })} type="button">Rejeitar</button>
@@ -203,16 +162,25 @@ function HospitalList({ hospitals, onAction }: {
   ));
 }
 
-function DonorList({ donors, onAction }: { donors: Donor[]; onAction: (pending: Pending) => void }) {
+function DonorList({ donors, history, onAction, onDetails }: {
+  donors: Donor[];
+  history: HistoryPayload;
+  onAction: (pending: Pending) => void;
+  onDetails: (details: VerificationDetails) => void;
+}) {
   if (!donors.length) return <EmptyState title="Sem dadores pendentes." message="Não há dadores à espera de revisão." />;
   return donors.map((donor) => (
     <article className={styles.rowCard} key={donor.id}>
       <strong>{donor.name}</strong>
-      <span>{donor.bloodType} · {donor.province} · {donorLabel(donor)}</span>
+      <span>{donor.bloodType} · {donor.province} · {donor.municipality} · {donor.phone ?? "sem telefone"} · {donorLabel(donor)}</span>
       <div className={styles.controls}>
+        <button onClick={() => onDetails({
+          donor,
+          histories: history.donorVerifications.filter((item) => item.donor_id === donor.id),
+          type: "donor"
+        })} type="button">Ver detalhes</button>
         <button onClick={() => onAction({ action: "verify_donor", donor, title: "Verificar dador" })} type="button">Verificar</button>
         <button onClick={() => onAction({ action: "review_donor", donor, title: "Manter em revisão" })} type="button">Revisão</button>
-        <button onClick={() => onAction({ action: "reject_donor", donor, title: "Rejeitar dador" })} type="button">Rejeitar</button>
         <button onClick={() => onAction({ action: "suspend_donor", donor, title: "Suspender dador" })} type="button">Suspender</button>
       </div>
     </article>

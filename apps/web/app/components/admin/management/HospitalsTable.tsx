@@ -128,24 +128,27 @@ export function HospitalsTable() {
   }
 
   function queueAction(hospital: Hospital, action: string) {
-    if (action === "Ligar utilizador" || action === "Desligar utilizador") {
+    if (action === "Ver perfil" || action === "Editar instituição") {
+      setMessage(`${action}: ${hospital.name} · ${hospital.province}, ${hospital.municipality}.`);
+      return;
+    }
+    if (action === "Ligar utilizador") {
       const email = window.prompt("Email do utilizador hospitalar:")?.trim();
       if (!email) return;
       setPending({ action, email, hospital, title: action });
       return;
     }
-    setPending({ action, hospital, title: action });
+    if (action === "Suspender/Reativar") {
+      const title = hospital.verificationStatus === "suspended" ? "Reativar hospital" : "Suspender hospital";
+      setPending({ action: title, hospital, title });
+    }
   }
 }
 
 const actionMap: Record<string, string> = {
-  "Aprovar hospital": "approve_hospital",
-  "Pedir revisão": "review_hospital",
   "Reativar hospital": "reactivate_hospital",
-  "Rejeitar hospital": "reject_hospital",
   "Suspender hospital": "suspend_hospital",
-  "Ligar utilizador": "link_hospital_user",
-  "Desligar utilizador": "unlink_hospital_user"
+  "Ligar utilizador": "link_hospital_user"
 };
 
 function reasonFor(action: string) {

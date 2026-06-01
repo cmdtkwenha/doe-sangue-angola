@@ -44,7 +44,7 @@ export function DonorsTable() {
             "Próxima elegível": formatDate(donor.nextEligibleDonationDate)
           },
           actions: donorActions,
-          onAction: (action) => setPending({ action, donor, title: action })
+          onAction: (action) => queueAction(action, donor)
         }))}
       />
       <ConfirmationModal
@@ -60,9 +60,17 @@ export function DonorsTable() {
     </>
   );
 
+  function queueAction(action: string, donor: Donor) {
+    if (action === "Ver perfil" || action === "Ver histórico" || action === "Editar estado") {
+      setMessage(`${action}: ${donor.name} · ${donor.bloodType} · ${donor.province}, ${donor.municipality}.`);
+      return;
+    }
+    setPending({ action, donor, title: action });
+  }
+
   async function runPending() {
     if (!pending) return;
-    const apiAction = actionMap[pending.action];
+    const apiAction = pending.donor.available ? "suspend_donor" : "reactivate_donor";
     if (!apiAction) return;
     setSaving(true);
     const response = await fetch("/api/admin/verification", {
@@ -79,13 +87,6 @@ export function DonorsTable() {
     if (response.ok && payload?.ok !== false) setRefresh((value) => value + 1);
   }
 }
-
-const actionMap: Record<string, string> = {
-  "Necessita revisão": "review_donor",
-  "Reativar dador": "reactivate_donor",
-  "Suspender dador": "suspend_donor",
-  "Verificar dador": "verify_donor"
-};
 
 function eligibilityLabel(donor: Donor) {
   const labels: Record<string, string> = {
