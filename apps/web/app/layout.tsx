@@ -4,6 +4,8 @@ import { KeyboardNavigationHelper } from "./components/accessibility";
 import { AuthProvider } from "./components/auth/AuthProvider";
 import { ErrorBoundary } from "./components/ui/ErrorBoundary";
 import { OfflineBanner } from "./components/ui/OfflineBanner";
+import { InstallPrompt } from "./components/pwa/InstallPrompt";
+import { ServiceWorkerRegister } from "./components/pwa/ServiceWorkerRegister";
 import "./globals.css";
 import "./theme.css";
 
@@ -14,6 +16,11 @@ export const metadata: Metadata = {
   },
   description: "Plataforma nacional conectada de doação de sangue em Angola.",
   applicationName: "Doe Sangue Angola",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Doe Sangue"
+  },
   keywords: [
     "doação de sangue Angola",
     "Sangue Angola",
@@ -21,6 +28,7 @@ export const metadata: Metadata = {
     "dadores de sangue"
   ],
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://doesangue.ao"),
+  manifest: "/manifest.webmanifest",
   openGraph: {
     title: "Doe Sangue Angola",
     description: "Admin, hospitais e dadores ligados para salvar vidas.",
@@ -39,7 +47,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html data-scroll-behavior="smooth" lang="pt">
       <body>
         <KeyboardNavigationHelper />
+        <ServiceWorkerRegister />
         <OfflineBanner />
+        <InstallPrompt />
         <ErrorBoundary>
           <AuthProvider>{children}</AuthProvider>
         </ErrorBoundary>
