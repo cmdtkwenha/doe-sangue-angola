@@ -13,6 +13,7 @@ type Tab = "hospitals" | "donors" | "cases";
 type Pending =
   | { action: string; donor?: Donor; hospital?: Hospital; title: string }
   | null;
+type Resolved = { donors: string[]; hospitals: string[] };
 
 const tabs: Array<{ id: Tab; label: string }> = [
   { id: "hospitals", label: "Hospitais Pendentes" },
@@ -24,6 +25,7 @@ export function VerificationWorkbench() {
   const [active, setActive] = useState<Tab>("hospitals");
   const [refresh, setRefresh] = useState(0);
   const [pending, setPending] = useState<Pending>(null);
+  const [resolved, setResolved] = useState<Resolved>({ donors: [], hospitals: [] });
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
   const live = useSupabaseRealtimeVersion(["hospitals", "donors"]);
@@ -31,12 +33,13 @@ export function VerificationWorkbench() {
     useApiData<Hospital[]>("/api/hospitals", [], live + refresh);
   const { data: donors, error: donorError, loading: loadingDonors } =
     useApiData<Donor[]>("/api/donors", [], live + refresh);
-  const pendingHospitals = hospitals.filter((item) => ["pending", "needs_review"].includes(hospitalStatus(item)));
-  const pendingDonors = donors.filter((item) => ["needs_review", "pending_verification"].includes(String(item.eligibilityStatus)));
-  const cases = [
-    ...pendingHospitals.map((item) => ({ id: item.id, label: item.name, type: "Hospital", status: hospitalLabel(item) })),
-    ...pendingDonors.map((item) => ({ id: item.id, label: item.name, type: "Dador", status: donorLabel(item) }))
-  ];
+  const pendingHospitals = hospitals
+    .filter((item) => ["pending", "needs_review"].includes(hospitalStatus(item)))
+    .filter((item) => !resolved.hospitals.includes(item.id));
+  const pendingDonors = donors
+    .filter((item) => ["needs_review", "pending_verification"].includes(String(item.eligibilityStatus)))
+    .filter((item) => !resolved.donors.includes(item.id));
+  const cases: Array<{ id: string; label: string; status: string; type: string }> = [];
   const loading = loadingHospitals || loadingDonors;
   const error = hospitalError || donorError;
 
@@ -49,7 +52,13 @@ export function VerificationWorkbench() {
         <strong>Fila de verificação</strong>
         <div className={styles.controls}>
           {tabs.map((tab) => (
-            <button key={tab.id} onClick={() => setActive(tab.id)} type="button">
+            <button
+              aria-pressed={active === tab.id}
+              className={active === tab.id ? styles.activeFilter : ""}
+              key={tab.id}
+              onClick={() => setActive(tab.id)}
+              type="button"
+            >
               {tab.label}
             </button>
           ))}
@@ -86,10 +95,21 @@ export function VerificationWorkbench() {
       method: "PATCH"
     });
     const payload = await response.json().catch(() => null);
+    const ok = response.ok && payload?.ok !== false;
+    if (ok) markResolved(pending);
     setSaving(false);
     setPending(null);
-    setMessage(response.ok && payload?.ok !== false ? "Verificação atualizada." : payload?.message ?? "Falha na ação.");
-    if (response.ok && payload?.ok !== false) setRefresh((value) => value + 1);
+    setMessage(ok ? "Verificação atualizada com sucesso." : payload?.message ?? "Falha na ação.");
+    if (ok) setRefresh((value) => value + 1);
+  }
+
+  function markResolved(item: NonNullable<Pending>) {
+    if (item.hospital && ["approve_hospital", "reject_hospital", "suspend_hospital"].includes(item.action)) {
+      setResolved((value) => ({ ...value, hospitals: [...new Set([...value.hospitals, item.hospital!.id])] }));
+    }
+    if (item.donor && ["verify_donor", "suspend_donor", "reactivate_donor"].includes(item.action)) {
+      setResolved((value) => ({ ...value, donors: [...new Set([...value.donors, item.donor!.id])] }));
+    }
   }
 }
 
@@ -127,7 +147,7 @@ function DonorList({ donors, onAction }: { donors: Donor[]; onAction: (pending: 
 }
 
 function CaseList({ cases }: { cases: Array<{ id: string; label: string; status: string; type: string }> }) {
-  if (!cases.length) return <EmptyState title="Sem casos de verificação." message="Não há casos pendentes neste momento." />;
+  if (!cases.length) return <EmptyState title="Sem casos pendentes." message="Não há casos de verificação ativos neste momento." />;
   return cases.map((item) => (
     <article className={styles.rowCard} key={item.id}>
       <strong>{item.type}: {item.label}</strong>

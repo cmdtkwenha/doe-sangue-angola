@@ -34,6 +34,7 @@ export type DonorResponseStatus =
 
 export type DonorEligibilityStatus =
   | "eligible"
+  | "pending_verification"
   | "temporarily_deferred"
   | "permanently_deferred"
   | "needs_review";

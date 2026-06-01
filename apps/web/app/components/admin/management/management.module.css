@@ -35,6 +35,21 @@
   gap: 10px;
 }
 
+.controls button,
+.activeFilter {
+  border: 1px solid #dfe5ee;
+  border-radius: 10px;
+  min-height: 38px;
+  padding: 0 12px;
+  font-weight: 900;
+}
+
+.activeFilter {
+  border-color: #d01424;
+  background: #fff0f1;
+  color: #b10f1f;
+}
+
 .rowCard {
   border-top: 1px solid #edf0f4;
   display: grid;

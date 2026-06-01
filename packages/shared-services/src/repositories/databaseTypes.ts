@@ -143,7 +143,7 @@ export function mapDonor(row: DonorRow): Donor {
 }
 
 function normalizeEligibility(value?: string | null) {
-  const valid = ["eligible", "temporarily_deferred", "permanently_deferred", "needs_review"];
+  const valid = ["eligible", "needs_review", "pending_verification", "permanently_deferred", "temporarily_deferred"];
   if (valid.includes(value ?? "")) return value as Donor["eligibilityStatus"];
   return ["Pendente", "Revisão", "Em revisão"].includes(value ?? "") ? "needs_review" : "eligible";
 }
