@@ -8,19 +8,23 @@ import type { BloodRequest } from "@doe-sangue-angola/shared-types";
 import { useApiData } from "@hooks/useApiData";
 import { useRealtimeVersion } from "@hooks/useRealtimeVersion";
 import { useSupabaseRealtimeVersion } from "@hooks/useSupabaseRealtimeVersion";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ActionToast } from "../ui/ActionToast";
 import { ConfirmationModal } from "../ui/ConfirmationModal";
+import { DonorResponseStatusBadge, normalizeDonorResponseStatus } from "../ui/DonorResponseStatusBadge";
 import { EmptyState } from "../ui/EmptyState";
+import { HospitalDonorDetailsModal } from "./HospitalDonorDetailsModal";
 import styles from "./hospitalPortal.module.css";
+import type { AcceptedDonor, WorkflowStatus } from "./incomingDonorTypes";
 import { useCurrentHospital } from "./useCurrentHospital";
 import { updateStatusAction } from "../workflow/workflowActions";
 
 export function ActiveRequestsTable() {
   const version = useRealtimeVersion();
-  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses", "donors"]);
+  const liveVersion = useSupabaseRealtimeVersion(["blood_requests", "donor_responses", "donors", "users"]);
   const [closing, setClosing] = useState<BloodRequest | null>(null);
   const [closedIds, setClosedIds] = useState<string[]>([]);
+  const [selectedDonor, setSelectedDonor] = useState<AcceptedDonor | null>(null);
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ message: string; tone: "error" | "success" }>({
@@ -34,6 +38,18 @@ export function ActiveRequestsTable() {
     [],
     version + liveVersion
   );
+  const { data: acceptedDonors, error: donorsError } = useApiData<AcceptedDonor[]>(
+    hospitalId ? "/api/hospital/accepted-donors" : "/api/appointments?hospitalId=missing",
+    [],
+    version + liveVersion
+  );
+  const donorsByRequest = useMemo(() => groupDonorsByRequest(acceptedDonors), [acceptedDonors]);
+
+  useEffect(() => {
+    if (!selectedDonor) return;
+    const updated = acceptedDonors.find((donor) => donor.responseId === selectedDonor.responseId);
+    if (updated && updated !== selectedDonor) setSelectedDonor(updated);
+  }, [acceptedDonors, selectedDonor]);
 
   async function closeRequest() {
     if (!closing) return;
@@ -45,6 +61,22 @@ export function ActiveRequestsTable() {
     if (result.ok) setClosing(null);
     else setClosedIds((items) => items.filter((id) => id !== closing.id));
     setSaving(false);
+  }
+
+  async function updateDonorStatus(row: AcceptedDonor, status: WorkflowStatus) {
+    try {
+      setSaving(true);
+      const response = await fetch("/api/donor-responses/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ responseId: row.responseId, status })
+      });
+      const payload = await response.json().catch(() => null);
+      const ok = Boolean(payload?.ok);
+      showToast(ok ? "Estado do dador atualizado." : payload?.message ?? "Falha ao atualizar dador.", ok ? "success" : "error");
+    } finally {
+      setSaving(false);
+    }
   }
 
   function showToast(message: string, tone: "error" | "success") {
@@ -60,6 +92,7 @@ export function ActiveRequestsTable() {
       </div>
       {loading ? <p className={styles.rowMuted}>A sincronizar pedidos...</p> : null}
       {error ? <p className={styles.rowMuted}>{error}</p> : null}
+      {donorsError ? <p className={styles.rowMuted}>{donorsError}</p> : null}
       {requests.filter((request) => !closedIds.includes(request.id)).length === 0 ? (
         <EmptyState
           message="Crie um pedido urgente quando precisar de dadores compatíveis."
@@ -89,6 +122,10 @@ export function ActiveRequestsTable() {
                 Fechar
               </button>
             ) : null}
+            <AssignedDonors
+              donors={donorsByRequest.get(request.id) ?? []}
+              onOpen={setSelectedDonor}
+            />
           </article>
           ))}
         </div>
@@ -106,10 +143,62 @@ export function ActiveRequestsTable() {
         title="Confirmar fecho do pedido"
         tone="danger"
       />
+      <HospitalDonorDetailsModal
+        donor={selectedDonor}
+        onAction={(row, status) => void updateDonorStatus(row, status)}
+        onClose={() => setSelectedDonor(null)}
+        saving={saving}
+      />
       <ActionToast message={toast.message} tone={toast.tone} />
       <a className={styles.footerLink} href="/hospital/requests">Ver todos os pedidos</a>
     </section>
   );
+}
+
+function AssignedDonors({ donors, onOpen }: {
+  donors: AcceptedDonor[];
+  onOpen: (donor: AcceptedDonor) => void;
+}) {
+  if (!donors.length) return null;
+  return (
+    <div style={{ display: "grid", gap: 8, gridColumn: "1 / -1" }}>
+      <strong>{donors.length === 1 ? "1 dador a caminho" : `${donors.length} dadores a caminho`}</strong>
+      {donors.map((donor) => (
+        <div
+          key={donor.responseId}
+          style={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 10 }}
+        >
+          <span>
+            <strong>{donor.donorName}</strong>{" "}
+            <span className={styles.rowMuted}>
+              {donor.donorBloodType} · ETA {donor.eta} · Tel. {donor.donorPhone}
+            </span>
+          </span>
+          <DonorResponseStatusBadge status={donor.status} />
+          <span className={styles.rowMuted}>PIN: {pinStatusLabel(donor)}</span>
+          <button className="button secondary" onClick={() => onOpen(donor)} type="button">
+            Ver detalhes do dador
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function pinStatusLabel(donor: AcceptedDonor) {
+  const status = normalizeDonorResponseStatus(donor.status);
+  return status === "pin_validated" || status === "completed"
+    ? "PIN Validado"
+    : "Pendente";
+}
+
+function groupDonorsByRequest(donors: AcceptedDonor[]) {
+  const groups = new Map<string, AcceptedDonor[]>();
+  donors.forEach((donor) => {
+    if (!donor.bloodRequestId) return;
+    groups.set(donor.bloodRequestId, [...(groups.get(donor.bloodRequestId) ?? []), donor]);
+  });
+  return groups;
 }
 
 function statusTone(status: string) {
