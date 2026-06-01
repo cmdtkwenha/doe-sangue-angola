@@ -74,7 +74,7 @@ export async function GET() {
         createdAt: item.created_at ?? undefined,
         donorBloodType: donor?.blood_type ?? "-",
         donorId: item.donor_id,
-        donorName: user?.name ?? "Dador aceite",
+        donorName: cleanName(user?.name),
         donorPhone: user?.phone ?? "por completar",
         emergencyContactName: donor?.emergency_contact_name ?? undefined,
         emergencyContactPhone: donor?.emergency_contact_phone ?? undefined,
@@ -147,6 +147,11 @@ function normalizeStatus(status?: string | null): DonorResponseStatus {
     "PIN Validado": "pin_validated"
   };
   return oldValues[status ?? ""] ?? "accepted";
+}
+
+function cleanName(name?: string | null) {
+  const value = name?.trim();
+  return value || "Nome não disponível";
 }
 
 async function getHospital(db: Awaited<ReturnType<typeof createRouteSupabase>>, id: string) {

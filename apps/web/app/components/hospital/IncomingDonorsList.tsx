@@ -24,7 +24,7 @@ const cancelReasons = ["Dador cancelou", "PIN inválido", "Pedido encerrado", "O
 
 export function IncomingDonorsList() {
   const version = useRealtimeVersion();
-  const liveVersion = useSupabaseRealtimeVersion(["donor_responses", "blood_requests", "donors"]);
+  const liveVersion = useSupabaseRealtimeVersion(["donor_responses", "blood_requests", "donors", "users"]);
   const [message, setMessage] = useState("Aguardando dadores aceites.");
   const [pending, setPending] = useState<PendingAction>(null);
   const [pins, setPins] = useState<Record<string, string>>({});

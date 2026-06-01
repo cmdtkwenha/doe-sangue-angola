@@ -20,17 +20,23 @@ type Props = {
 export function HospitalDonorDetailsModal({ donor, onAction, onClose, saving }: Props) {
   if (!donor) return null;
   const status = normalizeDonorResponseStatus(donor.status);
+  const donorName = donor.donorName?.trim() || "Nome não disponível";
+  const summary = [
+    donor.donorBloodType,
+    donor.gender,
+    donor.age ? `${donor.age} anos` : undefined
+  ].filter(Boolean).join(" • ");
 
   return (
     <div className={styles.backdrop} role="presentation">
       <section aria-modal="true" className={styles.modal} role="dialog">
         <header className={styles.header}>
           <div className={styles.identity}>
-            <div aria-hidden className={styles.photo}>{initials(donor.donorName)}</div>
+            <div aria-hidden className={styles.photo}>{initials(donorName)}</div>
             <div>
-              <p className="eyebrow">Detalhes do dador</p>
-              <h2>{donor.donorName}</h2>
+              <h2>{donorName}</h2>
               <DonorResponseStatusBadge status={status} />
+              <p className={styles.summary}>{summary || donor.donorBloodType}</p>
             </div>
           </div>
           <button className={styles.close} onClick={onClose} type="button">Fechar</button>
@@ -38,14 +44,14 @@ export function HospitalDonorDetailsModal({ donor, onAction, onClose, saving }: 
 
         <div className={styles.body}>
           <InfoSection title="Identificação">
-            <Field label="Dador ID" value={donor.donorId} />
-            <Field label="Verificação" value={donor.verificationStatus ?? "Verificado"} />
+            <Field label="Nome completo" value={donorName} />
+            <Field label="ID Dador" value={donor.donorId} />
             <Field label="Tipo sanguíneo" value={donor.donorBloodType} />
-            <Field label="Idade" value={donor.age ? `${donor.age} anos` : "Por completar"} />
             <Field label="Género" value={donor.gender ?? "Por completar"} />
+            <Field label="Idade" value={donor.age ? `${donor.age} anos` : "Por completar"} />
             <Field label="Telefone" value={donor.donorPhone} />
-            <Field label="Contacto emergência" value={donor.emergencyContactName ?? "Por completar"} />
-            <Field label="Telefone emergência" value={donor.emergencyContactPhone ?? "Por completar"} />
+            <Field label="Contacto de emergência" value={donor.emergencyContactName ?? "Por completar"} />
+            <Field label="Telefone de emergência" value={donor.emergencyContactPhone ?? "Por completar"} />
           </InfoSection>
 
           <InfoSection title="Elegibilidade">
