@@ -2,6 +2,7 @@ import type { UserRole } from "@doe-sangue-angola/shared-types";
 import { getAuthMode } from "./config";
 
 export type AuthUser = {
+  accountStatus?: string;
   id: string;
   authUserId?: string;
   name: string;

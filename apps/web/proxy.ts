@@ -6,6 +6,13 @@ import {
   isKnownRole
 } from "@doe-sangue-angola/shared-services";
 
+type AccessProfile = {
+  account_status?: string | null;
+  auth_user_id?: string | null;
+  id: string;
+  role?: string | null;
+};
+
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const allowedRoles = getAllowedRolesForPath(path);
@@ -46,13 +53,42 @@ async function resolveRole(
   supabase: ReturnType<typeof createServerClient>,
   user: { id: string; email?: string }
 ) : Promise<UserRole | null> {
-  const { data } = await supabase
-    .from("profiles")
-    .select("role,linked_entity_id")
-    .or(`auth_user_id.eq.${user.id},email.eq.${user.email ?? ""}`)
-    .maybeSingle();
+  const data = await loadAccessProfile(supabase, user.id, user.email ?? "");
+  if (data?.account_status !== "Ativo") return null;
 
   return isKnownRole(data?.role) ? data.role : null;
+}
+
+async function loadAccessProfile(
+  supabase: ReturnType<typeof createServerClient>,
+  authUserId: string,
+  email: string
+) {
+  return await firstByAuthOrEmail(supabase, "users", authUserId, email) ??
+    await firstByAuthOrEmail(supabase, "profiles", authUserId, email);
+}
+
+async function firstByAuthOrEmail(
+  supabase: ReturnType<typeof createServerClient>,
+  table: "profiles" | "users",
+  authUserId: string,
+  email: string
+) {
+  const { data } = await supabase
+    .from(table)
+    .select("id,auth_user_id,role,account_status")
+    .or(orFilter(authUserId, email))
+    .limit(5);
+  const rows = (data ?? []) as AccessProfile[];
+  return rows.find((row) => row.auth_user_id === authUserId || row.id === authUserId) ?? rows[0] ?? null;
+}
+
+function orFilter(authUserId: string, email: string) {
+  return [
+    `id.eq.${authUserId}`,
+    `auth_user_id.eq.${authUserId}`,
+    email ? `email.eq.${email}` : ""
+  ].filter(Boolean).join(",");
 }
 
 export const config = {

@@ -94,6 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     async logout() {
       if (supabase) await supabase.auth.signOut();
+      clearAuthStorage();
       setSession(null);
       router.push("/auth");
     },
@@ -153,6 +154,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }), [authMode, error, loading, router, session]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+function clearAuthStorage() {
+  if (typeof window === "undefined") return;
+  const stores = [window.localStorage, window.sessionStorage];
+  stores.forEach((store) => {
+    Object.keys(store)
+      .filter((key) => key.includes("supabase") || key.includes("sb-") || key.includes("auth"))
+      .forEach((key) => store.removeItem(key));
+  });
 }
 
 async function createSupabaseProfile(input: {

@@ -18,14 +18,10 @@ export async function requireApiSession(roles?: UserRole[]) {
   const { data, error } = await db.auth.getUser();
   if (error || !data.user) throw new ApiError(401, "Sessão inválida. Entre novamente.");
 
-  const { data: profile, error: profileError } = await db
-    .from("profiles")
-    .select("id,auth_user_id,role,linked_entity_id,name,email")
-    .eq("auth_user_id", data.user.id)
-    .maybeSingle();
+  const profile = await loadAccessProfile(db, data.user.id, data.user.email ?? "");
 
-  if (profileError) throw new ApiError(500, "Não foi possível validar o perfil.");
   if (!profile?.role) throw new ApiError(403, "Perfil sem permissões configuradas.");
+  if (profile.account_status !== "Ativo") throw new ApiError(403, "Conta sem estado ativo.");
   if (roles?.length && !roles.includes(profile.role as UserRole)) {
     throw new ApiError(403, "Sem permissão para esta ação.");
   }
@@ -39,6 +35,47 @@ export async function requireApiSession(roles?: UserRole[]) {
     profileId: profile.id,
     role: profile.role as UserRole
   };
+}
+
+type AccessProfile = {
+  account_status?: string | null;
+  email?: string | null;
+  id: string;
+  linked_entity_id?: string | null;
+  name?: string | null;
+  role?: string | null;
+};
+
+async function loadAccessProfile(
+  db: Awaited<ReturnType<typeof createRouteSupabase>>,
+  authUserId: string,
+  email: string
+): Promise<AccessProfile | null> {
+  return await firstByAuthOrEmail(db, "users", authUserId, email) ??
+    await firstByAuthOrEmail(db, "profiles", authUserId, email);
+}
+
+async function firstByAuthOrEmail(
+  db: Awaited<ReturnType<typeof createRouteSupabase>>,
+  table: "profiles" | "users",
+  authUserId: string,
+  email: string
+) {
+  const { data, error } = await db
+    .from(table)
+    .select("id,auth_user_id,role,linked_entity_id,name,email,account_status")
+    .or(orFilter(authUserId, email))
+    .limit(5);
+  if (error) throw new ApiError(500, `Não foi possível validar ${table}. ${error.message}`);
+  return (data ?? []).find((row) => row.auth_user_id === authUserId || row.id === authUserId) ?? data?.[0] ?? null;
+}
+
+function orFilter(authUserId: string, email: string) {
+  return [
+    `id.eq.${authUserId}`,
+    `auth_user_id.eq.${authUserId}`,
+    email ? `email.eq.${email}` : ""
+  ].filter(Boolean).join(",");
 }
 
 export async function requireAuthUser() {
