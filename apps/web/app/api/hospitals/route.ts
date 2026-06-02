@@ -21,8 +21,12 @@ export async function GET(request: Request) {
     const hospitals = await hospitalRepository.listHospitals();
     return principal.role === "admin"
       ? hospitals
-      : hospitals.filter((item) => item.verified && item.verificationStatus === "verified");
+      : hospitals.filter((item) => item.verified && isVerified(item.verificationStatus));
   });
+}
+
+function isVerified(status?: string) {
+  return status === "Verificado" || status === "verified";
 }
 
 export async function PUT(request: Request) {

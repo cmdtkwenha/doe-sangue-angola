@@ -11,12 +11,15 @@ type HospitalRow = {
   contact?: string | null;
   email?: string | null;
   facility_type?: string | null;
+  hospital_type?: string | null;
+  institutional_email?: string | null;
   id: string;
   license_number?: string | null;
   municipality: string;
   name: string;
   phone?: string | null;
   province: string;
+  responsible_person?: string | null;
   rejection_reason?: string | null;
   type?: string | null;
   verified?: boolean | null;
@@ -94,14 +97,14 @@ function mapHospital(row: HospitalRow): Hospital {
     id: row.id,
     address: row.address ?? undefined,
     capacity: row.capacity ?? 0,
-    contact: row.contact ?? row.phone ?? "",
-    email: row.email ?? undefined,
+    contact: row.responsible_person ?? row.contact ?? row.phone ?? "",
+    email: row.institutional_email ?? row.email ?? undefined,
     licenseNumber: row.license_number ?? undefined,
     municipality: row.municipality,
     name: row.name,
     province: row.province,
     rejectionReason: row.rejection_reason ?? undefined,
-    type: row.facility_type ?? row.type ?? "Hospital",
+    type: row.hospital_type ?? row.facility_type ?? row.type ?? "Hospital",
     verified: Boolean(row.verified),
     verificationStatus: normalizeHospitalStatus(row)
   };

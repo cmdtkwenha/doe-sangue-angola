@@ -19,6 +19,7 @@ export async function GET() {
     ]);
     if (hospitalRows.error) throw new Error(`hospitals select: ${hospitalRows.error.message}`);
     if (donorRows.error) throw new Error(`donors select: ${donorRows.error.message}`);
+    debug("hospitals pending query result", hospitalRows.data);
 
     const donors = (donorRows.data ?? []) as DonorRow[];
     const users = await loadUsers(db, donors.map((row) => row.user_id));
@@ -70,4 +71,8 @@ function isPendingHospital(row: AnyRow) {
 function isPendingDonor(row: AnyRow) {
   const status = String(row.status ?? row.eligibility_status ?? "eligible");
   return status === "pending_verification" || status === "needs_review";
+}
+
+function debug(label: string, value: unknown) {
+  if (process.env.NODE_ENV !== "production") console.info(`[admin-verification] ${label}`, value);
 }

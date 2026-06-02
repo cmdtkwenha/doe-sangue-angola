@@ -14,7 +14,7 @@ const schemaContract = {
   hospital_notification_preferences: ["id", "hospital_id", "preferences", "created_at", "updated_at"],
   hospital_staff: ["id", "hospital_id", "auth_user_id", "name", "email", "staff_role", "status", "invited_by", "last_activity_at", "created_at", "updated_at"],
   hospital_verifications: ["id", "hospital_id", "verified_by", "status", "notes", "created_at", "updated_at"],
-  hospitals: ["id", "name", "province", "municipality", "verified", "verification_status", "status", "rejection_reason", "capacity", "contact", "created_at", "address", "email", "facility_type", "license_number", "phone", "latitude", "longitude", "main_contact_person", "operational_phone", "operational_email", "emergency_contact", "operating_hours"],
+  hospitals: ["id", "name", "province", "municipality", "verified", "verification_status", "status", "rejection_reason", "capacity", "contact", "created_at", "address", "email", "facility_type", "hospital_type", "institutional_email", "responsible_person", "license_number", "phone", "latitude", "longitude", "main_contact_person", "operational_phone", "operational_email", "emergency_contact", "operating_hours"],
   legal_consents: ["id", "user_id", "role", "consent_type", "version", "page", "accepted_at"],
   municipalities: ["id", "name", "province"],
   notification_preferences: ["id", "donor_id", "preferences", "created_at"],

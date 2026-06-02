@@ -66,11 +66,12 @@ async function applyAction(
   adminUserId: string
 ) {
   if (action === "approve_hospital") {
-    return updateHospital(db, body.hospitalId, "Verificado", adminUserId, body.reason, { verified: true, verification_status: "Verificado" });
+    return updateHospital(db, body.hospitalId, "Verificado", adminUserId, body.reason, { status: "Verificado", verified: true, verification_status: "Verificado" });
   }
   if (action === "reject_hospital") {
     return updateHospital(db, body.hospitalId, "Rejeitado", adminUserId, body.reason, {
       rejection_reason: body.reason ?? "Rejeitado pela administração.",
+      status: "Rejeitado",
       verified: false,
       verification_status: "Rejeitado"
     });
@@ -78,6 +79,7 @@ async function applyAction(
   if (action === "review_hospital") {
     return updateHospital(db, body.hospitalId, "Revisão Necessária", adminUserId, body.reason, {
       rejection_reason: body.reason ?? "Revisão documental solicitada.",
+      status: "Revisão Necessária",
       verified: false,
       verification_status: "Revisão Necessária"
     });
@@ -85,12 +87,13 @@ async function applyAction(
   if (action === "suspend_hospital") {
     return updateHospital(db, body.hospitalId, "Suspenso", adminUserId, body.reason, {
       rejection_reason: body.reason ?? "Conta suspensa pela administração.",
+      status: "Suspenso",
       verified: false,
       verification_status: "Suspenso"
     });
   }
   if (action === "reactivate_hospital") {
-    return updateHospital(db, body.hospitalId, "Verificado", adminUserId, body.reason, { rejection_reason: null, verified: true, verification_status: "Verificado" });
+    return updateHospital(db, body.hospitalId, "Verificado", adminUserId, body.reason, { rejection_reason: null, status: "Verificado", verified: true, verification_status: "Verificado" });
   }
   if (action === "link_hospital_user") {
     const profileId = body.profileId ?? await profileIdByEmail(db, body.email);
@@ -118,6 +121,7 @@ async function updateHospital(
   const hospitalId = assertString(id, "Hospital");
   const { data: before } = await db.from("hospitals").select("verification_status,verified").eq("id", hospitalId).maybeSingle();
   const { error } = await db.from("hospitals").update(patch).eq("id", hospitalId);
+  debug("approval result", { error, hospitalId, patch });
   if (error) throw new Error(`hospitals update: ${error.message}`);
   await insertVerification(db, "hospital_verifications", { hospital_id: hospitalId, notes, status, verified_by: adminUserId });
   return {
@@ -186,4 +190,8 @@ async function profileIdByEmail(
 function normalizeAction(value?: string) {
   if (!actions.includes(value ?? "")) throw new ApiError(400, "Ação de verificação inválida.");
   return value as string;
+}
+
+function debug(label: string, value: unknown) {
+  if (process.env.NODE_ENV !== "production") console.info(`[admin-verification] ${label}`, value);
 }

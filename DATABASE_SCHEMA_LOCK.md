@@ -92,7 +92,8 @@ Do not patch runtime errors by adding frontend-only fields.
 ### hospitals
 `id`, `name`, `province`, `municipality`, `verified`, `verification_status`,
 `status`, `rejection_reason`, `capacity`, `contact`, `created_at`, `address`, `email`,
-`facility_type`, `license_number`, `phone`, `latitude`, `longitude`,
+`facility_type`, `hospital_type`, `institutional_email`, `responsible_person`,
+`license_number`, `phone`, `latitude`, `longitude`,
 `main_contact_person`, `operational_phone`, `operational_email`,
 `emergency_contact`, `operating_hours`
 

@@ -40,13 +40,13 @@ export type DonorRow = {
 export type HospitalRow = {
   id: string;
   address?: string | null;
-  email?: string | null;
-  facility_type?: string | null;
+  email?: string | null; facility_type?: string | null;
+  hospital_type?: string | null; institutional_email?: string | null;
   license_number?: string | null;
   name: string;
   phone?: string | null;
-  province: string;
-  municipality: string;
+  province: string; municipality: string;
+  responsible_person?: string | null;
   type?: string | null;
   verified: boolean;
   verification_status?: string | null;
@@ -151,7 +151,7 @@ export function mapHospital(row: HospitalRow): Hospital {
   return {
     id: row.id,
     address: row.address ?? undefined,
-    email: row.email ?? undefined,
+    email: row.institutional_email ?? row.email ?? undefined,
     licenseNumber: row.license_number ?? undefined,
     name: row.name,
     province: row.province,
@@ -160,10 +160,10 @@ export function mapHospital(row: HospitalRow): Hospital {
     verificationStatus: normalizeHospitalStatus(row.verification_status, row.verified),
     rejectionReason: row.rejection_reason ?? undefined,
     capacity: row.capacity,
-    contact: row.contact ?? row.phone ?? "",
+    contact: row.responsible_person ?? row.contact ?? row.phone ?? "",
     latitude: row.latitude ?? undefined,
     longitude: row.longitude ?? undefined,
-    type: row.facility_type ?? row.type ?? undefined
+    type: row.hospital_type ?? row.facility_type ?? row.type ?? undefined
   };
 }
 

@@ -28,6 +28,7 @@ export async function POST(request: Request) {
     const principal = await requireApiSession(["hospital", "admin"]);
     const db = await createRouteSupabase();
     const writeDb = createPrivilegedSupabase() ?? db;
+    await ensureHospitalAccessProfile(writeDb, principal);
     const hospitalId = body.mode === "register"
       ? await registerHospital(writeDb, body)
       : await selectApprovedHospital(writeDb, body.hospitalId);
@@ -51,26 +52,32 @@ export async function POST(request: Request) {
 
 async function registerHospital(db: Db, body: Body) {
   const type = assertHospitalType(body.type);
+  const payload = {
+    address: assertString(body.address, "Morada", 240),
+    capacity: 0,
+    contact: assertString(body.responsiblePerson, "Pessoa responsável", 160),
+    email: optionalString(body.email, 180),
+    facility_type: type,
+    hospital_type: type,
+    institutional_email: optionalString(body.email, 180),
+    license_number: assertString(body.licenseNumber, "Número da licença sanitária", 120),
+    municipality: assertString(body.municipality, "Município", 120),
+    name: assertString(body.name, "Nome do hospital/clínica", 180),
+    phone: assertString(body.phone, "Telefone", 80),
+    province: assertString(body.province, "Província", 120),
+    responsible_person: assertString(body.responsiblePerson, "Pessoa responsável", 160),
+    status: "Pendente",
+    type,
+    verification_status: "Pendente",
+    verified: false
+  };
+  debug("hospital registration payload", payload);
   const { data, error } = await db
     .from("hospitals")
-    .insert({
-      address: assertString(body.address, "Morada", 240),
-      capacity: 0,
-      contact: assertString(body.responsiblePerson, "Pessoa responsável", 160),
-      email: optionalString(body.email, 180),
-      facility_type: type,
-      license_number: assertString(body.licenseNumber, "Número da licença sanitária", 120),
-      municipality: assertString(body.municipality, "Município", 120),
-      name: assertString(body.name, "Nome do hospital/clínica", 180),
-      phone: assertString(body.phone, "Telefone", 80),
-      province: assertString(body.province, "Província", 120),
-      status: "Pendente",
-      type,
-      verification_status: "Pendente",
-      verified: false
-    })
+    .insert(payload)
     .select("id")
     .single();
+  debug("hospital insert result", { data, error });
   if (error) throw new Error(`Registo do hospital: ${error.message}`);
   return data.id as string;
 }
@@ -116,6 +123,27 @@ async function linkHospitalUser(db: Db, principal: Awaited<ReturnType<typeof req
   if (error) throw new Error(`Ligação do perfil: ${error.message}`);
 }
 
+async function ensureHospitalAccessProfile(db: Db, principal: Awaited<ReturnType<typeof requireApiSession>>) {
+  const payload = {
+    account_status: "Ativo",
+    auth_user_id: principal.authUserId,
+    email: principal.email,
+    linked_entity_id: null,
+    name: principal.name,
+    role: "hospital"
+  };
+  const { data: profile } = await db
+    .from("profiles")
+    .select("id")
+    .eq("auth_user_id", principal.authUserId)
+    .maybeSingle();
+  const query = profile?.id
+    ? db.from("profiles").update(payload).eq("id", profile.id)
+    : db.from("profiles").insert(payload);
+  const { error } = await query;
+  if (error) throw new Error(`Perfil hospitalar: ${error.message}`);
+}
+
 function assertHospitalType(value: unknown) {
   const type = assertString(value, "Tipo", 80);
   if (!allowedTypes.includes(type)) throw new ApiError(400, "Tipo de instituição inválido.");
@@ -134,3 +162,7 @@ function createPrivilegedSupabase() {
 }
 
 type Db = Awaited<ReturnType<typeof createRouteSupabase>> | SupabaseClient;
+
+function debug(label: string, value: unknown) {
+  if (process.env.NODE_ENV !== "production") console.info(`[hospital-onboarding] ${label}`, value);
+}
