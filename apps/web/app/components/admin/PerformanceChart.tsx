@@ -7,8 +7,8 @@ import styles from "./adminAdvanced.module.css";
 
 export function PerformanceChart() {
   const { data: requests, loading } = useApiData<BloodRequest[]>("/api/blood-requests", []);
-  const completed = requests.filter((request) => ["Concluído", "Concluido"].includes(request.status));
-  const active = requests.filter((request) => !["Cancelado", "Concluído", "Concluido"].includes(request.status));
+  const completed = requests.filter((request) => request.status === "Concluído");
+  const active = requests.filter((request) => !["Cancelado", "Concluído"].includes(request.status));
   const fulfilment = requests.length ? Math.round((completed.length / requests.length) * 100) : 0;
 
   return (

@@ -17,7 +17,7 @@ export async function GET() {
       countRows(db, "donors"),
       countRows(db, "blood_requests", {
         column: "status",
-        inValues: ["Aberto", "Em Correspondência", "Agendado", "Doador a Caminho"]
+        inValues: ["Aberto", "Dador a Caminho", "PIN Validado"]
       }),
       countRows(db, "donor_responses", { column: "status", value: "Doação concluída" }),
       countRows(db, "support_issues", {

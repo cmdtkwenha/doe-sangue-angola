@@ -16,16 +16,10 @@ export type Urgency = "Desastre" | "Critica" | "Alta" | "Media" | "Normal";
 
 export type RequestStatus =
   | "Aberto"
-  | "Em Correspondência"
-  | "Agendado"
-  | "Doador a Caminho"
-  | "Pedido preenchido"
-  | "Preenchido"
+  | "Dador a Caminho"
   | "PIN Validado"
   | "Concluído"
-  | "Cancelado"
-  | "Triagem"
-  | "Concluido";
+  | "Cancelado";
 
 export type DonorResponseStatus =
   | "Dador a Caminho"
@@ -138,7 +132,7 @@ export type Appointment = {
   date: string;
   time: string;
   pin: string;
-  status: "Cancelado" | "Chegou" | "Confirmado" | "Concluido" | "Pendente" | "PIN Validado";
+  status: "Cancelado" | "Chegou" | "Confirmado" | "Concluído" | "Pendente" | "PIN Validado";
 };
 
 export type InventoryItem = {

@@ -52,7 +52,7 @@ async function loadRealSummary() {
       dataProvider.listDonors(),
       dataProvider.listRequests()
     ]) as [Hospital[], Donor[], BloodRequest[]];
-    const active = requests.filter((request) => !["Cancelado", "Concluído", "Concluido"].includes(request.status));
+    const active = requests.filter((request) => !["Cancelado", "Concluído"].includes(request.status));
     return {
       activeRequests: active.length,
       availableDonors: donors.filter((donor) => donor.available).length,

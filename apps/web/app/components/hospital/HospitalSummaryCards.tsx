@@ -22,9 +22,9 @@ export function HospitalSummaryCards() {
     [],
     version + liveVersion
   );
-  const active = requests.filter((item) => !["Cancelado", "Concluído", "Concluido"].includes(item.status));
+  const active = requests.filter((item) => !["Cancelado", "Concluído"].includes(item.status));
   const incoming = responses.filter((item) => ["Dador a Caminho", "Chegou", "PIN Validado"].includes(item.status));
-  const completed = requests.filter((item) => ["Concluído", "Concluido"].includes(item.status));
+  const completed = requests.filter((item) => item.status === "Concluído");
   const responseRate = requests.length ? Math.round((completed.length / requests.length) * 100) : 0;
 
   return (

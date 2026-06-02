@@ -54,7 +54,7 @@ async function syncRequestStatus(
     ? "PIN Validado"
     : status === "Cancelado"
       ? "Cancelado"
-      : "Doador a Caminho";
+      : "Dador a Caminho";
   const { error } = await db
     .from("blood_requests")
     .update({ status: requestStatus })

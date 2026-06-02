@@ -68,6 +68,13 @@ export async function POST(request: Request) {
     if (!canDonorDonateToRequest(donorRow.blood_type, requestRow.blood_type)) {
       throw new ApiError(409, "Este pedido não é compatível com o seu tipo sanguíneo.");
     }
+    if (process.env.NODE_ENV !== "production") {
+      console.info("[donor-accept] blood_requests.status", {
+        current: requestRow.status,
+        next: "Dador a Caminho",
+        requestId: requestRow.id
+      });
+    }
     const response = await acceptWithQuota(db, donorId, requestRow.id);
     const appointment = await createAppointment(db, donorId, requestRow.id, response.hospital_id, response.confirmation_pin, supabaseError);
     await notifyHospitalUsers(

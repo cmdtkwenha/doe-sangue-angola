@@ -29,7 +29,7 @@ export function RequestCard({
       : styles.stableText;
   const remaining = request.remainingSlots ?? request.units;
   const acceptedCount = request.acceptedCount ?? Math.max(request.units - remaining, 0);
-  const filled = request.status === "Preenchido" || request.status === "Concluído" || remaining <= 0;
+  const filled = request.status === "Concluído" || remaining <= 0;
 
   return (
     <article className={`${styles.request} ${styles[tone]}`}>

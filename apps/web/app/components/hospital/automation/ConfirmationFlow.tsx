@@ -29,7 +29,7 @@ export function ConfirmationFlow() {
         <button className={styles.button} onClick={async () => { await acceptRequestAction(donor.id, request.id); refresh((item) => item + 1); }} type="button">
           Confirmar aceitação
         </button>
-        <button className={styles.secondary} onClick={async () => { await updateStatusAction(request.id, "Doador a Caminho"); refresh((item) => item + 1); }} type="button">
+        <button className={styles.secondary} onClick={async () => { await updateStatusAction(request.id, "Dador a Caminho"); refresh((item) => item + 1); }} type="button">
           Dador a caminho
         </button>
       </div>

@@ -11,8 +11,8 @@ export function AnalyticsGrid({ scope }: { scope: "admin" | "hospital" }) {
   const { data: donors } = useApiData<Donor[]>("/api/donors", []);
   const { data: hospitals } = useApiData<Hospital[]>("/api/hospitals", []);
   const { data: requests } = useApiData<BloodRequest[]>("/api/blood-requests", []);
-  const completed = requests.filter((request) => ["Concluído", "Concluido"].includes(request.status));
-  const active = requests.filter((request) => !["Cancelado", "Concluído", "Concluido"].includes(request.status));
+  const completed = requests.filter((request) => request.status === "Concluído");
+  const active = requests.filter((request) => !["Cancelado", "Concluído"].includes(request.status));
   const provinceItems = Array.from(groupByProvince(requests)).sort((a, b) => b[1] - a[1]);
   const hasData = donors.length > 0 || hospitals.length > 0 || requests.length > 0;
 

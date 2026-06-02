@@ -24,7 +24,7 @@ export function HospitalPerformancePanel() {
     [],
     version + liveVersion
   );
-  const completed = requests.filter((request) => ["Concluído", "Concluido"].includes(request.status));
+  const completed = requests.filter((request) => request.status === "Concluído");
   const activeResponses = responses.filter((item) => item.status !== "Cancelado");
   const metrics = [
     ["Pedidos ativos", String(requests.length), "Registos reais"],

@@ -21,9 +21,7 @@ export type DonorResponse = {
 
 export const workflowStatuses = [
   "Aberto",
-  "Em Correspondência",
-  "Agendado",
-  "Doador a Caminho",
+  "Dador a Caminho",
   "PIN Validado",
   "Concluído",
   "Cancelado"
@@ -45,7 +43,7 @@ export function createWorkflowRequest(input?: Partial<BloodRequest>) {
     urgency: input?.urgency ?? "Critica"
   });
 
-  updateRequestStatus(result.request.id, "Em Correspondência");
+  updateRequestStatus(result.request.id, "Aberto");
   recordAudit("matchingAgent", `Procurou dadores compatíveis para ${result.request.id}`);
 
   return { ...result, hospital };
@@ -89,7 +87,7 @@ export function acceptWorkflowRequest(donorId: string, requestId: string) {
     decision: "Aceite",
     time: nowTime()
   });
-  updateRequestStatus(requestId, "Agendado");
+  updateRequestStatus(requestId, "Dador a Caminho");
   recordAudit("Dador Mobile", `${donor.name} aceitou o pedido ${requestId}`);
 
   return result;
@@ -119,7 +117,7 @@ export function rejectWorkflowRequest(donorId: string, requestId: string) {
 }
 
 export function markDonorOnWay(requestId: string) {
-  const request = updateRequestStatus(requestId, "Doador a Caminho");
+  const request = updateRequestStatus(requestId, "Dador a Caminho");
   recordAudit("Hospital", `Confirmou dador a caminho para ${requestId}`);
 
   return { ok: Boolean(request), request };

@@ -23,7 +23,7 @@ export function PinValidationFlow() {
       </div>
       <div className={styles.pinBox}>{expected}</div>
       <div className={styles.actions}>
-        <button className={`${styles.button} ${styles.soft}`} onClick={async () => { await updateStatusAction(request.id, "Doador a Caminho"); refresh(); }} type="button">
+        <button className={`${styles.button} ${styles.soft}`} onClick={async () => { await updateStatusAction(request.id, "Dador a Caminho"); refresh(); }} type="button">
           Dador a caminho
         </button>
         <input className={styles.input} maxLength={4} onChange={(event) => setPin(event.target.value)} placeholder="PIN" value={pin} />

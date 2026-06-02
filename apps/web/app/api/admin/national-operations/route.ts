@@ -4,7 +4,7 @@ import { apiResponse } from "../../_utils/apiResponse";
 import { createRouteSupabase, requireApiSession } from "../../_utils/security";
 import { sampleNationalOperations } from "./sample";
 
-const closed = new Set(["Cancelado", "Concluído", "Concluido"]);
+const closed = new Set(["Cancelado", "Concluído"]);
 const criticalUrgency = new Set(["Critica", "Desastre"]);
 
 type DonorRow = {

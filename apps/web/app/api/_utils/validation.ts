@@ -5,16 +5,10 @@ const bloodTypes: BloodType[] = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+
 const urgencies: Urgency[] = ["Desastre", "Critica", "Alta", "Media", "Normal"];
 const statuses: RequestStatus[] = [
   "Aberto",
-  "Em Correspondência",
-  "Agendado",
-  "Doador a Caminho",
-  "Preenchido",
-  "Pedido preenchido",
+  "Dador a Caminho",
   "PIN Validado",
   "Concluído",
-  "Cancelado",
-  "Triagem",
-  "Concluido"
+  "Cancelado"
 ];
 const roles: UserRole[] = ["admin", "hospital", "donor", "support", "viewer"];
 

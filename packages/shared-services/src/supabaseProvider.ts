@@ -35,7 +35,7 @@ export const supabaseProvider: DataProvider = {
     const donor = await donorRepository.findDonor(realDonorId);
     const requests = await requestRepository.listRequests();
     return requests.filter((request) =>
-      !["Cancelado", "Concluído", "Concluido"].includes(request.status) &&
+      !["Cancelado", "Concluído"].includes(request.status) &&
       matchingAgent(request, [donor]).some((match) => match.donor.id === donor.id)
     );
   },
@@ -88,7 +88,7 @@ export const supabaseProvider: DataProvider = {
       .slice(0, 12);
     const request = await requestRepository.updateRequestStatus(
       created.id,
-      "Em Correspondência"
+      "Aberto"
     );
 
     const notifications = await Promise.allSettled(matches.map((match) =>

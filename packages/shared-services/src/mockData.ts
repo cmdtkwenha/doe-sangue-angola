@@ -78,7 +78,7 @@ export const requests: BloodRequest[] = [
     bloodType: "A+",
     units: 2,
     urgency: "Alta",
-    status: "Em Correspondência",
+    status: "Aberto",
     createdAt: "2026-05-11T09:10:00Z"
   },
   {
@@ -88,7 +88,7 @@ export const requests: BloodRequest[] = [
     bloodType: "B+",
     units: 3,
     urgency: "Media",
-    status: "Agendado",
+    status: "Dador a Caminho",
     createdAt: "2026-05-10T16:45:00Z"
   }
 ];

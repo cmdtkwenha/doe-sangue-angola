@@ -201,16 +201,8 @@ function nearDonor(request: BloodRequest, donor: ReturnType<typeof mapDonor>) {
 }
 
 const closedStatuses = [
-  "Agendado",
   "Cancelado",
-  "CANCELLED",
-  "COMPLETED",
-  "Concluído",
-  "Concluido",
-  "Doador a Caminho",
-  "FULFILLED",
-  "Preenchido",
-  "PIN Validado"
+  "Concluído"
 ];
 
 function formatSupabaseError(error: {

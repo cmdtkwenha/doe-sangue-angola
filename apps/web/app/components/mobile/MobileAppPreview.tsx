@@ -145,5 +145,5 @@ function isActiveResponse(status: DonorPin["status"]) {
 }
 
 function isFilled(request: BloodRequest) {
-  return request.status === "Preenchido" || request.status === "Concluído" || (request.remainingSlots ?? 1) <= 0;
+  return request.status === "Concluído" || (request.remainingSlots ?? 1) <= 0;
 }

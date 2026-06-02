@@ -20,7 +20,7 @@ export function acceptRequest(donorId: string, requestId: string) {
 
   const existing = appointments.find((item) => item.id === `a-${donorId}-${requestId}`);
   if (existing) {
-    request.status = "Agendado";
+    request.status = "Dador a Caminho";
     return {
       ok: true,
       message: "Pedido já aceite. PIN existente mantido.",
@@ -29,7 +29,7 @@ export function acceptRequest(donorId: string, requestId: string) {
   }
 
   const appointment = schedulingAgent(donor, hospital);
-  request.status = "Agendado";
+  request.status = "Dador a Caminho";
   appointments.unshift({ ...appointment, id: `a-${donorId}-${requestId}` });
   recordAudit("schedulingAgent", `Gerou PIN ${appointment.pin} para ${donor.name}`);
   trackDonorAcceptance(donorId, requestId);

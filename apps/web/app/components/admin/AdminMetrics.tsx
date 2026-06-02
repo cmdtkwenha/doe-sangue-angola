@@ -16,11 +16,11 @@ export function AdminMetrics() {
   const { data: donors, error: donorError, loading: loadingDonors } = useApiData<Donor[]>("/api/donors", [], refresh);
   const { data: hospitals, error: hospitalError, loading: loadingHospitals } = useApiData<Hospital[]>("/api/hospitals", [], refresh);
   const { data: requests, error: requestError, loading: loadingRequests } = useApiData<BloodRequest[]>("/api/blood-requests", [], refresh);
-  const active = requests.filter((request) => !["Cancelado", "Concluído", "Concluido"].includes(request.status));
+  const active = requests.filter((request) => !["Cancelado", "Concluído"].includes(request.status));
   const critical = active.filter((request) => request.urgency === "Critica");
   const month = new Date().toISOString().slice(0, 7);
   const monthlyDonations = requests.filter((request) =>
-    ["Concluído", "Concluido"].includes(request.status) && request.createdAt.startsWith(month)
+    request.status === "Concluído" && request.createdAt.startsWith(month)
   );
   const metrics: Metric[] = [
     { label: "Dadores Registados", value: String(donors.length), change: "Registos reais", tone: "green" },

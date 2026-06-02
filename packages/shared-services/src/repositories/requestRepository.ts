@@ -102,7 +102,7 @@ export const requestRepository = {
   async completeRequest(donorId: string, requestId: string) {
     const { error } = await getDatabaseClient()
       .from("appointments")
-      .update({ status: "Concluido" })
+      .update({ status: "Concluído" })
       .eq("donor_id", donorId)
       .eq("blood_request_id", requestId);
     if (error) throw error;
@@ -114,7 +114,7 @@ export const requestRepository = {
   async acceptRequest(donorId: string, requestId: string) {
     const existing = await findAppointment(donorId, requestId);
     if (existing) {
-      await this.updateRequestStatus(requestId, "Doador a Caminho");
+      await this.updateRequestStatus(requestId, "Dador a Caminho");
       return existing;
     }
 
@@ -138,7 +138,7 @@ export const requestRepository = {
       .single();
 
     if (error) throw error;
-    await this.updateRequestStatus(requestId, "Doador a Caminho");
+    await this.updateRequestStatus(requestId, "Dador a Caminho");
 
     return mapAppointment(data as unknown as AppointmentRow);
   },

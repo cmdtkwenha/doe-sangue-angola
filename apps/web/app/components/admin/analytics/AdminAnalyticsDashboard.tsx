@@ -122,7 +122,7 @@ function compute(data: Data, filters: Filters) {
   const inventory = data.inventory.filter((row) => !filters.hospital || row.hospital_id === filters.hospital);
   const completed = responses.filter((row) => row.status === "Doação concluída");
   const cancelled = responses.filter((row) => row.status === "Cancelado");
-  const open = requests.filter((row) => !["Concluído", "Concluido", "Cancelado"].includes(row.status));
+  const open = requests.filter((row) => !["Concluído", "Cancelado"].includes(row.status));
   const critical = requests.filter((row) => ["Critica", "Desastre"].includes(row.urgency));
   const profiles = new Map(data.profiles.map((row) => [row.linked_entity_id, row]));
   const hospitalNames = new Map(data.hospitals.map((row) => [row.id, row.name]));
