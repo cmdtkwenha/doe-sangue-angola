@@ -19,7 +19,7 @@ export async function GET() {
         column: "status",
         inValues: ["Aberto", "Em Correspondência", "Agendado", "Doador a Caminho"]
       }),
-      countRows(db, "donor_responses", { column: "status", value: "completed" }),
+      countRows(db, "donor_responses", { column: "status", value: "Doação concluída" }),
       countRows(db, "support_issues", {
         column: "status",
         inValues: ["Aberto", "Em revisão"]

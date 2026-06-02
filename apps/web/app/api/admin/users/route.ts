@@ -75,18 +75,18 @@ async function applyAction(db: Awaited<ReturnType<typeof createRouteSupabase>>, 
   if (action === "change_role") {
     await updateProfile(db, profile, { linked_entity_id: null, role: assertRole(body.role) });
   }
-  if (action === "suspend_user") await updateProfile(db, profile, { account_status: "suspended" });
-  if (action === "reactivate_user") await updateProfile(db, profile, { account_status: "active" });
+  if (action === "suspend_user") await updateProfile(db, profile, { account_status: "Suspenso" });
+  if (action === "reactivate_user") await updateProfile(db, profile, { account_status: "Ativo" });
   if (action === "reset_role") await updateProfile(db, profile, { linked_entity_id: null, role: "viewer" });
   if (action === "force_password_reset") await updateProfile(db, profile, { password_reset_requested_at: new Date().toISOString() });
   if (action === "unlink_hospital" && profile.role === "hospital") await updateProfile(db, profile, { linked_entity_id: null });
   if (action === "unlink_donor" && profile.role === "donor") await updateProfile(db, profile, { linked_entity_id: null });
   if (action === "link_hospital") await updateProfile(db, profile, { linked_entity_id: assertString(body.hospitalId, "Hospital"), role: "hospital" });
-  if (action === "approve_hospital") await updateHospital(db, body.hospitalId ?? profile.linked_entity_id, { verification_status: "verified", verified: true });
-  if (action === "suspend_hospital") await updateHospital(db, body.hospitalId ?? profile.linked_entity_id, { verification_status: "suspended", verified: false });
-  if (action === "verify_donor") await updateDonor(db, body.donorId ?? profile.linked_entity_id, { available: true, eligibility_status: "eligible" });
-  if (action === "review_donor") await updateDonor(db, body.donorId ?? profile.linked_entity_id, { available: false, eligibility_status: "needs_review" });
-  if (action === "suspend_donor") await updateDonor(db, body.donorId ?? profile.linked_entity_id, { available: false, eligibility_status: "permanently_deferred" });
+  if (action === "approve_hospital") await updateHospital(db, body.hospitalId ?? profile.linked_entity_id, { verification_status: "Verificado", verified: true });
+  if (action === "suspend_hospital") await updateHospital(db, body.hospitalId ?? profile.linked_entity_id, { verification_status: "Suspenso", verified: false });
+  if (action === "verify_donor") await updateDonor(db, body.donorId ?? profile.linked_entity_id, { available: true, eligibility_status: "Elegível" });
+  if (action === "review_donor") await updateDonor(db, body.donorId ?? profile.linked_entity_id, { available: false, eligibility_status: "Revisão Necessária" });
+  if (action === "suspend_donor") await updateDonor(db, body.donorId ?? profile.linked_entity_id, { available: false, eligibility_status: "Diferido Permanente" });
 }
 
 async function updateProfile(db: Awaited<ReturnType<typeof createRouteSupabase>>, profile: Record<string, string | null>, patch: Record<string, string | null>) {

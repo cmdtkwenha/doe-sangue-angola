@@ -34,7 +34,7 @@ export function HospitalOnboarding() {
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const approved = hospitals.filter((hospital) => hospital.verified && hospital.verificationStatus === "verified");
+  const approved = hospitals.filter((hospital) => hospital.verified && isVerified(hospital.verificationStatus));
   const [hospitalId, setHospitalId] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("Escolha um hospital aprovado.");
@@ -95,10 +95,11 @@ export function HospitalOnboarding() {
         .select("id,verified,verification_status")
         .eq("id", hospitalId)
         .eq("verified", true)
-        .eq("verification_status", "verified")
         .single();
       if (hospitalError) throw new Error(formatSupabaseError(hospitalError));
-      if (!hospital?.id) throw new Error("Hospital aprovado não encontrado.");
+      if (!hospital?.id || !isVerified(String(hospital.verification_status ?? ""))) {
+        throw new Error("Hospital aprovado não encontrado.");
+      }
 
       const profilePayload = {
         auth_user_id: authUser.id,
@@ -227,8 +228,13 @@ function mapHospital(row: HospitalRow): Hospital {
 
 function normalizeHospitalStatus(row: HospitalRow) {
   const value = row.verification_status;
-  if (value === "pending" || value === "verified" || value === "rejected" || value === "suspended") return value;
-  return row.verified ? "verified" : "pending";
+  if (value === "Pendente" || value === "Verificado" || value === "Rejeitado" || value === "Suspenso" || value === "Revisão Necessária") return value;
+  if (value === "pending" || value === "verified" || value === "rejected" || value === "suspended" || value === "needs_review") return value;
+  return row.verified ? "Verificado" : "Pendente";
+}
+
+function isVerified(status?: string) {
+  return status === "Verificado" || status === "verified";
 }
 
 function formatSupabaseError(error: {

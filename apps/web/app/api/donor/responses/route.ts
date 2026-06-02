@@ -66,25 +66,28 @@ export async function GET() {
 
 function normalizeStatus(status?: string | null): DonorResponseStatus {
   const oldValues: Record<string, DonorResponseStatus> = {
-    accepted: "accepted",
-    arrived: "arrived",
-    cancelled: "cancelled",
-    Cancelado: "cancelled",
-    Chegou: "arrived",
-    completed: "completed",
-    Concluido: "completed",
-    "Concluído": "completed",
-    no_show: "no_show",
-    NO_SHOW: "no_show",
-    pin_validated: "pin_validated",
-    "PIN Validado": "pin_validated"
+    accepted: "Dador a Caminho",
+    arrived: "Chegou",
+    cancelled: "Cancelado",
+    Cancelado: "Cancelado",
+    Chegou: "Chegou",
+    completed: "Doação concluída",
+    Concluido: "Doação concluída",
+    "Concluído": "Doação concluída",
+    "Doação concluída": "Doação concluída",
+    no_show: "Não Compareceu",
+    NO_SHOW: "Não Compareceu",
+    "Não Compareceu": "Não Compareceu",
+    pin_validated: "PIN Validado",
+    "PIN Validado": "PIN Validado",
+    "Dador a Caminho": "Dador a Caminho"
   };
-  return oldValues[status ?? ""] ?? "accepted";
+  return oldValues[status ?? ""] ?? "Dador a Caminho";
 }
 
 function isOldStatus(status?: string | null) {
   const normalized = normalizeStatus(status);
-  return normalized === "completed" || normalized === "cancelled" || normalized === "no_show";
+  return normalized === "Doação concluída" || normalized === "Cancelado" || normalized === "Não Compareceu";
 }
 
 function locationLabel(hospital?: { municipality?: string | null; province?: string | null } | null) {

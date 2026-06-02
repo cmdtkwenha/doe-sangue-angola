@@ -120,8 +120,8 @@ function compute(data: Data, filters: Filters) {
   const donors = data.donors.filter((row) => match(row, filters));
   const hospitals = data.hospitals.filter((row) => match(row, filters));
   const inventory = data.inventory.filter((row) => !filters.hospital || row.hospital_id === filters.hospital);
-  const completed = responses.filter((row) => row.status === "completed");
-  const cancelled = responses.filter((row) => row.status === "cancelled");
+  const completed = responses.filter((row) => row.status === "Doação concluída");
+  const cancelled = responses.filter((row) => row.status === "Cancelado");
   const open = requests.filter((row) => !["Concluído", "Concluido", "Cancelado"].includes(row.status));
   const critical = requests.filter((row) => ["Critica", "Desastre"].includes(row.urgency));
   const profiles = new Map(data.profiles.map((row) => [row.linked_entity_id, row]));
@@ -189,14 +189,14 @@ function hospitalPerformance(requests: Row[], responses: Row[], names: Map<strin
   return top(group(requests, "hospital_id"), 5).map(([id]) => {
     const hospitalRequests = requests.filter((row) => row.hospital_id === id);
     const hospitalResponses = responses.filter((row) => row.hospital_id === id);
-    const completed = hospitalResponses.filter((row) => row.status === "completed").length;
+    const completed = hospitalResponses.filter((row) => row.status === "Doação concluída").length;
     const eta = average(hospitalResponses.map((row) => Number(row.eta_minutes ?? 0)).filter(Boolean));
-    return { Hospital: names.get(id) ?? id, "Taxa fulfilment": pct(completed, hospitalRequests.length), "ETA médio": `${eta} min`, Cancelados: String(hospitalResponses.filter((row) => row.status === "cancelled").length) };
+    return { Hospital: names.get(id) ?? id, "Taxa fulfilment": pct(completed, hospitalRequests.length), "ETA médio": `${eta} min`, Cancelados: String(hospitalResponses.filter((row) => row.status === "Cancelado").length) };
   });
 }
 
 function topDonors(donors: Row[], profiles: Map<any, Row>, responses: Row[]) {
-  return donors.map((donor) => ({ Donor: profiles.get(donor.id)?.name ?? donor.blood_type ?? donor.id, Doações: String(responses.filter((row) => row.donor_id === donor.id && row.status === "completed").length), Retenção: donor.last_donation_date || donor.last_donation ? "Com histórico" : "Novo", "Resposta média": `${donor.response_speed_minutes ?? 0} min` }))
+  return donors.map((donor) => ({ Donor: profiles.get(donor.id)?.name ?? donor.blood_type ?? donor.id, Doações: String(responses.filter((row) => row.donor_id === donor.id && row.status === "Doação concluída").length), Retenção: donor.last_donation_date || donor.last_donation ? "Com histórico" : "Novo", "Resposta média": `${donor.response_speed_minutes ?? 0} min` }))
     .sort((a, b) => Number(b.Doações) - Number(a.Doações)).slice(0, 6);
 }
 

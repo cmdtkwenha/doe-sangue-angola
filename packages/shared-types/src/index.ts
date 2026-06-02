@@ -15,15 +15,12 @@ export type UserRole = "admin" | "hospital" | "donor" | "support" | "viewer";
 export type Urgency = "Desastre" | "Critica" | "Alta" | "Media" | "Normal";
 
 export type RequestStatus =
-  | "OPEN"
-  | "FULFILLED"
-  | "COMPLETED"
-  | "CANCELLED"
   | "Aberto"
   | "Em Correspondência"
   | "Agendado"
   | "Doador a Caminho"
   | "Pedido preenchido"
+  | "Preenchido"
   | "PIN Validado"
   | "Concluído"
   | "Cancelado"
@@ -31,14 +28,19 @@ export type RequestStatus =
   | "Concluido";
 
 export type DonorResponseStatus =
-  | "accepted"
-  | "arrived"
-  | "pin_validated"
-  | "completed"
-  | "cancelled"
-  | "no_show";
+  | "Dador a Caminho"
+  | "Chegou"
+  | "PIN Validado"
+  | "Doação concluída"
+  | "Cancelado"
+  | "Não Compareceu";
 
 export type DonorEligibilityStatus =
+  | "Elegível"
+  | "Verificação Pendente"
+  | "Diferido Temporário"
+  | "Diferido Permanente"
+  | "Revisão Necessária"
   | "eligible"
   | "pending_verification"
   | "temporarily_deferred"
@@ -46,6 +48,11 @@ export type DonorEligibilityStatus =
   | "needs_review";
 
 export type HospitalVerificationStatus =
+  | "Revisão Necessária"
+  | "Pendente"
+  | "Verificado"
+  | "Rejeitado"
+  | "Suspenso"
   | "needs_review"
   | "pending"
   | "verified"

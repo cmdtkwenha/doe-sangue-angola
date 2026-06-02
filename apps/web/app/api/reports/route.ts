@@ -91,8 +91,8 @@ function adminReports(data: ReturnType<typeof filterRows> & { donors: Row[]; hos
     report("donors-province", "Dadores por província", "Distribuição real de dadores.", groupRows(data.donors, "province", "Dadores")),
     report("hospitals-province", "Hospitais por província", "Hospitais registados por província.", groupRows(data.hospitals, "province", "Hospitais")),
     report("requests-status", "Pedidos por estado", "Pedidos de sangue agrupados por estado.", groupRows(data.requests, "status", "Pedidos")),
-    report("completed-donations", "Doações concluídas", "Respostas concluídas no período.", rowsByStatus(data.responses, "completed")),
-    report("cancelled-responses", "Respostas canceladas", "Respostas de dadores canceladas.", rowsByStatus(data.responses, "cancelled")),
+    report("completed-donations", "Doações concluídas", "Respostas concluídas no período.", rowsByStatus(data.responses, "Doação concluída")),
+    report("cancelled-responses", "Respostas canceladas", "Respostas de dadores canceladas.", rowsByStatus(data.responses, "Cancelado")),
     report("blood-demand", "Procura por tipo sanguíneo", "Unidades pedidas por tipo.", demandRows(data.requests)),
     report("inventory-shortages", "Escassez de inventário", "Stock abaixo dos limites.", shortageRows(data.inventory))
   ];
@@ -101,8 +101,8 @@ function adminReports(data: ReturnType<typeof filterRows> & { donors: Row[]; hos
 function hospitalReports(data: ReturnType<typeof filterRows>): Report[] {
   return [
     report("hospital-requests", "Pedidos criados", "Pedidos criados pelo hospital.", requestRows(data.requests)),
-    report("donors-accepted", "Dadores aceites", "Dadores aceites por pedido.", rowsByStatus(data.responses, "accepted")),
-    report("donations-completed", "Doações concluídas", "Doações concluídas pelo hospital.", rowsByStatus(data.responses, "completed")),
+    report("donors-accepted", "Dadores aceites", "Dadores aceites por pedido.", rowsByStatus(data.responses, "Dador a Caminho")),
+    report("donations-completed", "Doações concluídas", "Doações concluídas pelo hospital.", rowsByStatus(data.responses, "Doação concluída")),
     report("average-eta", "ETA médio", "Tempo médio estimado dos dadores.", etaRows(data.responses)),
     report("inventory-movements", "Movimentos de inventário", "Entradas, consumo, expiração e ajustes.", movementRows(data.movements)),
     report("blood-shortages", "Escassez por tipo sanguíneo", "Tipos abaixo dos limites.", shortageRows(data.inventory))

@@ -88,7 +88,7 @@ function UserCard({ onAction, user }: {
           <small>{user.email || "Sem email"}</small>
         </span>
         <Badge label={roleLabel(user.role)} tone={user.role === "admin" ? "danger" : "neutral"} />
-        <Badge label={statusLabel(user.account_status)} tone={user.account_status === "suspended" ? "danger" : "success"} />
+        <Badge label={statusLabel(user.account_status)} tone={isSuspended(user.account_status) ? "danger" : "success"} />
       </div>
       <div className={styles.meta}>
         <Read label="Criado" value={formatDate(user.created_at)} />
@@ -123,7 +123,11 @@ function filterUsers(users: UserRow[], query: string) {
 }
 
 function statusLabel(value?: string) {
-  return value === "suspended" ? "Suspenso" : "Ativo";
+  return isSuspended(value) ? "Suspenso" : "Ativo";
+}
+
+function isSuspended(value?: string) {
+  return value === "Suspenso" || value === "suspended";
 }
 
 function roleLabel(value: string) {

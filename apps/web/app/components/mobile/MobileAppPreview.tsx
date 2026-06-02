@@ -141,9 +141,9 @@ export function MobileAppPreview() {
 }
 
 function isActiveResponse(status: DonorPin["status"]) {
-  return status !== "completed" && status !== "cancelled" && status !== "no_show";
+  return status !== "Doação concluída" && status !== "Cancelado" && status !== "Não Compareceu";
 }
 
 function isFilled(request: BloodRequest) {
-  return request.status === "FULFILLED" || request.status === "COMPLETED" || (request.remainingSlots ?? 1) <= 0;
+  return request.status === "Preenchido" || request.status === "Concluído" || (request.remainingSlots ?? 1) <= 0;
 }

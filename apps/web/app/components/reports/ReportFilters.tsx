@@ -4,7 +4,7 @@ import { bloodTypes } from "@doe-sangue-angola/shared-services";
 import type { ReportFilterState } from "./reportTypes";
 import styles from "./reports.module.css";
 
-const statuses = ["", "Aberto", "Doador a Caminho", "PIN Validado", "Concluído", "Cancelado", "accepted", "completed", "cancelled"];
+const statuses = ["", "Aberto", "Dador a Caminho", "PIN Validado", "Doação concluída", "Concluído", "Cancelado"];
 
 export function ReportFilters({
   filters,

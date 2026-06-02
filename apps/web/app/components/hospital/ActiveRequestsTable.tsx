@@ -55,7 +55,7 @@ export function ActiveRequestsTable() {
     if (!closing) return;
     setSaving(true);
     setClosedIds((items) => [...new Set([...items, closing.id])]);
-    const result = await updateStatusAction(closing.id, "CANCELLED");
+    const result = await updateStatusAction(closing.id, "Cancelado");
     const message = result.ok ? "Pedido fechado com sucesso." : result.message;
     showToast(message, result.ok ? "success" : "error");
     if (result.ok) setClosing(null);
@@ -189,7 +189,7 @@ function AssignedDonors({ donors, onOpen }: {
 
 function pinStatusLabel(donor: AcceptedDonor) {
   const status = normalizeDonorResponseStatus(donor.status);
-  return status === "pin_validated" || status === "completed"
+  return status === "PIN Validado" || status === "Doação concluída"
     ? "PIN Validado"
     : "Pendente";
 }
@@ -204,7 +204,7 @@ function groupDonorsByRequest(donors: AcceptedDonor[]) {
 }
 
 function statusTone(status: string) {
-  if (status === "Aberto" || status === "OPEN") return "pill red";
+  if (status === "Aberto") return "pill red";
   if (isCompletedRequest(status)) return "pill green";
   return "pill gold";
 }

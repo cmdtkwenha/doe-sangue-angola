@@ -73,7 +73,7 @@ function buildPayload(input: SaveDonorInput) {
     consent_version: input.consentVersion,
     emergency_contact_name: input.emergencyContactName,
     emergency_contact_phone: input.emergencyContactPhone,
-    eligibility_status: "eligible",
+    eligibility_status: "Elegível",
     gender: input.gender,
     medical_disclaimer_version: input.consentVersion,
     municipality: input.municipality,

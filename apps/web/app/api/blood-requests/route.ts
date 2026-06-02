@@ -143,7 +143,7 @@ export async function POST(request: Request) {
         province: input.province,
         accepted_count: 0,
         remaining_slots: input.units,
-        status: "OPEN",
+        status: "Aberto",
         units: input.units,
         units_needed: input.units,
         urgency: input.urgency
@@ -172,12 +172,15 @@ function assertHospitalCanRequest(hospital: {
   verification_status?: string | null;
   verified?: boolean | null;
 }) {
-  const status = hospital.verification_status ?? (hospital.verified ? "verified" : "pending");
-  if (status === "verified" && hospital.verified !== false) return;
+  const status = hospital.verification_status ?? (hospital.verified ? "Verificado" : "Pendente");
+  if ((status === "Verificado" || status === "verified") && hospital.verified !== false) return;
   const labels: Record<string, string> = {
     pending: "Conta em revisão. Aguarde aprovação do Admin para criar pedidos reais.",
+    Pendente: "Conta em revisão. Aguarde aprovação do Admin para criar pedidos reais.",
     rejected: `Conta rejeitada. ${hospital.rejection_reason ?? "Contacte o suporte."}`,
-    suspended: "Conta suspensa. Contacte o suporte antes de criar pedidos."
+    Rejeitado: `Conta rejeitada. ${hospital.rejection_reason ?? "Contacte o suporte."}`,
+    suspended: "Conta suspensa. Contacte o suporte antes de criar pedidos.",
+    Suspenso: "Conta suspensa. Contacte o suporte antes de criar pedidos."
   };
   throw new ApiError(403, labels[status] ?? "Hospital não aprovado para criar pedidos.");
 }
@@ -206,6 +209,7 @@ const closedStatuses = [
   "Concluido",
   "Doador a Caminho",
   "FULFILLED",
+  "Preenchido",
   "PIN Validado"
 ];
 

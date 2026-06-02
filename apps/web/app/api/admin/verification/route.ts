@@ -66,31 +66,31 @@ async function applyAction(
   adminUserId: string
 ) {
   if (action === "approve_hospital") {
-    return updateHospital(db, body.hospitalId, "approved", adminUserId, body.reason, { verified: true, verification_status: "verified" });
+    return updateHospital(db, body.hospitalId, "Verificado", adminUserId, body.reason, { verified: true, verification_status: "Verificado" });
   }
   if (action === "reject_hospital") {
-    return updateHospital(db, body.hospitalId, "rejected", adminUserId, body.reason, {
+    return updateHospital(db, body.hospitalId, "Rejeitado", adminUserId, body.reason, {
       rejection_reason: body.reason ?? "Rejeitado pela administração.",
       verified: false,
-      verification_status: "rejected"
+      verification_status: "Rejeitado"
     });
   }
   if (action === "review_hospital") {
-    return updateHospital(db, body.hospitalId, "needs_review", adminUserId, body.reason, {
+    return updateHospital(db, body.hospitalId, "Revisão Necessária", adminUserId, body.reason, {
       rejection_reason: body.reason ?? "Revisão documental solicitada.",
       verified: false,
-      verification_status: "needs_review"
+      verification_status: "Revisão Necessária"
     });
   }
   if (action === "suspend_hospital") {
-    return updateHospital(db, body.hospitalId, "suspended", adminUserId, body.reason, {
+    return updateHospital(db, body.hospitalId, "Suspenso", adminUserId, body.reason, {
       rejection_reason: body.reason ?? "Conta suspensa pela administração.",
       verified: false,
-      verification_status: "suspended"
+      verification_status: "Suspenso"
     });
   }
   if (action === "reactivate_hospital") {
-    return updateHospital(db, body.hospitalId, "approved", adminUserId, body.reason, { rejection_reason: null, verified: true, verification_status: "verified" });
+    return updateHospital(db, body.hospitalId, "Verificado", adminUserId, body.reason, { rejection_reason: null, verified: true, verification_status: "Verificado" });
   }
   if (action === "link_hospital_user") {
     const profileId = body.profileId ?? await profileIdByEmail(db, body.email);
@@ -100,11 +100,11 @@ async function applyAction(
     const profileId = body.profileId ?? await profileIdByEmail(db, body.email);
     return updateProfile(db, profileId, { linked_entity_id: null });
   }
-  if (action === "verify_donor") return updateDonor(db, body.donorId, "verified", adminUserId, body.reason, { available: true, eligibility_status: "eligible" });
-  if (action === "review_donor") return updateDonor(db, body.donorId, "needs_review", adminUserId, body.reason, { available: false, eligibility_status: "needs_review" });
-  if (action === "reject_donor") return updateDonor(db, body.donorId, "rejected", adminUserId, body.reason, { available: false, eligibility_status: "permanently_deferred" });
-  if (action === "suspend_donor") return updateDonor(db, body.donorId, "suspended", adminUserId, body.reason, { available: false, eligibility_status: "permanently_deferred" });
-  if (action === "reactivate_donor") return updateDonor(db, body.donorId, "verified", adminUserId, body.reason, { available: true, eligibility_status: "eligible" });
+  if (action === "verify_donor") return updateDonor(db, body.donorId, "Verificado", adminUserId, body.reason, { available: true, eligibility_status: "Elegível" });
+  if (action === "review_donor") return updateDonor(db, body.donorId, "Revisão Necessária", adminUserId, body.reason, { available: false, eligibility_status: "Revisão Necessária" });
+  if (action === "reject_donor") return updateDonor(db, body.donorId, "Rejeitado", adminUserId, body.reason, { available: false, eligibility_status: "Diferido Permanente" });
+  if (action === "suspend_donor") return updateDonor(db, body.donorId, "Suspenso", adminUserId, body.reason, { available: false, eligibility_status: "Diferido Permanente" });
+  if (action === "reactivate_donor") return updateDonor(db, body.donorId, "Verificado", adminUserId, body.reason, { available: true, eligibility_status: "Elegível" });
 }
 
 async function updateHospital(
@@ -122,7 +122,7 @@ async function updateHospital(
   await insertVerification(db, "hospital_verifications", { hospital_id: hospitalId, notes, status, verified_by: adminUserId });
   return {
     newStatus: status,
-    oldStatus: before?.verification_status ?? (before?.verified ? "approved" : "pending"),
+    oldStatus: before?.verification_status ?? (before?.verified ? "Verificado" : "Pendente"),
     targetId: hospitalId,
     targetType: "hospital"
   };
@@ -143,7 +143,7 @@ async function updateDonor(
   await insertVerification(db, "donor_verifications", { donor_id: donorId, notes, status, verified_by: adminUserId });
   return {
     newStatus: status,
-    oldStatus: before?.eligibility_status ?? "pending",
+    oldStatus: before?.eligibility_status ?? "Pendente",
     targetId: donorId,
     targetType: "donor"
   };

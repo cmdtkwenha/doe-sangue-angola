@@ -8,7 +8,7 @@ export function formatTime(value?: string) {
 
 export function isActiveStatus(status: string) {
   const normalized = normalizeDonorResponseStatus(status);
-  return normalized !== "completed" && normalized !== "cancelled";
+  return normalized !== "Doação concluída" && normalized !== "Cancelado" && normalized !== "Não Compareceu";
 }
 
 export function splitRows(rows: AcceptedDonor[]) {

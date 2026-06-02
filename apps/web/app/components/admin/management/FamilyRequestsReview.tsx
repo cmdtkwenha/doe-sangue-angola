@@ -80,6 +80,11 @@ export function FamilyRequestsReview() {
 
 function statusLabel(status: string) {
   return {
+    Aprovado: "Aprovado",
+    Ativo: "Ativo",
+    Cancelado: "Cancelado",
+    Pendente: "Em revisão",
+    Resolvido: "Resolvido",
     active: "Ativo",
     approved: "Aprovado",
     cancelled: "Cancelado",
@@ -90,7 +95,7 @@ function statusLabel(status: string) {
 
 function familySummary(requests: FamilyRequest[]) {
   return {
-    fulfilled: requests.filter((item) => item.status === "fulfilled").length,
+    fulfilled: requests.filter((item) => item.status === "Resolvido").length,
     provinces: new Set(requests.map((item) => item.province).filter(Boolean)).size
   };
 }

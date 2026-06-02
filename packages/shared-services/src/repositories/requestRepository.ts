@@ -49,7 +49,7 @@ export const requestRepository = {
         urgency: input.urgency,
         accepted_count: 0,
         remaining_slots: input.units,
-        status: "OPEN"
+        status: "Aberto"
       })
       .select(requestColumns)
       .single();
@@ -84,7 +84,7 @@ export const requestRepository = {
   },
 
   closeRequest(id: string) {
-    return this.updateRequestStatus(id, "CANCELLED");
+    return this.updateRequestStatus(id, "Cancelado");
   },
 
   async updateRequestStatus(id: string, status: BloodRequest["status"]) {
@@ -108,7 +108,7 @@ export const requestRepository = {
     if (error) throw error;
 
     await donorRepository.addRewardPoints(donorId, 120);
-    return this.updateRequestStatus(requestId, "COMPLETED");
+    return this.updateRequestStatus(requestId, "Concluído");
   },
 
   async acceptRequest(donorId: string, requestId: string) {

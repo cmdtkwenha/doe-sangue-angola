@@ -87,7 +87,7 @@ async function seedPilot(db: Awaited<ReturnType<typeof createRouteSupabase>>) {
     eta_minutes: 15,
     hospital_id: hospital.id,
     pin_expires_at: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString(),
-    status: "accepted"
+    status: "Dador a Caminho"
   });
   return { message: "Cenário piloto criado.", requestId };
 }

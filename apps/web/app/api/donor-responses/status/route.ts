@@ -17,7 +17,7 @@ import {
 } from "./statusHelpers";
 
 type StatusBody = { confirmationPin?: string; responseId: string; status: string };
-const allowed: ResponseStatus[] = ["arrived", "cancelled", "completed", "no_show", "pin_validated"];
+const allowed: ResponseStatus[] = ["Chegou", "Cancelado", "Doação concluída", "Não Compareceu", "PIN Validado"];
 
 export async function POST(request: Request) {
   requireSameOrigin(request);
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     const status = normalizeActionStatus(body.status);
     if (!status || !allowed.includes(status)) throw new ApiError(400, "Estado inválido.");
     assertTransition(normalizeCurrentStatus(existing.status), status);
-    if (status === "pin_validated") {
+    if (status === "PIN Validado") {
       const pin = assertPin(optionalString(body.confirmationPin, 4));
       assertPinRate(existing);
       if (pin !== existing.confirmation_pin) {
@@ -57,13 +57,13 @@ export async function POST(request: Request) {
       .select("id,status")
       .single();
     if (updateError) throw supabaseError("Não foi possível atualizar o estado do dador", updateError);
-    if (status === "pin_validated") await clearPinFailures(db, responseId);
+    if (status === "PIN Validado") await clearPinFailures(db, responseId);
     await syncAcceptance(db, existing, status);
     await applyOperationalEffects(db, responseId, existing.donor_id, status);
     await syncRequest(db, existing.blood_request_id, status);
     await syncFamilyRequest(db, familyId(existing), status);
     await notifyDonor(db, existing.donor_id, status);
-  if (status === "completed" || status === "cancelled" || status === "no_show") {
+  if (status === "Doação concluída" || status === "Cancelado" || status === "Não Compareceu") {
       await notifyAdmins(db, workflowTitle(status), workflowMessage(status), status);
     }
     await auditApiAction(principal, auditMessage(status, responseId));
@@ -76,8 +76,8 @@ async function syncFamilyRequest(
   familyRequestId: string | undefined,
   status: ResponseStatus
 ) {
-  if (!familyRequestId || !["completed", "cancelled"].includes(status)) return;
-  const next = status === "completed" ? "fulfilled" : "cancelled";
+  if (!familyRequestId || !["Doação concluída", "Cancelado"].includes(status)) return;
+  const next = status === "Doação concluída" ? "Resolvido" : "Cancelado";
   await db.from("family_emergency_requests").update({
     status: next,
     updated_at: new Date().toISOString()
@@ -95,8 +95,8 @@ async function applyOperationalEffects(
   donorId: string,
   status: ResponseStatus
 ) {
-  if (status === "arrived") await rewardOnce(db, responseId, donorId, 40, "Chegada confirmada", "reward_arrived_at");
-  if (status === "completed") {
+  if (status === "Chegou") await rewardOnce(db, responseId, donorId, 40, "Chegada confirmada", "reward_arrived_at");
+  if (status === "Doação concluída") {
     await rewardOnce(db, responseId, donorId, 120, "Doação concluída", "reward_completed_at");
     await updateCooldown(db, donorId);
   }
@@ -124,7 +124,7 @@ async function updateCooldown(db: Awaited<ReturnType<typeof createRouteSupabase>
   next.setDate(next.getDate() + days);
   await db.from("donors").update({
     available: false,
-    eligibility_status: "temporarily_deferred",
+    eligibility_status: "Diferido Temporário",
     last_donation_date: new Date().toISOString().slice(0, 10),
     next_eligible_donation_date: next.toISOString()
   }).eq("id", donorId);
@@ -166,9 +166,9 @@ async function syncAcceptance(
   status: ResponseStatus
 ) {
   const payload = {
-    arrived_at: status === "arrived" || status === "pin_validated" ? new Date().toISOString() : undefined,
-    cancelled_at: status === "cancelled" || status === "no_show" ? new Date().toISOString() : undefined,
-    completed_at: status === "completed" ? new Date().toISOString() : undefined,
+    arrived_at: status === "Chegou" || status === "PIN Validado" ? new Date().toISOString() : undefined,
+    cancelled_at: status === "Cancelado" || status === "Não Compareceu" ? new Date().toISOString() : undefined,
+    completed_at: status === "Doação concluída" ? new Date().toISOString() : undefined,
     status: acceptanceStatus(status),
     updated_at: new Date().toISOString()
   };

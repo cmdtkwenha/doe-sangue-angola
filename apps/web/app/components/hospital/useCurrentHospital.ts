@@ -109,6 +109,7 @@ function mapHospital(row: HospitalRow): Hospital {
 
 function normalizeHospitalStatus(row: HospitalRow) {
   const value = row.verification_status;
-  if (value === "pending" || value === "verified" || value === "rejected" || value === "suspended") return value;
-  return row.verified ? "verified" : "pending";
+  if (value === "Pendente" || value === "Verificado" || value === "Rejeitado" || value === "Suspenso" || value === "Revisão Necessária") return value;
+  if (value === "pending" || value === "verified" || value === "rejected" || value === "suspended" || value === "needs_review") return value;
+  return row.verified ? "Verificado" : "Pendente";
 }

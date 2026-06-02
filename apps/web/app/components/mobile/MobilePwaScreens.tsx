@@ -94,7 +94,7 @@ export function RequestsScreen({
 }
 
 export function HistoryScreen({ responses }: { responses: DonorPin[] }) {
-  const sorted = responses.filter((item) => item.status === "completed" || item.status === "cancelled");
+  const sorted = responses.filter((item) => item.status === "Doação concluída" || item.status === "Cancelado");
   return (
     <section className={pwa.screen}>
       <h1>Histórico</h1>
@@ -128,12 +128,12 @@ export function ProfileScreen({ donor, loading }: { donor: Donor | null; loading
 
 function statusLabel(status: DonorResponseStatus) {
   const labels: Record<DonorResponseStatus, string> = {
-    accepted: "Dador a Caminho",
-    arrived: "Chegou",
-    cancelled: "Cancelado",
-    completed: "Doação concluída",
-    no_show: "Não compareceu",
-    pin_validated: "PIN Validado"
+    "Dador a Caminho": "Dador a Caminho",
+    Chegou: "Chegou",
+    Cancelado: "Cancelado",
+    "Doação concluída": "Doação concluída",
+    "Não Compareceu": "Não compareceu",
+    "PIN Validado": "PIN Validado"
   };
   return labels[status] ?? status;
 }

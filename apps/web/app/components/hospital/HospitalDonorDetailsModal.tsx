@@ -76,9 +76,9 @@ export function HospitalDonorDetailsModal({ donor, onAction, onClose, saving }: 
         </div>
 
         <div className={styles.actions}>
-          <button disabled={saving || !canMoveDonorResponse(status, "arrived")} onClick={() => onAction(donor, "arrived")} type="button">Validar chegada</button>
-          <button disabled={saving || !canMoveDonorResponse(status, "completed")} onClick={() => onAction(donor, "completed")} type="button">Concluir doação</button>
-          <button disabled={saving || !canMoveDonorResponse(status, "cancelled")} onClick={() => onAction(donor, "cancelled")} type="button">Cancelar pedido</button>
+          <button disabled={saving || !canMoveDonorResponse(status, "Chegou")} onClick={() => onAction(donor, "Chegou")} type="button">Validar chegada</button>
+          <button disabled={saving || !canMoveDonorResponse(status, "Doação concluída")} onClick={() => onAction(donor, "Doação concluída")} type="button">Concluir doação</button>
+          <button disabled={saving || !canMoveDonorResponse(status, "Cancelado")} onClick={() => onAction(donor, "Cancelado")} type="button">Cancelar pedido</button>
         </div>
         <p className={styles.privacy}>Dados sensíveis, autenticação, BI completo, consentimentos legais e dados administrativos não são apresentados neste painel.</p>
       </section>

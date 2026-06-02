@@ -61,7 +61,7 @@ export function IncomingDonorsList() {
       showToast(`Ação indisponível para ${donorResponseLabels[current]}.`, "error");
       return;
     }
-    if (status === "pin_validated" && !/^\d{4}$/.test(pins[row.responseId] ?? "")) {
+    if (status === "PIN Validado" && !/^\d{4}$/.test(pins[row.responseId] ?? "")) {
       showToast("Introduza o PIN de 4 dígitos informado pelo dador.", "error");
       return;
     }
@@ -134,7 +134,7 @@ export function IncomingDonorsList() {
               <DonorResponseStatusBadge status={row.status} />
             </span>
             <span className={styles.actions}>
-              <button disabled={saving || !canMoveDonorResponse(normalizeDonorResponseStatus(row.status), "arrived")} onClick={() => ask(row, "arrived")} type="button">Chegou</button>
+              <button disabled={saving || !canMoveDonorResponse(normalizeDonorResponseStatus(row.status), "Chegou")} onClick={() => ask(row, "Chegou")} type="button">Chegou</button>
               <button disabled={saving} onClick={() => setSelected(row)} type="button">Ver detalhes</button>
               <input
                 aria-label="PIN do dador"
@@ -145,9 +145,9 @@ export function IncomingDonorsList() {
                 placeholder="PIN"
                 value={pins[row.responseId] ?? ""}
               />
-              <button disabled={saving || !canMoveDonorResponse(normalizeDonorResponseStatus(row.status), "pin_validated")} onClick={() => ask(row, "pin_validated")} type="button">PIN validado</button>
-              <button disabled={saving || !canMoveDonorResponse(normalizeDonorResponseStatus(row.status), "completed")} onClick={() => ask(row, "completed")} type="button">Doação concluída</button>
-              <button disabled={saving || !canMoveDonorResponse(normalizeDonorResponseStatus(row.status), "cancelled")} onClick={() => ask(row, "cancelled")} type="button">Cancelado</button>
+              <button disabled={saving || !canMoveDonorResponse(normalizeDonorResponseStatus(row.status), "PIN Validado")} onClick={() => ask(row, "PIN Validado")} type="button">PIN validado</button>
+              <button disabled={saving || !canMoveDonorResponse(normalizeDonorResponseStatus(row.status), "Doação concluída")} onClick={() => ask(row, "Doação concluída")} type="button">Doação concluída</button>
+              <button disabled={saving || !canMoveDonorResponse(normalizeDonorResponseStatus(row.status), "Cancelado")} onClick={() => ask(row, "Cancelado")} type="button">Cancelado</button>
             </span>
           </article>
           ))}
@@ -178,10 +178,10 @@ export function IncomingDonorsList() {
         onConfirm={() => void update()}
         open={Boolean(pending)}
         reason={reason}
-        reasonOptions={pending?.status === "cancelled" ? cancelReasons : []}
+        reasonOptions={pending?.status === "Cancelado" ? cancelReasons : []}
         setReason={setReason}
         title="Confirmar atualização"
-        tone={pending?.status === "cancelled" ? "danger" : "primary"}
+        tone={pending?.status === "Cancelado" ? "danger" : "primary"}
       />
       <ActionToast message={toast.message} tone={toast.tone} />
       <HospitalDonorDetailsModal

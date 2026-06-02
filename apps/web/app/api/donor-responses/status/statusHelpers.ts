@@ -1,111 +1,105 @@
 import type { DonorResponseStatus } from "@doe-sangue-angola/shared-types";
 import { ApiError } from "../../_utils/apiResponse";
 
-export type ResponseStatus = Exclude<DonorResponseStatus, "accepted">;
+export type ResponseStatus = Exclude<DonorResponseStatus, "Dador a Caminho">;
 
 export function workflowTitle(status: ResponseStatus) {
   const titles: Record<ResponseStatus, string> = {
-    arrived: "Chegada confirmada",
-    cancelled: "Pedido cancelado",
-    completed: "Doação concluída",
-    no_show: "Dador ausente",
-    pin_validated: "PIN validado"
+    Chegou: "Chegada confirmada",
+    Cancelado: "Pedido cancelado",
+    "Doação concluída": "Doação concluída",
+    "Não Compareceu": "Dador ausente",
+    "PIN Validado": "PIN validado"
   };
   return titles[status];
 }
 
 export function workflowMessage(status: ResponseStatus) {
   const messages: Record<ResponseStatus, string> = {
-    arrived: "O hospital marcou a sua chegada. Aguarde a validação do PIN.",
-    cancelled: "A resposta ao pedido foi cancelada.",
-    completed: "Obrigado. A doação foi concluída com sucesso.",
-    no_show: "A resposta foi marcada como não compareceu.",
-    pin_validated: "O seu PIN foi validado pelo hospital."
+    Chegou: "O hospital marcou a sua chegada. Aguarde a validação do PIN.",
+    Cancelado: "A resposta ao pedido foi cancelada.",
+    "Doação concluída": "Obrigado. A doação foi concluída com sucesso.",
+    "Não Compareceu": "A resposta foi marcada como não compareceu.",
+    "PIN Validado": "O seu PIN foi validado pelo hospital."
   };
   return messages[status];
 }
 
 export function auditMessage(status: ResponseStatus, responseId: string) {
   const actions: Record<ResponseStatus, string> = {
-    arrived: "Confirmou chegada do dador",
-    cancelled: "Cancelou resposta do dador",
-    completed: "Concluiu doação",
-    no_show: "Marcou dador como ausente",
-    pin_validated: "Validou PIN do dador"
+    Chegou: "Confirmou chegada do dador",
+    Cancelado: "Cancelou resposta do dador",
+    "Doação concluída": "Concluiu doação",
+    "Não Compareceu": "Marcou dador como ausente",
+    "PIN Validado": "Validou PIN do dador"
   };
   return `${actions[status]} (${responseId}).`;
 }
 
 export function normalizeActionStatus(status?: string): ResponseStatus | null {
-  const oldValues: Record<string, ResponseStatus> = {
-    arrived: "arrived",
-    cancelled: "cancelled",
-    Cancelado: "cancelled",
-    Chegou: "arrived",
-    completed: "completed",
-    Concluido: "completed",
-    "Concluído": "completed",
-    no_show: "no_show",
-    NO_SHOW: "no_show",
-    pin_validated: "pin_validated",
-    "PIN Validado": "pin_validated"
+  const values: Record<string, ResponseStatus> = {
+    arrived: "Chegou",
+    cancelled: "Cancelado",
+    Cancelado: "Cancelado",
+    Chegou: "Chegou",
+    completed: "Doação concluída",
+    Concluido: "Doação concluída",
+    "Concluído": "Doação concluída",
+    "Doação concluída": "Doação concluída",
+    no_show: "Não Compareceu",
+    NO_SHOW: "Não Compareceu",
+    "Não compareceu": "Não Compareceu",
+    "Não Compareceu": "Não Compareceu",
+    pin_validated: "PIN Validado",
+    "PIN Validado": "PIN Validado"
   };
-  return oldValues[status ?? ""] ?? null;
+  return values[status ?? ""] ?? null;
 }
 
 export function normalizeCurrentStatus(status?: string): DonorResponseStatus {
-  return normalizeActionStatus(status) ?? (status === "accepted" ? "accepted" : "accepted");
+  if (status === "accepted") return "Dador a Caminho";
+  return normalizeActionStatus(status) ?? "Dador a Caminho";
 }
 
 export function assertTransition(current: DonorResponseStatus, next: ResponseStatus) {
-  if (current === "completed") throw new ApiError(409, "Doação já concluída.");
-  if (current === "cancelled") throw new ApiError(409, "Resposta do dador já cancelada.");
-  if (current === "no_show") throw new ApiError(409, "Resposta marcada como não compareceu.");
-  if (next === "cancelled" || next === "no_show") return;
+  if (current === "Doação concluída") throw new ApiError(409, "Doação já concluída.");
+  if (current === "Cancelado") throw new ApiError(409, "Resposta do dador já cancelada.");
+  if (current === "Não Compareceu") throw new ApiError(409, "Resposta marcada como não compareceu.");
+  if (next === "Cancelado" || next === "Não Compareceu") return;
   const validNext: Record<DonorResponseStatus, DonorResponseStatus[]> = {
-    accepted: ["arrived"],
-    arrived: ["pin_validated"],
-    cancelled: [],
-    completed: [],
-    no_show: [],
-    pin_validated: ["completed"]
+    "Dador a Caminho": ["Chegou"],
+    Chegou: ["PIN Validado"],
+    Cancelado: [],
+    "Doação concluída": [],
+    "Não Compareceu": [],
+    "PIN Validado": ["Doação concluída"]
   };
-  if (!validNext[current].includes(next)) {
-    throw new ApiError(409, transitionMessage(current, next));
-  }
+  if (!validNext[current].includes(next)) throw new ApiError(409, transitionMessage(current, next));
 }
 
 export function statusPayload(status: ResponseStatus) {
   const now = new Date().toISOString();
   return {
-    arrived_at: status === "arrived" || status === "pin_validated" ? now : undefined,
-    cancelled_at: status === "cancelled" || status === "no_show" ? now : undefined,
-    completed_at: status === "completed" ? now : undefined,
-    donation_completed_at: status === "completed" ? now : undefined,
-    pin_validated_at: status === "pin_validated" ? now : undefined,
+    arrived_at: status === "Chegou" || status === "PIN Validado" ? now : undefined,
+    cancelled_at: status === "Cancelado" || status === "Não Compareceu" ? now : undefined,
+    completed_at: status === "Doação concluída" ? now : undefined,
+    donation_completed_at: status === "Doação concluída" ? now : undefined,
+    pin_validated_at: status === "PIN Validado" ? now : undefined,
     status
   };
 }
 
 export function acceptanceStatus(status: ResponseStatus) {
   const values: Record<ResponseStatus, string> = {
-    arrived: "ARRIVED",
-    cancelled: "CANCELLED",
-    completed: "COMPLETED",
-    no_show: "NO_SHOW",
-    pin_validated: "ARRIVED"
+    Chegou: "Chegou",
+    Cancelado: "Cancelado",
+    "Doação concluída": "Concluído",
+    "Não Compareceu": "Não Compareceu",
+    "PIN Validado": "Chegou"
   };
   return values[status];
 }
 
 function transitionMessage(current: DonorResponseStatus, next: ResponseStatus) {
-  const labels: Record<DonorResponseStatus, string> = {
-    accepted: "Dador a Caminho",
-    arrived: "Chegou",
-    cancelled: "Cancelado",
-    completed: "Doação concluída",
-    no_show: "Não compareceu",
-    pin_validated: "PIN Validado"
-  };
-  return `Ação inválida: ${labels[current]} não pode passar diretamente para ${labels[next]}.`;
+  return `Ação inválida: ${current} não pode passar diretamente para ${next}.`;
 }

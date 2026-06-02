@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     const status = new URL(request.url).searchParams.get("status");
     const db = await createRouteSupabase();
     let query = db.from("family_emergency_requests").select("*").order("created_at", { ascending: false });
-    if (principal.role !== "admin") query = query.in("status", ["approved", "active"]);
+    if (principal.role !== "admin") query = query.in("status", ["Aprovado", "Ativo"]);
     if (status) query = query.eq("status", status);
     const { data, error } = await query;
     if (error) throw new Error(`family_emergency_requests select: ${error.message}`);
@@ -67,7 +67,7 @@ export async function PATCH(request: Request) {
       await auditApiAction(principal, `Aprovou pedido familiar ${id}.`);
       return requestRecord;
     }
-    const status = action === "more_info" ? "pending_review" : "cancelled";
+    const status = action === "more_info" ? "Pendente" : "Cancelado";
     const { data, error: updateError } = await db
       .from("family_emergency_requests")
       .update({ review_note: note, status, updated_at: new Date().toISOString() })
@@ -92,7 +92,7 @@ function familyInput(body: Partial<FamilyBody>) {
     patient_name: assertString(body.patientName, "Paciente", 120),
     province: assertString(body.province, "Província", 120),
     relationship: assertString(body.relationship, "Relação", 80),
-    status: "pending_review",
+    status: "Pendente",
     units_needed: assertUnits(body.unitsNeeded),
     urgency: assertUrgency(body.urgency)
   };
@@ -128,7 +128,7 @@ async function approveFamilyRequest(db: Awaited<ReturnType<typeof createRouteSup
     blood_request_id: created.id,
     hospital_id: hospital.id,
     review_note: note,
-    status: "active",
+    status: "Ativo",
     updated_at: new Date().toISOString()
   }).eq("id", family.id);
   await notifyMatchedDonors(db, mapRequest(data as any), donorColumns);

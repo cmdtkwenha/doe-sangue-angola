@@ -76,21 +76,21 @@ export function DonorPinCard() {
 }
 
 function isActive(status: DonorResponseStatus) {
-  return status !== "completed" && status !== "cancelled" && status !== "no_show";
+  return status !== "Doação concluída" && status !== "Cancelado" && status !== "Não Compareceu";
 }
 
 function canCancel(status: DonorResponseStatus) {
-  return status === "accepted" || status === "arrived" || status === "pin_validated";
+  return status === "Dador a Caminho" || status === "Chegou" || status === "PIN Validado";
 }
 
 function statusLabel(status: DonorResponseStatus) {
   const labels: Record<DonorResponseStatus, string> = {
-    accepted: "Dador a Caminho",
-    arrived: "Chegou",
-    cancelled: "Cancelado",
-    completed: "Doação concluída",
-    no_show: "Não compareceu",
-    pin_validated: "PIN Validado"
+    "Dador a Caminho": "Dador a Caminho",
+    Chegou: "Chegou",
+    Cancelado: "Cancelado",
+    "Doação concluída": "Doação concluída",
+    "Não Compareceu": "Não compareceu",
+    "PIN Validado": "PIN Validado"
   };
   return labels[status] ?? status;
 }

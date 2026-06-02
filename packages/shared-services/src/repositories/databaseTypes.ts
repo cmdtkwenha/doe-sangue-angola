@@ -142,9 +142,9 @@ export function mapDonor(row: DonorRow): Donor {
 }
 
 function normalizeEligibility(value?: string | null) {
-  const valid = ["eligible", "needs_review", "pending_verification", "permanently_deferred", "temporarily_deferred"];
+  const valid = ["Elegível", "Revisão Necessária", "Verificação Pendente", "Diferido Permanente", "Diferido Temporário", "eligible", "needs_review", "pending_verification", "permanently_deferred", "temporarily_deferred"];
   if (valid.includes(value ?? "")) return value as Donor["eligibilityStatus"];
-  return ["Pendente", "Revisão", "Em revisão"].includes(value ?? "") ? "needs_review" : "eligible";
+  return ["Pendente", "Revisão", "Em revisão"].includes(value ?? "") ? "Revisão Necessária" : "Elegível";
 }
 
 export function mapHospital(row: HospitalRow): Hospital {
@@ -168,9 +168,9 @@ export function mapHospital(row: HospitalRow): Hospital {
 }
 
 function normalizeHospitalStatus(value?: string | null, verified?: boolean) {
-  const valid = ["needs_review", "pending", "verified", "rejected", "suspended"];
+  const valid = ["Revisão Necessária", "Pendente", "Verificado", "Rejeitado", "Suspenso", "needs_review", "pending", "verified", "rejected", "suspended"];
   if (valid.includes(value ?? "")) return value as Hospital["verificationStatus"];
-  return verified ? "verified" : "pending";
+  return verified ? "Verificado" : "Pendente";
 }
 
 export function mapRequest(row: RequestRow): BloodRequest {

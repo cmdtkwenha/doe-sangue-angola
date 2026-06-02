@@ -108,7 +108,7 @@ async function getDonationMetrics(db: Awaited<ReturnType<typeof createRouteSupab
     .from("donor_responses")
     .select("donor_id,status")
     .in("donor_id", donorIds)
-    .eq("status", "completed");
+    .eq("status", "Doação concluída");
   if (error) throw supabaseError("Não foi possível carregar métricas de doação", error);
   (data ?? []).forEach((row) => metrics.set(row.donor_id, (metrics.get(row.donor_id) ?? 0) + 1));
   return metrics;
@@ -149,20 +149,23 @@ function createPrivilegedSupabase() {
 
 function normalizeStatus(status?: string | null): DonorResponseStatus {
   const oldValues: Record<string, DonorResponseStatus> = {
-    accepted: "accepted",
-    arrived: "arrived",
-    cancelled: "cancelled",
-    Cancelado: "cancelled",
-    Chegou: "arrived",
-    completed: "completed",
-    Concluido: "completed",
-    "Concluído": "completed",
-    no_show: "no_show",
-    NO_SHOW: "no_show",
-    pin_validated: "pin_validated",
-    "PIN Validado": "pin_validated"
+    accepted: "Dador a Caminho",
+    arrived: "Chegou",
+    cancelled: "Cancelado",
+    Cancelado: "Cancelado",
+    Chegou: "Chegou",
+    completed: "Doação concluída",
+    Concluido: "Doação concluída",
+    "Concluído": "Doação concluída",
+    "Doação concluída": "Doação concluída",
+    no_show: "Não Compareceu",
+    NO_SHOW: "Não Compareceu",
+    "Não Compareceu": "Não Compareceu",
+    pin_validated: "PIN Validado",
+    "PIN Validado": "PIN Validado",
+    "Dador a Caminho": "Dador a Caminho"
   };
-  return oldValues[status ?? ""] ?? "accepted";
+  return oldValues[status ?? ""] ?? "Dador a Caminho";
 }
 
 function cleanName(name?: string | null, email?: string | null) {

@@ -23,7 +23,7 @@ export function RequestDetailsModal({
   if (!open || !request) return null;
   const remaining = request.remainingSlots ?? request.units;
   const accepted = request.acceptedCount ?? Math.max(request.units - remaining, 0);
-  const filled = request.status === "FULFILLED" || request.status === "COMPLETED" || remaining <= 0;
+  const filled = request.status === "Preenchido" || request.status === "Concluído" || remaining <= 0;
 
   return (
     <AccessibleModal onClose={onClose} title="Detalhes do pedido">

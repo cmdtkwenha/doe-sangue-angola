@@ -30,5 +30,5 @@ export type AcceptedDonor = {
   verificationStatus?: string;
 };
 
-export type WorkflowStatus = Exclude<DonorResponseStatus, "accepted">;
+export type WorkflowStatus = Exclude<DonorResponseStatus, "Dador a Caminho">;
 export type PendingAction = { row: AcceptedDonor; status: WorkflowStatus } | null;

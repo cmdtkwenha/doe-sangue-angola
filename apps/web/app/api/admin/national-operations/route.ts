@@ -81,7 +81,7 @@ function buildNationalOperations(input: {
 }) {
   const activeRequests = input.requests.filter((item) => !closed.has(item.status));
   const criticalRequests = activeRequests.filter((item) => criticalUrgency.has(item.urgency));
-  const completed = input.responses.filter((item) => item.status === "completed");
+  const completed = input.responses.filter((item) => item.status === "Doação concluída");
   const today = new Date().toISOString().slice(0, 10);
   const month = today.slice(0, 7);
   const verifiedHospitals = input.hospitals.filter(isVerifiedHospital);
@@ -147,7 +147,7 @@ function buildAreas(requests: RequestRow[], hospitals: HospitalRow[], responses:
     const areaRequests = requests.filter((item) => item[key] === name && !closed.has(item.status));
     const critical = areaRequests.filter((item) => criticalUrgency.has(item.urgency)).length;
     const hospitalsTotal = hospitals.filter((item) => item[key] === name && isVerifiedHospital(item)).length;
-    const donations = responses.filter((item) => item.status === "completed" && hospitalAreas.get(item.hospital_id ?? "") === name).length;
+    const donations = responses.filter((item) => item.status === "Doação concluída" && hospitalAreas.get(item.hospital_id ?? "") === name).length;
     const level = critical ? "critical" : areaRequests.length > hospitalsTotal ? "warning" : hospitalsTotal > areaRequests.length + 2 ? "surplus" : "stable";
     return { critical, donations, hospitals: hospitalsTotal, level, name, requests: areaRequests.length, surplus: Math.max(0, hospitalsTotal - areaRequests.length) };
   }).sort((a, b) => b.critical - a.critical || b.requests - a.requests).slice(0, 12);
@@ -158,7 +158,7 @@ function buildRankings(donors: DonorRow[], hospitals: HospitalRow[], responses: 
   const hospitalProvinces = new Map(hospitals.map((item) => [item.id, item.province]));
   return Array.from(provinces).map((province) => ({
     activeDonors: donors.filter((item) => item.province === province && item.available).length,
-    donations: responses.filter((item) => item.status === "completed" && hospitalProvinces.get(item.hospital_id ?? "") === province).length,
+    donations: responses.filter((item) => item.status === "Doação concluída" && hospitalProvinces.get(item.hospital_id ?? "") === province).length,
     hospitals: hospitals.filter((item) => item.province === province && isVerifiedHospital(item)).length,
     province
   })).sort((a, b) => b.donations - a.donations || b.activeDonors - a.activeDonors).slice(0, 8);

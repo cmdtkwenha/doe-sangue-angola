@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     const id = assertString(body.id, "Pedido familiar");
     const { data: family, error } = await db.from("family_emergency_requests").select("*").eq("id", id).single();
     if (error) throw new Error(`family_emergency_requests select: ${error.message}`);
-    if (!["approved", "active"].includes(family.status)) {
+    if (!["Aprovado", "Ativo"].includes(family.status)) {
       throw new ApiError(409, "Pedido familiar ainda não aprovado para adoção.");
     }
     if (family.blood_request_id) return family;
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     await db.from("family_emergency_requests").update({
       blood_request_id: created.id,
       hospital_id: hospitalId,
-      status: "active",
+      status: "Ativo",
       updated_at: new Date().toISOString()
     }).eq("id", id);
     await auditApiAction(principal, `Adotou pedido familiar ${id}.`);

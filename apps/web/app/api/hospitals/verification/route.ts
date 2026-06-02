@@ -34,17 +34,17 @@ function assertAction(action?: string): Action {
 
 function verificationPatch(action: Action, reason?: string) {
   if (action === "approve" || action === "reactivate") {
-    return { rejection_reason: null, verification_status: "verified", verified: true };
+    return { rejection_reason: null, verification_status: "Verificado", verified: true };
   }
   if (action === "reject") {
     const text = optionalString(reason, 240);
     if (!text) throw new ApiError(400, "Informe o motivo da rejeição.");
-    return { rejection_reason: text, verification_status: "rejected", verified: false };
+    return { rejection_reason: text, verification_status: "Rejeitado", verified: false };
   }
   if (action === "suspend") {
     return {
       rejection_reason: optionalString(reason, 240) ?? "Conta suspensa pelo administrador.",
-      verification_status: "suspended",
+      verification_status: "Suspenso",
       verified: false
     };
   }

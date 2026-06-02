@@ -31,19 +31,19 @@ export async function POST(request: Request) {
     if (principal.role !== "admin" && existing.donor_id !== donor?.id) {
       throw new ApiError(403, "Só pode cancelar a sua própria aceitação.");
     }
-    if (["completed", "cancelled", "no_show"].includes(existing.status ?? "")) {
+    if (["Doação concluída", "Cancelado", "Não Compareceu", "completed", "cancelled", "no_show"].includes(existing.status ?? "")) {
       throw new ApiError(409, "Esta aceitação já não pode ser cancelada.");
     }
 
     const now = new Date().toISOString();
     const { error: updateError } = await db
       .from("donor_responses")
-      .update({ cancelled_at: now, status: "cancelled" })
+      .update({ cancelled_at: now, status: "Cancelado" })
       .eq("id", responseId);
     if (updateError) throw supabaseError("Não foi possível cancelar a aceitação", updateError);
 
     await db.from("request_acceptances")
-      .update({ cancelled_at: now, status: "CANCELLED", updated_at: now })
+      .update({ cancelled_at: now, status: "Cancelado", updated_at: now })
       .eq("request_id", existing.blood_request_id)
       .eq("donor_id", existing.donor_id);
 
@@ -52,8 +52,8 @@ export async function POST(request: Request) {
     });
     if (quotaError) throw supabaseError("Não foi possível reabrir a vaga do pedido", quotaError);
 
-    await auditApiAction(principal, `DONOR_CANCELLED ${responseId}. REQUEST_REOPENED ${existing.blood_request_id}.`);
-    return { responseId, status: "cancelled" };
+    await auditApiAction(principal, `Dador cancelou aceitação ${responseId}. Pedido reaberto ${existing.blood_request_id}.`);
+    return { responseId, status: "Cancelado" };
   });
 }
 
