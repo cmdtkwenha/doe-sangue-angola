@@ -88,7 +88,7 @@ export const supabaseProvider: DataProvider = {
       .slice(0, 12);
     const request = await requestRepository.updateRequestStatus(
       created.id,
-      "Aberto"
+      "Em Correspondência"
     );
 
     const notifications = await Promise.allSettled(matches.map((match) =>

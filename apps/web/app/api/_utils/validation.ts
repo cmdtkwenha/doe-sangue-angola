@@ -1,15 +1,8 @@
-import type { BloodType, RequestStatus, Urgency, UserRole } from "@doe-sangue-angola/shared-types";
+import { isRequestStatus, type BloodType, type Urgency, type UserRole } from "@doe-sangue-angola/shared-types";
 import { ApiError } from "./apiResponse";
 
 const bloodTypes: BloodType[] = ["O-", "O+", "A-", "A+", "B-", "B+", "AB-", "AB+"];
 const urgencies: Urgency[] = ["Desastre", "Critica", "Alta", "Media", "Normal"];
-const statuses: RequestStatus[] = [
-  "Aberto",
-  "Dador a Caminho",
-  "PIN Validado",
-  "Concluído",
-  "Cancelado"
-];
 const roles: UserRole[] = ["admin", "hospital", "donor", "support", "viewer"];
 
 export function assertString(value: unknown, label: string, max = 160) {
@@ -38,8 +31,8 @@ export function assertUrgency(value: unknown) {
 }
 
 export function assertStatus(value: unknown) {
-  if (!statuses.includes(value as RequestStatus)) throw new ApiError(400, "Estado inválido.");
-  return value as RequestStatus;
+  if (!isRequestStatus(value)) throw new ApiError(400, "Estado inválido.");
+  return value;
 }
 
 export function assertRole(value: unknown) {

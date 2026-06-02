@@ -1,3 +1,5 @@
+import type { RequestStatus } from "./requestStatusConstants";
+
 export type Locale = "pt" | "en" | "fr";
 
 export type BloodType =
@@ -14,12 +16,8 @@ export type UserRole = "admin" | "hospital" | "donor" | "support" | "viewer";
 
 export type Urgency = "Desastre" | "Critica" | "Alta" | "Media" | "Normal";
 
-export type RequestStatus =
-  | "Aberto"
-  | "Dador a Caminho"
-  | "PIN Validado"
-  | "Concluído"
-  | "Cancelado";
+export type { RequestStatus } from "./requestStatusConstants";
+export { isRequestStatus, REQUEST_STATUSES } from "./requestStatusConstants";
 
 export type DonorResponseStatus =
   | "Dador a Caminho"
