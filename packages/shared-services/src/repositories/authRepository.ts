@@ -60,6 +60,7 @@ export const authRepository = {
     const { data, error } = await db
       .from("profiles")
       .upsert({
+        account_status: "Ativo",
         auth_user_id: input.authUserId,
         email: input.email,
         linked_entity_id: input.linkedEntityId,
@@ -75,6 +76,7 @@ export const authRepository = {
     const { data: user, error: userError } = await db
       .from("users")
       .upsert({
+        account_status: "Ativo",
         id: profile.id,
         auth_user_id: input.authUserId,
         email: input.email,

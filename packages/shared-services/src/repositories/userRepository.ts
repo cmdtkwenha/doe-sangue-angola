@@ -55,6 +55,7 @@ export const userRepository = {
     const { data, error } = await getDatabaseClient()
       .from("users")
       .insert({
+        account_status: "Ativo",
         auth_user_id: input.authUserId,
         email: input.email,
         name: input.name,

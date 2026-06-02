@@ -34,10 +34,11 @@ export async function GET(request: Request) {
       if (principal.role !== "admin" && principal.authUserId !== userId && principal.profileId !== userId) {
         throw new ApiError(403, "Acesso negado ao perfil do dador.");
       }
+      const userIds = await resolvePublicUserIds(db, userId);
       const { data, error } = await db
         .from("donors")
         .select(donorColumns)
-        .eq("user_id", userId)
+        .in("user_id", userIds)
         .maybeSingle();
       if (error) throw new Error(formatSupabaseError(error));
       return data ? await enrichDonor(db, data as unknown as DonorRow) : null;
@@ -66,6 +67,15 @@ export async function GET(request: Request) {
     if (error) throw new Error(formatSupabaseError(error));
     return Promise.all((data as unknown as DonorRow[]).map((row) => enrichDonor(db, row)));
   });
+}
+
+async function resolvePublicUserIds(db: DbClient, authUserId: string) {
+  const { data, error } = await db
+    .from("users")
+    .select("id")
+    .or(`id.eq.${authUserId},auth_user_id.eq.${authUserId}`);
+  if (error) throw new Error(formatSupabaseError(error));
+  return [...new Set([authUserId, ...(data ?? []).map((item) => item.id)])];
 }
 
 export async function POST(request: Request) {

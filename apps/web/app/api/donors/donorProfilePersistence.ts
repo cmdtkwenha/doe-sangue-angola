@@ -25,10 +25,10 @@ export async function saveDonor(db: DbClient, input: SaveDonorInput): Promise<Do
   if (!input.consentAccepted) {
     throw new ApiError(400, "Aceite os termos, privacidade e aviso médico para continuar.");
   }
-  await upsertPublicUser(db, input);
+  const publicUserId = await upsertPublicUser(db, input);
   const query = db
     .from("donors")
-    .upsert(buildPayload(input), { onConflict: "user_id" });
+    .upsert(buildPayload(input, publicUserId), { onConflict: "user_id" });
   const { data, error } = await query.select(donorColumns).single();
   if (error) throw new Error(formatSupabaseError(error));
   await recordConsent(db, input).catch((error) => {
@@ -51,20 +51,31 @@ async function recordConsent(db: DbClient, input: SaveDonorInput) {
 }
 
 async function upsertPublicUser(db: DbClient, input: SaveDonorInput) {
-  const { error } = await db
+  const payload = {
+    account_status: "Ativo",
+    auth_user_id: input.userId,
+    email: input.email,
+    name: input.fullName || input.email.split("@")[0] || "Utilizador",
+    phone: input.phone,
+    role: "donor"
+  };
+  const { data: existing, error: findError } = await db
     .from("users")
-    .upsert({
-      auth_user_id: input.userId,
-      email: input.email,
-      id: input.userId,
-      name: input.fullName || input.email.split("@")[0] || "Utilizador",
-      phone: input.phone,
-      role: "donor"
-    }, { onConflict: "email" });
+    .select("id")
+    .or(`auth_user_id.eq.${input.userId},email.eq.${input.email}`)
+    .maybeSingle();
+  if (findError) throw new Error(formatSupabaseError(findError));
+
+  const publicUserId = existing?.id ?? input.userId;
+  const query = existing?.id
+    ? db.from("users").update(payload).eq("id", existing.id)
+    : db.from("users").insert({ ...payload, id: publicUserId });
+  const { error } = await query;
   if (error) throw new Error(formatSupabaseError(error));
+  return publicUserId;
 }
 
-function buildPayload(input: SaveDonorInput) {
+function buildPayload(input: SaveDonorInput, publicUserId: string) {
   return {
     available: true,
     birth_date: input.birthDate || null,
@@ -80,7 +91,7 @@ function buildPayload(input: SaveDonorInput) {
     phone: input.phone,
     privacy_policy_version: input.consentVersion,
     province: input.province,
-    user_id: input.userId
+    user_id: publicUserId
   };
 }
 

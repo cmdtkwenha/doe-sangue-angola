@@ -59,7 +59,7 @@ export const donorRepository = {
     const db = getDatabaseClient();
     const { error: userError } = await db
       .from("users")
-      .update({ phone: input.phone, name: input.fullName })
+      .update({ account_status: "Ativo", phone: input.phone, name: input.fullName })
       .eq("id", input.userId);
 
     if (userError) throw userError;

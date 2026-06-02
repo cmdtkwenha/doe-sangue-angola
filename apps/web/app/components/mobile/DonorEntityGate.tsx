@@ -30,10 +30,19 @@ export function DonorEntityGate({ children }: { children: ReactNode }) {
         setState({ found: false, loading: false, reason: authError?.message ?? "Sessão inválida." });
         return;
       }
+      const { data: users, error: userError } = await supabase
+        .from("users")
+        .select("id")
+        .or(`id.eq.${userId},auth_user_id.eq.${userId}`);
+      if (userError) {
+        setState({ found: false, loading: false, reason: userError.message });
+        return;
+      }
+      const userIds = [...new Set([userId, ...(users ?? []).map((item) => item.id)])];
       const { data, error } = await supabase
         .from("donors")
         .select("*")
-        .eq("user_id", userId)
+        .in("user_id", userIds)
         .maybeSingle();
       if (!mounted) return;
       setState({
