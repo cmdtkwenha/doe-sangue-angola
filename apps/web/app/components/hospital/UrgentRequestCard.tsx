@@ -31,8 +31,8 @@ export function UrgentRequestCard() {
       setMessage("Ligue a conta a um hospital aprovado antes de criar pedidos.");
       return;
     }
-    if (hospital.verificationStatus !== "verified" || !hospital.verified) {
-      setMessage("Conta em revisão ou bloqueada. Apenas hospitais verificados podem criar pedidos.");
+    if (!isVerified(hospital.verificationStatus) || !hospital.verified) {
+      setMessage("Hospital pendente de verificação.");
       return;
     }
     setConfirming({
@@ -83,7 +83,7 @@ export function UrgentRequestCard() {
           text="Use apenas quando o hospital precisa de sangue imediato e quer notificar dadores compatíveis."
         />
         <p className="muted">{message}</p>
-        <button className="button" disabled={hospital?.verificationStatus !== "verified"} onClick={ask} type="button">
+        <button className="button" disabled={!isVerified(hospital?.verificationStatus)} onClick={ask} type="button">
           CRIAR PEDIDO URGENTE
         </button>
         <BloodRequestConfirmationModal
@@ -96,4 +96,8 @@ export function UrgentRequestCard() {
       </div>
     </article>
   );
+}
+
+function isVerified(status?: string) {
+  return status === "Verificado" || status === "verified";
 }

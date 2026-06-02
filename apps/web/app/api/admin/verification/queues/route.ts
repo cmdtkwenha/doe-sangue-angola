@@ -63,8 +63,8 @@ function enrichDonor(
 }
 
 function isPendingHospital(row: AnyRow) {
-  const status = String(row.status ?? row.verification_status ?? (row.verified ? "verified" : "pending"));
-  return status === "pending" || status === "needs_review";
+  const status = String(row.verification_status ?? row.status ?? (row.verified ? "Verificado" : "Pendente"));
+  return ["pending", "needs_review", "Pendente", "Revisão Necessária"].includes(status);
 }
 
 function isPendingDonor(row: AnyRow) {

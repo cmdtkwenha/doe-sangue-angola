@@ -7,6 +7,7 @@ import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabaseClient";
 import { useAuth } from "../auth/useAuth";
+import { HospitalRegistrationForm } from "./HospitalRegistrationForm";
 import { OnboardingShell } from "./OnboardingShell";
 import styles from "./onboarding.module.css";
 
@@ -32,6 +33,7 @@ export function HospitalOnboarding() {
   const { session } = useAuth();
   const router = useRouter();
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [mode, setMode] = useState<"register" | "select">("select");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const approved = hospitals.filter((hospital) => hospital.verified && isVerified(hospital.verificationStatus));
@@ -58,7 +60,7 @@ export function HospitalOnboarding() {
           .select("*")
           .order("name");
         if (!active) return;
-        if (error) throw new Error(formatSupabaseError(error));
+        if (error) throw new Error(error.message);
         setHospitals((data as HospitalRow[]).map(mapHospital));
       } catch (queryError) {
         if (!active) return;
@@ -87,61 +89,16 @@ export function HospitalOnboarding() {
     setSaving(true);
     setMessage("A ligar conta ao hospital selecionado...");
     try {
-      const { data: auth } = await supabase.auth.getUser();
-      const authUser = auth.user;
-      if (!authUser?.id) throw new Error("Sessão inválida. Entre novamente.");
-      const { data: hospital, error: hospitalError } = await supabase
-        .from("hospitals")
-        .select("id,verified,verification_status")
-        .eq("id", hospitalId)
-        .eq("verified", true)
-        .single();
-      if (hospitalError) throw new Error(formatSupabaseError(hospitalError));
-      if (!hospital?.id || !isVerified(String(hospital.verification_status ?? ""))) {
-        throw new Error("Hospital aprovado não encontrado.");
-      }
-
-      const profilePayload = {
-        auth_user_id: authUser.id,
-        email: authUser.email ?? session.user.email,
-        linked_entity_id: hospitalId,
-        name: session.user.name || authUser.email || "Hospital",
-        role: "hospital"
-      };
-      const { data: updated, error: updateError } = await supabase
-        .from("profiles")
-        .update(profilePayload)
-        .eq("auth_user_id", authUser.id)
-        .select("id")
-        .maybeSingle();
-      if (updateError) throw new Error(formatSupabaseError(updateError));
-
-      if (!updated?.id) {
-        const { error: insertError } = await supabase
-          .from("profiles")
-          .insert(profilePayload);
-        if (insertError) throw new Error(formatSupabaseError(insertError));
-      }
-
-      const { data: profile, error: verifyError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("auth_user_id", authUser.id)
-        .maybeSingle();
-      if (verifyError) throw new Error(formatSupabaseError(verifyError));
-      if (profile?.role !== "hospital" || profile.linked_entity_id !== hospitalId) {
-        throw new Error("Perfil criado, mas o hospital ainda não ficou ligado.");
-      }
-      await supabase.from("legal_consents").insert({
-        consent_type: "hospital_responsibility",
-        page: "/onboarding/hospital",
-        role: "hospital",
-        user_id: authUser.id,
-        version: "pilot-v1"
+      const response = await fetch("/api/hospitals/onboarding", {
+        body: JSON.stringify({ hospitalId, mode: "select" }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST"
       });
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || payload?.ok === false) throw new Error(payload?.message ?? "Não foi possível ligar o hospital.");
       await supabase.auth.refreshSession();
       analyticsEvents.onboardingCompleted("hospital");
-      setMessage("Hospital ligado com sucesso.");
+      setMessage(payload?.data?.message ?? "Hospital ligado com sucesso.");
       router.refresh();
       setTimeout(() => router.replace("/hospital"), 500);
     } catch (error) {
@@ -160,6 +117,16 @@ export function HospitalOnboarding() {
       subtitle="Escolha o hospital aprovado antes de criar pedidos de sangue."
       title="Configurar hospital verificado"
     >
+      <div className={styles.actions}>
+        <button className={mode === "select" ? "button" : styles.secondary} onClick={() => setMode("select")} type="button">
+          Selecionar hospital aprovado
+        </button>
+        <button className={mode === "register" ? "button" : styles.secondary} onClick={() => setMode("register")} type="button">
+          Registar novo hospital ou clínica
+        </button>
+      </div>
+      {mode === "register" ? <HospitalRegistrationForm /> : null}
+      {mode === "select" ? (
       <form className={styles.summary} onSubmit={save}>
         <div>
           <div className="eyebrow">Lista aprovada</div>
@@ -204,6 +171,7 @@ export function HospitalOnboarding() {
         </button>
         <span className="muted" role="status">{message}</span>
       </form>
+      ) : null}
     </OnboardingShell>
   );
 }
@@ -235,13 +203,4 @@ function normalizeHospitalStatus(row: HospitalRow) {
 
 function isVerified(status?: string) {
   return status === "Verificado" || status === "verified";
-}
-
-function formatSupabaseError(error: {
-  code?: string;
-  details?: string;
-  hint?: string;
-  message: string;
-}) {
-  return error.message;
 }
