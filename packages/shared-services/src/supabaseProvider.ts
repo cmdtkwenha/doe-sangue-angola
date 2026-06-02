@@ -1,5 +1,5 @@
 import { matchingAgent } from "@doe-sangue-angola/agents";
-import type { BloodRequest } from "@doe-sangue-angola/shared-types";
+import { REQUEST_STATUS, type BloodRequest } from "@doe-sangue-angola/shared-types";
 import type { DataProvider } from "./mockProvider";
 import { appointmentRepository } from "./repositories/appointmentRepository";
 import { auditRepository } from "./repositories/auditRepository";
@@ -88,7 +88,7 @@ export const supabaseProvider: DataProvider = {
       .slice(0, 12);
     const request = await requestRepository.updateRequestStatus(
       created.id,
-      "Em Correspondência"
+      REQUEST_STATUS.EM_CORRESPONDENCIA
     );
 
     const notifications = await Promise.allSettled(matches.map((match) =>

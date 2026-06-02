@@ -1,14 +1,14 @@
-import { isRequestStatus, type RequestStatus } from "@doe-sangue-angola/shared-types";
+import { isRequestStatus, REQUEST_STATUS, type RequestStatus } from "@doe-sangue-angola/shared-types";
 
 export function normalizeRequestStatus(status: string): RequestStatus {
-  if (status === "OPEN") return "Aberto";
-  if (status === "FULFILLED") return "Dador a Caminho";
-  if (status === "COMPLETED") return "Concluído";
-  if (status === "CANCELLED") return "Cancelado";
-  if (status === "Preenchido" || status === "Pedido preenchido") return "Dador a Caminho";
-  if (status === "Doador a Caminho") return "Dador a Caminho";
-  if (status === "Triagem" || status === "Agendado") return "Aberto";
-  if (status === "Concluido") return "Concluído";
+  if (status === "OPEN") return REQUEST_STATUS.ABERTO;
+  if (status === "FULFILLED") return REQUEST_STATUS.DADOR_A_CAMINHO;
+  if (status === "COMPLETED") return REQUEST_STATUS.CONCLUIDO;
+  if (status === "CANCELLED") return REQUEST_STATUS.CANCELADO;
+  if (status === "Preenchido" || status === "Pedido preenchido") return REQUEST_STATUS.DADOR_A_CAMINHO;
+  if (status === "Doador a Caminho") return REQUEST_STATUS.DADOR_A_CAMINHO;
+  if (status === "Triagem" || status === "Agendado") return REQUEST_STATUS.ABERTO;
+  if (status === "Concluido") return REQUEST_STATUS.CONCLUIDO;
   if (isRequestStatus(status)) return status;
   return status as RequestStatus;
 }

@@ -1,6 +1,10 @@
 -- Standardize request and donor workflow statuses to Angolan Portuguese.
 -- Keeps existing rows; converts old English values safely.
 
+alter table public.donor_responses disable trigger user;
+alter table public.donor_responses drop constraint if exists donor_responses_status_check;
+alter table public.request_acceptances drop constraint if exists request_acceptances_status_check;
+
 update public.blood_requests
 set status = case status
   when 'OPEN' then 'Aberto'
@@ -32,12 +36,10 @@ set status = case status
 end;
 
 alter table public.donor_responses
-  drop constraint if exists donor_responses_status_check,
   add constraint donor_responses_status_check
   check (status in ('Dador a Caminho', 'Chegou', 'PIN Validado', 'Doação concluída', 'Cancelado', 'Não Compareceu'));
 
 alter table public.request_acceptances
-  drop constraint if exists request_acceptances_status_check,
   add constraint request_acceptances_status_check
   check (status in ('Aceite', 'Chegou', 'Concluído', 'Cancelado', 'Não Compareceu'));
 
@@ -100,6 +102,8 @@ begin
   raise exception 'Transição inválida de % para %', old_status, new_status;
 end;
 $$;
+
+alter table public.donor_responses enable trigger user;
 
 create or replace function public.recompute_request_quota(p_request_id uuid)
 returns void

@@ -1,5 +1,9 @@
 -- Standardize family request and account statuses to Angolan Portuguese.
 
+alter table public.family_emergency_requests drop constraint if exists family_emergency_status_check;
+alter table public.users drop constraint if exists users_account_status_check;
+alter table public.profiles drop constraint if exists profiles_account_status_check;
+
 update public.family_emergency_requests
 set status = case status
   when 'pending_review' then 'Pendente'
@@ -27,17 +31,14 @@ end
 where to_regclass('public.profiles') is not null;
 
 alter table public.family_emergency_requests
-  drop constraint if exists family_emergency_status_check,
   add constraint family_emergency_status_check
   check (status in ('Pendente', 'Aprovado', 'Ativo', 'Resolvido', 'Cancelado'));
 
 alter table public.users
-  drop constraint if exists users_account_status_check,
   add constraint users_account_status_check
   check (account_status in ('Ativo', 'Suspenso'));
 
 alter table public.profiles
-  drop constraint if exists profiles_account_status_check,
   add constraint profiles_account_status_check
   check (account_status in ('Ativo', 'Suspenso'));
 

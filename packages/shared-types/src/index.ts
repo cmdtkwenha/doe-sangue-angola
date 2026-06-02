@@ -17,7 +17,7 @@ export type UserRole = "admin" | "hospital" | "donor" | "support" | "viewer";
 export type Urgency = "Desastre" | "Critica" | "Alta" | "Media" | "Normal";
 
 export type { RequestStatus } from "./requestStatusConstants";
-export { isRequestStatus, REQUEST_STATUSES } from "./requestStatusConstants";
+export { isRequestStatus, REQUEST_STATUS, REQUEST_STATUSES } from "./requestStatusConstants";
 
 export type DonorResponseStatus =
   | "Dador a Caminho"
