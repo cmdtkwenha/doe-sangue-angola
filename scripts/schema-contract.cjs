@@ -33,6 +33,7 @@ const schemaContract = {
 const integrityContract = [
   "accept_blood_request_quota",
   "blood_requests_hospital_fk",
+  "donors_eligibility_status_check",
   "blood_requests_quota_non_negative_check",
   "blood_requests_required_fields_check",
   "donor_responses_one_active_per_donor",
@@ -45,4 +46,14 @@ const integrityContract = [
   "request_acceptances_one_active_per_donor"
 ];
 
-module.exports = { integrityContract, schemaContract };
+const valueContract = {
+  "donors.eligibility_status": [
+    "Pendente",
+    "Elegível",
+    "Inelegível",
+    "Temporariamente Inelegível",
+    "Revisão Necessária"
+  ]
+};
+
+module.exports = { integrityContract, schemaContract, valueContract };

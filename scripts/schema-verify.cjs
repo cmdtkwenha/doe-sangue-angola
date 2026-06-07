@@ -1,7 +1,7 @@
 const { createClient } = require("@supabase/supabase-js");
 const { readdirSync, readFileSync } = require("node:fs");
 const { join } = require("node:path");
-const { integrityContract, schemaContract } = require("./schema-contract.cjs");
+const { integrityContract, schemaContract, valueContract } = require("./schema-contract.cjs");
 const { checkSupabaseReferences } = require("./schema-reference-check.cjs");
 
 const root = join(__dirname, "..");
@@ -56,6 +56,11 @@ function verifyMigrationCoverage() {
   integrityContract.forEach((rule) => {
     if (!latest.includes(rule)) missing.push(`integrity.${rule}`);
   });
+  for (const [field, values] of Object.entries(valueContract)) {
+    values.forEach((value) => {
+      if (!latest.includes(value)) missing.push(`values.${field}.${value}`);
+    });
+  }
   if (missing.length) {
     console.error("schema:verify local contract failed:");
     missing.forEach((item) => console.error(`- ${item}`));
