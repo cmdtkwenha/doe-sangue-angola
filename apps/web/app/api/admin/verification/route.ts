@@ -103,11 +103,11 @@ async function applyAction(
     const profileId = body.profileId ?? await profileIdByEmail(db, body.email);
     return updateProfile(db, profileId, { linked_entity_id: null });
   }
-  if (action === "verify_donor") return updateDonor(db, body.donorId, "Verificado", adminUserId, body.reason, { available: true, eligibility_status: "Elegível" });
+  if (action === "verify_donor") return updateDonor(db, body.donorId, "Verificado", adminUserId, body.reason, { available: true, eligibility_status: "Verificado" });
   if (action === "review_donor") return updateDonor(db, body.donorId, "Revisão Necessária", adminUserId, body.reason, { available: false, eligibility_status: "Revisão Necessária" });
-  if (action === "reject_donor") return updateDonor(db, body.donorId, "Rejeitado", adminUserId, body.reason, { available: false, eligibility_status: "Diferido Permanente" });
-  if (action === "suspend_donor") return updateDonor(db, body.donorId, "Suspenso", adminUserId, body.reason, { available: false, eligibility_status: "Diferido Permanente" });
-  if (action === "reactivate_donor") return updateDonor(db, body.donorId, "Verificado", adminUserId, body.reason, { available: true, eligibility_status: "Elegível" });
+  if (action === "reject_donor") return updateDonor(db, body.donorId, "Revisão Necessária", adminUserId, body.reason, { available: false, eligibility_status: "Revisão Necessária" });
+  if (action === "suspend_donor") return updateDonor(db, body.donorId, "Suspenso", adminUserId, body.reason, { available: false, eligibility_status: "Suspenso" });
+  if (action === "reactivate_donor") return updateDonor(db, body.donorId, "Verificado", adminUserId, body.reason, { available: true, eligibility_status: "Verificado" });
 }
 
 async function updateHospital(

@@ -95,9 +95,11 @@ function eligibilityBlockMessage(donor: {
   next_eligible_donation_date?: string | null;
 }) {
   const labels: Record<string, string> = {
-    needs_review: "Elegibilidade em revisão pela equipa.",
-    permanently_deferred: "Dador permanentemente diferido.",
-    temporarily_deferred: "Dador temporariamente diferido."
+    Pendente: "A sua conta está pendente de verificação.",
+    "Revisão Necessária": "A sua conta está em revisão pela Administração Nacional.",
+    Suspenso: "A sua conta está suspensa.",
+    needs_review: "A sua conta está em revisão pela Administração Nacional.",
+    pending_verification: "A sua conta está pendente de verificação."
   };
   const status = donor.eligibility_status ?? "";
   const next = donor.next_eligible_donation_date

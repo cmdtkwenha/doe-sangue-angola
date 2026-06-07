@@ -16,7 +16,9 @@ export async function notifyMatchedDonors(
   const { data } = disaster
     ? await query
     : await query.eq("province", requestRecord.province);
-  const donors = (data as unknown as DonorRow[] | null ?? []).map(mapDonor);
+  const donors = (data as unknown as DonorRow[] | null ?? [])
+    .filter((row) => row.available !== false && row.eligibility_status === "Verificado")
+    .map(mapDonor);
   const matches = matchingAgent(requestRecord, donors).filter((item) => item.score >= (disaster ? 45 : 55));
   await Promise.all(matches.map((match) =>
     notifyUser(db, {

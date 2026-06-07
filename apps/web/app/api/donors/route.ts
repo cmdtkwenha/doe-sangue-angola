@@ -108,6 +108,11 @@ export async function POST(request: Request) {
       .update({ linked_entity_id: donor.id, role: "donor" })
       .eq("auth_user_id", authUser.id);
     if (linkError) throw new Error(formatSupabaseError(linkError));
+    const { error: userLinkError } = await db
+      .from("users")
+      .update({ linked_entity_id: donor.id, name: assertString(body.fullName, "Nome completo", 180), role: "donor" })
+      .or(`id.eq.${donor.userId ?? authUser.id},auth_user_id.eq.${authUser.id},email.eq.${authUser.email ?? profile.email}`);
+    if (userLinkError) throw new Error(formatSupabaseError(userLinkError));
     await auditApiAction({
       authUserId: authUser.id,
       donorId: donor.id,

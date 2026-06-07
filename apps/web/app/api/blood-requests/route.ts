@@ -29,6 +29,7 @@ import {
   optionalString
 } from "../_utils/validation";
 import { donorColumns, requestColumns } from "./columns";
+import { donorBlocked } from "../_utils/donorEligibility";
 
 export async function GET(request: Request) {
   return apiResponse(async () => {
@@ -55,6 +56,7 @@ export async function GET(request: Request) {
       ) {
         throw new ApiError(403, "Acesso negado ao perfil do dador.");
       }
+      if (donorBlocked(donorRow)) return [];
       const { data, error } = await db
         .from("blood_requests")
         .select(requestColumns)

@@ -18,7 +18,9 @@ export function DonorsTable() {
   const [saving, setSaving] = useState(false);
   const version = useSupabaseRealtimeVersion(["donors"]);
   const { data: donors, error } = useApiData<Donor[]>("/api/donors", [], version + refresh);
-  const reviewCount = donors.filter((donor) => donor.eligibilityStatus === "needs_review").length;
+  const reviewCount = donors.filter((donor) =>
+    ["Revisão Necessária", "needs_review"].includes(String(donor.eligibilityStatus))
+  ).length;
 
   return (
     <>
@@ -92,8 +94,13 @@ function eligibilityLabel(donor: Donor) {
   const labels: Record<string, string> = {
     eligible: "Elegível",
     needs_review: "Revisão necessária",
+    Pendente: "Pendente",
     permanently_deferred: "Diferido permanente",
-    temporarily_deferred: "Diferido temporário"
+    Suspenso: "Suspenso",
+    temporarily_deferred: "Diferido temporário",
+    Verificado: "Verificado",
+    "Revisão Necessária": "Revisão necessária",
+    "Verificação Pendente": "Verificação pendente"
   };
   return labels[donor.eligibilityStatus ?? "eligible"] ?? (donor.available ? "Elegível" : "Pendente");
 }

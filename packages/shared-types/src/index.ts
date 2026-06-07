@@ -29,6 +29,9 @@ export type DonorResponseStatus =
 
 export type DonorEligibilityStatus =
   | "Elegível"
+  | "Pendente"
+  | "Verificado"
+  | "Suspenso"
   | "Verificação Pendente"
   | "Diferido Temporário"
   | "Diferido Permanente"

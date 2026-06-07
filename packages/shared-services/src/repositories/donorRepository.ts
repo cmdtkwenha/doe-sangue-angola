@@ -13,6 +13,7 @@ const donorColumns = [
   "gender",
   "available",
   "birth_date",
+  "eligibility_status",
   "last_donation",
   "last_donation_date",
   "points",
@@ -72,7 +73,8 @@ export const donorRepository = {
         municipality: input.municipality,
         birth_date: input.birthDate || null,
         gender: input.gender || null,
-        available: true
+        available: false,
+        eligibility_status: "Pendente"
       }, { onConflict: "user_id" })
       .select(donorColumns)
       .single();

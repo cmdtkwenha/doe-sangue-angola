@@ -140,14 +140,18 @@ function formatDateTime(value?: string) {
   return new Date(value).toLocaleString("pt-AO", { dateStyle: "short", timeStyle: "short" });
 }
 
-function eligibleLabel(status = "eligible", nextEligibleDate?: string) {
+function eligibleLabel(status = "Pendente", nextEligibleDate?: string) {
   const labels: Record<string, string> = {
     eligible: "Elegível",
     needs_review: "Requer revisão",
+    Pendente: "Pendente",
     permanently_deferred: "Diferido permanente",
-    temporarily_deferred: "Diferido temporário"
+    Suspenso: "Suspenso",
+    temporarily_deferred: "Diferido temporário",
+    Verificado: "Verificado",
+    "Revisão Necessária": "Requer revisão"
   };
-  if (status !== "eligible") return labels[status] ?? "Requer revisão";
+  if (status !== "Verificado" && status !== "eligible") return labels[status] ?? "Requer revisão";
   if (!nextEligibleDate) return "Elegível";
   return new Date(nextEligibleDate).getTime() > Date.now() ? "Em pausa temporária" : "Elegível";
 }

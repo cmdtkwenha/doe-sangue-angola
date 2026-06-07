@@ -84,7 +84,7 @@ export async function GET() {
         donorPhone: user?.phone ?? donor?.phone ?? "por completar",
         emergencyContactName: donor?.emergency_contact_name ?? undefined,
         emergencyContactPhone: donor?.emergency_contact_phone ?? undefined,
-        eligibilityStatus: donor?.eligibility_status ?? "eligible",
+        eligibilityStatus: donor?.eligibility_status ?? "Pendente",
         eta: `${item.eta_minutes ?? 30} min`,
         gender: donor?.gender ?? undefined,
         hospitalId: item.hospital_id,

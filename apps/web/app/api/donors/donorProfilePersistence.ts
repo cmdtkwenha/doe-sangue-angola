@@ -77,14 +77,14 @@ async function upsertPublicUser(db: DbClient, input: SaveDonorInput) {
 
 function buildPayload(input: SaveDonorInput, publicUserId: string) {
   return {
-    available: true,
     birth_date: input.birthDate || null,
     blood_type: input.bloodType,
+    available: false,
     consent_accepted_at: new Date().toISOString(),
     consent_version: input.consentVersion,
     emergency_contact_name: input.emergencyContactName,
     emergency_contact_phone: input.emergencyContactPhone,
-    eligibility_status: "Elegível",
+    eligibility_status: "Pendente",
     gender: input.gender,
     medical_disclaimer_version: input.consentVersion,
     municipality: input.municipality,

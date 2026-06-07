@@ -85,7 +85,7 @@ function buildNationalOperations(input: {
   const today = new Date().toISOString().slice(0, 10);
   const month = today.slice(0, 7);
   const verifiedHospitals = input.hospitals.filter(isVerifiedHospital);
-  const activeDonors = input.donors.filter((item) => item.available && item.eligibility_status !== "temporarily_deferred");
+  const activeDonors = input.donors.filter((item) => item.available && item.eligibility_status === "Verificado");
   return {
     alerts: buildAlerts(input.inventory, criticalRequests),
     auditTrail: buildAudit(input.audits),

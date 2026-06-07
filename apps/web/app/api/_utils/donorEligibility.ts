@@ -3,7 +3,7 @@ export function donorBlocked(donor: {
   eligibility_status?: string | null;
   next_eligible_donation_date?: string | null;
 }) {
-  if (donor.eligibility_status && !["Elegível", "eligible"].includes(donor.eligibility_status)) return true;
+  if (donor.eligibility_status && !["Verificado"].includes(donor.eligibility_status)) return true;
   if (donor.available === false && !donor.next_eligible_donation_date) return true;
   if (!donor.next_eligible_donation_date) return false;
   return new Date(donor.next_eligible_donation_date).getTime() > Date.now();
