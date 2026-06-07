@@ -48,8 +48,8 @@ export async function checkDatabaseHealth() {
   if (!isDatabaseConfigured()) {
     return {
       ok: false as const,
-      mode: "mock-fallback" as const,
-      message: "Supabase não configurado. Modo mock continua disponível."
+      mode: "not-configured" as const,
+      message: "Supabase não configurado. Verifique as variáveis de ambiente."
     };
   }
 

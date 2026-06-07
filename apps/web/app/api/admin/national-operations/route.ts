@@ -2,10 +2,9 @@ import { bloodTypes, minimumStockByType } from "@doe-sangue-angola/shared-servic
 import type { BloodType } from "@doe-sangue-angola/shared-types";
 import { apiResponse } from "../../_utils/apiResponse";
 import { createRouteSupabase, requireApiSession } from "../../_utils/security";
-import { sampleNationalOperations } from "./sample";
 
 const closed = new Set(["Cancelado", "Concluído"]);
-const criticalUrgency = new Set(["Critica", "Desastre"]);
+const criticalUrgency = new Set(["Crítica", "Critica", "Desastre"]);
 
 type DonorRow = {
   available: boolean | null;
@@ -60,7 +59,6 @@ export async function GET() {
       read<InventoryRow>(db, "hospital_inventory", "blood_type,units_available,safe_minimum"),
       read<AuditRow>(db, "audit_logs", "id,actor_label,action,created_at")
     ]);
-    if (!donors.length && !requests.length && !responses.length) return sampleNationalOperations();
     return buildNationalOperations({ audits, donors, hospitals, inventory, requests, responses });
   });
 }
@@ -174,7 +172,8 @@ function buildAudit(audits: AuditRow[]) {
 }
 
 function isVerifiedHospital(item: HospitalRow) {
-  return item.verified && (item.verification_status ?? "verified") === "verified";
+  const status = item.verification_status ?? (item.verified ? "Verificado" : "Pendente");
+  return item.verified === true && status === "Verificado";
 }
 
 function completionDate(item: ResponseRow) {

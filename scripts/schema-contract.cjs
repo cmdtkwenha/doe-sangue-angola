@@ -4,7 +4,7 @@ const schemaContract = {
   blood_banks: ["id", "name", "province", "municipality", "address", "contact", "email", "facility_type", "license_number", "verified"],
   blood_requests: ["id", "created_by", "hospital_id", "patient_code", "blood_type", "units", "units_needed", "accepted_count", "remaining_slots", "province", "municipality", "notes", "urgency", "status", "created_at", "request_source", "family_request_id"],
   clinics: ["id", "name", "province", "municipality", "address", "contact", "email", "facility_type", "license_number", "verified"],
-  donor_responses: ["id", "donor_id", "hospital_id", "blood_request_id", "created_at", "eta_minutes", "confirmation_pin", "status", "accepted_at", "arrived_at", "pin_validated_at", "cancelled_at", "completed_at", "donation_completed_at", "pin_expires_at", "pin_locked_until", "last_pin_attempt_at", "failed_pin_attempts", "reward_accepted_at", "reward_arrived_at", "reward_completed_at"],
+  donor_responses: ["id", "donor_id", "hospital_id", "blood_request_id", "created_at", "eta_minutes", "confirmation_pin", "status", "accepted_at", "arrived_at", "pin_validated_at", "cancelled_at", "completed_at", "donation_completed_at", "pin_expires_at", "pin_locked_until", "last_pin_attempt_at", "failed_pin_attempts", "reward_accepted_at", "reward_arrived_at", "reward_completed_at", "archived_at"],
   donor_verifications: ["id", "donor_id", "verified_by", "status", "notes", "created_at", "updated_at"],
   donors: ["id", "user_id", "blood_type", "province", "municipality", "phone", "available", "eligibility_status", "last_donation", "points", "preferred_hospital_id", "created_at", "reliability_score", "response_speed_minutes", "next_eligible_donation_date", "consent_accepted_at", "consent_version", "privacy_policy_version", "medical_disclaimer_version", "emergency_contact_name", "emergency_contact_phone", "gender", "birth_date", "latitude", "longitude", "location_permission_status", "last_donation_date"],
   family_emergency_requests: ["id", "patient_name", "contact_name", "contact_phone", "relationship", "hospital_name", "hospital_id", "province", "municipality", "blood_type", "units_needed", "urgency", "status", "review_note", "blood_request_id", "share_token", "created_at", "updated_at"],
@@ -30,4 +30,16 @@ const schemaContract = {
   users: ["id", "auth_user_id", "role", "name", "email", "phone", "linked_entity_id", "account_status", "last_activity_at", "password_reset_requested_at", "created_at", "updated_at"]
 };
 
-module.exports = { schemaContract };
+const integrityContract = [
+  "accept_blood_request_quota",
+  "blood_requests_hospital_fk",
+  "blood_requests_quota_non_negative_check",
+  "blood_requests_required_fields_check",
+  "donor_responses_one_active_per_donor",
+  "donor_responses_pin_format_check",
+  "hospital_inventory_non_negative_check",
+  "recompute_request_quota",
+  "request_acceptances_one_active_per_donor"
+];
+
+module.exports = { integrityContract, schemaContract };

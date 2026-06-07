@@ -1,18 +1,18 @@
 const { createClient } = require("@supabase/supabase-js");
 const { readdirSync, readFileSync } = require("node:fs");
 const { join } = require("node:path");
-const { schemaContract } = require("./schema-contract.cjs");
+const { integrityContract, schemaContract } = require("./schema-contract.cjs");
 const { checkSupabaseReferences } = require("./schema-reference-check.cjs");
 
 const root = join(__dirname, "..");
 
 async function main() {
   verifyAppReferences();
+  verifyMigrationCoverage();
   const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !key) {
-    verifyMigrationCoverage();
     console.log("schema:verify passed locally. Set Supabase env vars to verify the remote database.");
     return;
   }
@@ -53,6 +53,9 @@ function verifyMigrationCoverage() {
       if (!latest.includes(column)) missing.push(`${table}.${column}`);
     });
   }
+  integrityContract.forEach((rule) => {
+    if (!latest.includes(rule)) missing.push(`integrity.${rule}`);
+  });
   if (missing.length) {
     console.error("schema:verify local contract failed:");
     missing.forEach((item) => console.error(`- ${item}`));
