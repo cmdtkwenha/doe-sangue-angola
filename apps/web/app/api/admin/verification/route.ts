@@ -119,14 +119,14 @@ async function updateHospital(
   patch: Record<string, boolean | null | string>
 ) {
   const hospitalId = assertString(id, "Hospital");
-  const { data: before } = await db.from("hospitals").select("verification_status,verified").eq("id", hospitalId).maybeSingle();
+  const { data: before } = await db.from("hospitals").select("status,verification_status,verified").eq("id", hospitalId).maybeSingle();
   const { error } = await db.from("hospitals").update(patch).eq("id", hospitalId);
   debug("approval result", { error, hospitalId, patch });
   if (error) throw new Error(`hospitals update: ${error.message}`);
   await insertVerification(db, "hospital_verifications", { hospital_id: hospitalId, notes, status, verified_by: adminUserId });
   return {
     newStatus: status,
-    oldStatus: before?.verification_status ?? (before?.verified ? "Verificado" : "Pendente"),
+    oldStatus: before?.status ?? before?.verification_status ?? (before?.verified ? "Verificado" : "Pendente"),
     targetId: hospitalId,
     targetType: "hospital"
   };

@@ -49,7 +49,7 @@ export type HospitalRow = {
   responsible_person?: string | null;
   type?: string | null;
   verified: boolean;
-  verification_status?: string | null;
+  verification_status?: string | null; status?: string | null;
   rejection_reason?: string | null;
   capacity: number;
   contact: string | null;
@@ -157,7 +157,7 @@ export function mapHospital(row: HospitalRow): Hospital {
     province: row.province,
     municipality: row.municipality,
     verified: row.verified,
-    verificationStatus: normalizeHospitalStatus(row.verification_status, row.verified),
+    verificationStatus: normalizeHospitalStatus(row.status ?? row.verification_status, row.verified),
     rejectionReason: row.rejection_reason ?? undefined,
     capacity: row.capacity,
     contact: row.responsible_person ?? row.contact ?? row.phone ?? "",

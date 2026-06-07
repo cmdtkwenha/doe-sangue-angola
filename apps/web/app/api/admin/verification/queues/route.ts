@@ -30,7 +30,7 @@ export async function GET() {
       donors: donors
         .filter((row) => isPendingDonor(row as AnyRow))
         .map((row) => enrichDonor(row, users)),
-      hospitalStatusField: "verification_status",
+      hospitalStatusField: "status, verification_status, verified",
       hospitals: ((hospitalRows.data ?? []) as HospitalRow[])
         .filter((row) => isPendingHospital(row as AnyRow))
         .map(mapHospital)
@@ -64,8 +64,16 @@ function enrichDonor(
 }
 
 function isPendingHospital(row: AnyRow) {
-  const status = String(row.verification_status ?? row.status ?? (row.verified ? "Verificado" : "Pendente"));
-  return ["pending", "needs_review", "Pendente", "Revisão Necessária"].includes(status);
+  const status = text(row.status);
+  const verification = text(row.verification_status);
+  if (["Rejeitado", "Suspenso"].includes(status) || ["Rejeitado", "Suspenso"].includes(verification)) {
+    return false;
+  }
+  return (
+    ["Pendente", "Revisão Necessária", "pending", "needs_review"].includes(status) ||
+    ["Pendente", "Revisão Necessária", "pending", "needs_review"].includes(verification) ||
+    row.verified === false
+  );
 }
 
 function isPendingDonor(row: AnyRow) {
@@ -75,4 +83,8 @@ function isPendingDonor(row: AnyRow) {
 
 function debug(label: string, value: unknown) {
   if (process.env.NODE_ENV !== "production") console.info(`[admin-verification] ${label}`, value);
+}
+
+function text(value: unknown) {
+  return typeof value === "string" ? value : "";
 }

@@ -58,9 +58,7 @@ export function VerificationWorkbench() {
     { donorVerifications: [], hospitalVerifications: [] },
     refresh
   );
-  const pendingHospitals = queue.hospitals
-    .filter((item) => ["pending", "needs_review", "Pendente", "Revisão Necessária"].includes(hospitalStatus(item)))
-    .filter((item) => !resolved.hospitals.includes(item.id));
+  const pendingHospitals = queue.hospitals.filter((item) => !resolved.hospitals.includes(item.id));
   const pendingDonors = queue.donors
     .filter((item) => ["needs_review", "pending_verification"].includes(String(item.eligibilityStatus)))
     .filter((item) => !resolved.donors.includes(item.id));
@@ -164,7 +162,7 @@ function HospitalList({ history, hospitals, onAction, onDetails }: {
   return hospitals.map((hospital) => (
     <article className={styles.rowCard} key={hospital.id}>
       <strong>{hospital.name}</strong>
-      <span>{hospital.province} · {hospital.municipality} · Licença: {hospital.licenseNumber ?? "sem registo"} · {hospitalLabel(hospital)}</span>
+      <span>{hospital.type ?? "Hospital"} · {hospital.province} · {hospital.municipality} · Licença: {hospital.licenseNumber ?? "sem registo"} · {hospitalLabel(hospital)}</span>
       <div className={styles.controls}>
         <button onClick={() => onDetails({
           histories: history.hospitalVerifications.filter((item) => item.hospital_id === hospital.id),
