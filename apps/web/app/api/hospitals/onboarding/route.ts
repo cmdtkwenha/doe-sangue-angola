@@ -86,11 +86,11 @@ async function selectApprovedHospital(db: Db, hospitalId?: string) {
   const id = assertString(hospitalId, "Hospital");
   const { data, error } = await db
     .from("hospitals")
-    .select("id,verified,verification_status")
+    .select("id,status,verified,verification_status")
     .eq("id", id)
     .maybeSingle();
   if (error) throw new Error(`Hospital aprovado: ${error.message}`);
-  if (!data?.id || !data.verified || !isVerified(data.verification_status)) {
+  if (!data?.id || !data.verified || !isVerified(data.status ?? data.verification_status)) {
     throw new ApiError(404, "Hospital aprovado não encontrado.");
   }
   return data.id as string;
@@ -101,7 +101,7 @@ async function linkHospitalUser(db: Db, principal: Awaited<ReturnType<typeof req
   const { error: userError } = await db
     .from("users")
     .update(patch)
-    .or(`id.eq.${principal.profileId},auth_user_id.eq.${principal.authUserId}`);
+    .or(`id.eq.${principal.profileId},auth_user_id.eq.${principal.authUserId},email.eq.${principal.email}`);
   if (userError) throw new Error(`Ligação do utilizador: ${userError.message}`);
   const { data: profile } = await db
     .from("profiles")

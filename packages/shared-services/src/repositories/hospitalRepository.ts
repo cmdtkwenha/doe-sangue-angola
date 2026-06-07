@@ -53,7 +53,7 @@ export const hospitalRepository = {
       .select("*")
       .eq("id", hospitalId)
       .eq("verified", true)
-      .eq("verification_status", "verified")
+      .eq("verification_status", "Verificado")
       .single();
 
     if (error) throw error;
@@ -77,7 +77,8 @@ export const hospitalRepository = {
       name: row.name,
       province: row.province,
       verified: row.verified,
-      verification_status: row.verified ? "verified" : "pending"
+      status: row.verified ? "Verificado" : "Pendente",
+      verification_status: row.verified ? "Verificado" : "Pendente"
     }));
     const { data, error } = await getDatabaseClient()
       .from("hospitals")

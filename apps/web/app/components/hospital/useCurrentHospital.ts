@@ -22,6 +22,7 @@ type HospitalRow = {
   responsible_person?: string | null;
   rejection_reason?: string | null;
   type?: string | null;
+  status?: string | null;
   verified?: boolean | null;
   verification_status?: string | null;
 };
@@ -111,7 +112,7 @@ function mapHospital(row: HospitalRow): Hospital {
 }
 
 function normalizeHospitalStatus(row: HospitalRow) {
-  const value = row.verification_status;
+  const value = row.status ?? row.verification_status;
   if (value === "Pendente" || value === "Verificado" || value === "Rejeitado" || value === "Suspenso" || value === "Revisão Necessária") return value;
   if (value === "pending" || value === "verified" || value === "rejected" || value === "suspended" || value === "needs_review") return value;
   return row.verified ? "Verificado" : "Pendente";

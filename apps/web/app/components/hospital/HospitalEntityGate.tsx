@@ -62,7 +62,7 @@ function hospitalStatusMessage(status?: string, reason?: string) {
   if (status === "Suspenso" || status === "suspended") {
     return "A conta foi suspensa. Contacte o suporte antes de criar novos pedidos.";
   }
-  return "Hospital pendente de verificação. Quando for aprovado pelo Admin, poderá criar pedidos reais.";
+  return "Hospital pendente de verificação pela Administração Nacional.";
 }
 
 function isVerified(status?: string) {

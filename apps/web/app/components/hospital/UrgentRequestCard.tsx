@@ -32,7 +32,7 @@ export function UrgentRequestCard() {
       return;
     }
     if (!isVerified(hospital.verificationStatus) || !hospital.verified) {
-      setMessage("Hospital pendente de verificação.");
+      setMessage("Hospital pendente de verificação pela Administração Nacional.");
       return;
     }
     setConfirming({

@@ -66,6 +66,7 @@ function enrichDonor(
 function isPendingHospital(row: AnyRow) {
   const status = text(row.status);
   const verification = text(row.verification_status);
+  if (row.verified === true || status === "Verificado" || verification === "Verificado") return false;
   if (["Rejeitado", "Suspenso"].includes(status) || ["Rejeitado", "Suspenso"].includes(verification)) {
     return false;
   }
