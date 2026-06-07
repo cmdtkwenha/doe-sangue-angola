@@ -7,20 +7,20 @@
 .panel {
   background: white;
   border: 1px solid #e3e7ee;
-  border-radius: 14px;
-  box-shadow: 0 14px 36px rgba(25, 35, 45, 0.06);
+  border-radius: 8px;
+  box-shadow: 0 10px 26px rgba(25, 35, 45, 0.055);
 }
 
 .hero {
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  padding: 22px;
+  padding: 16px;
 }
 
 .hero h2 {
   margin: 4px 0;
-  font-size: 26px;
+  font-size: 21px;
 }
 
 .metrics,
@@ -43,7 +43,7 @@
 }
 
 .panel {
-  padding: 18px;
+  padding: 14px;
 }
 
 .panelHead,
@@ -52,7 +52,8 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
+  font-size: 13px;
 }
 
 .exports,
@@ -69,8 +70,9 @@
   color: #151923;
   cursor: pointer;
   font-weight: 800;
-  min-height: 38px;
-  padding: 9px 12px;
+  min-height: 34px;
+  padding: 7px 10px;
+  font-size: 12px;
 }
 
 .exports button:first-child,
@@ -96,10 +98,11 @@
 .row,
 .rankRow {
   border: 1px solid #edf0f4;
-  border-radius: 12px;
+  border-radius: 8px;
   display: grid;
   gap: 6px;
-  padding: 12px;
+  padding: 10px;
+  font-size: 12px;
 }
 
 .bloodGrid {
@@ -109,7 +112,7 @@
 .stockBar {
   background: #edf0f4;
   border-radius: 999px;
-  height: 8px;
+  height: 7px;
   overflow: hidden;
 }
 
@@ -124,7 +127,7 @@
 .stable,
 .surplus {
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   padding: 4px 8px;
 }
@@ -155,7 +158,7 @@
 .areaCard.surplus {
   font-size: inherit;
   font-weight: inherit;
-  padding: 12px;
+  padding: 10px;
 }
 
 .legend {

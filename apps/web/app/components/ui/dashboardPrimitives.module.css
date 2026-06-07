@@ -1,0 +1,107 @@
+.kpiCard,
+.compactTable,
+.modalLayout,
+.mobileCard {
+  border: 1px solid #e2e7ee;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 10px 26px rgba(17, 24, 32, 0.06);
+}
+
+.kpiCard {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  min-height: 108px;
+  padding: 14px;
+}
+
+.kpiLabel,
+.kpiMeta {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.kpiIcon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff0f1;
+  color: #b10f1f;
+  font-weight: 900;
+}
+
+.kpiValue {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.statusBadge,
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.statusBadge {
+  min-height: 24px;
+  padding: 4px 9px;
+}
+
+.actionButton {
+  min-height: 34px;
+  border: 1px solid #d8dee7;
+  padding: 7px 11px;
+  background: #fff;
+  color: #151923;
+}
+
+.danger { background: #fff0f1; color: #b10f1f; border-color: #f4c9ce; }
+.gold { background: #fff6dc; color: #8a6500; border-color: #f2df9a; }
+.green { background: #edfdf3; color: #087443; border-color: #bfe9d1; }
+.neutral { background: #f5f7fa; color: #344054; border-color: #e2e7ee; }
+
+.compactTable {
+  display: grid;
+  overflow: hidden;
+}
+
+.compactTable > * {
+  display: grid;
+  grid-template-columns: var(--cols, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-top: 1px solid #edf0f4;
+  font-size: 12px;
+}
+
+.modalLayout {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.modalLayout h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.modalBody,
+.modalActions {
+  display: grid;
+  gap: 10px;
+}
+
+.mobileCard {
+  padding: 13px;
+}

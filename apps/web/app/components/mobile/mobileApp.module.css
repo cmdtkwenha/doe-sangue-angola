@@ -56,8 +56,8 @@
   transform: rotate(45deg);
 }
 .hero {
-  padding: 18px;
-  border-radius: 14px;
+  padding: 15px;
+  border-radius: 12px;
   color: white;
   background: linear-gradient(135deg, #e22232, #9f0d18);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
@@ -75,11 +75,13 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
-.heroMeta { grid-template-columns: 1fr 1fr auto; margin-top: 18px; }
+.hero h1 { margin: 0 0 4px; font-size: 20px; }
+.hero p { margin: 0; font-size: 12px; }
+.heroMeta { grid-template-columns: 1fr 1fr auto; margin-top: 14px; }
 .points, .level, .blood { font-weight: 950; }
-.points { color: white; font-size: 26px; }
-.level { color: #ffd66b; font-size: 24px; }
-.medal { color: #ffd66b; font-size: 24px; }
+.points { color: white; font-size: 24px; }
+.level { color: #ffd66b; font-size: 22px; }
+.medal { color: #ffd66b; font-size: 22px; }
 .progress { width: 100%; accent-color: #d01424; }
 .shortcutGrid {
   grid-template-columns: repeat(4, 1fr);
@@ -110,11 +112,11 @@
 .request,
 .modal {
   border: 1px solid #e7eaf0;
-  border-radius: 14px;
+  border-radius: 12px;
   background: white;
-  box-shadow: 0 14px 34px rgba(25, 35, 45, 0.075);
+  box-shadow: 0 10px 26px rgba(25, 35, 45, 0.07);
 }
-.card { padding: 14px; margin-top: 12px; }
+.card { padding: 12px; margin-top: 10px; }
 .pinCard {
   border-color: #f1c5ca;
   background: linear-gradient(145deg, #fff7f8, #ffffff 48%, #f4fbf7);
@@ -123,7 +125,7 @@
   display: grid;
   gap: 10px;
 }
-.pinHero { display: grid; gap: 2px; padding: 12px; border-radius: 14px; background: linear-gradient(135deg, #df1d2d, #b10f1f); color: white; box-shadow: 0 14px 26px rgba(177, 15, 31, 0.22); }
+.pinHero { display: grid; gap: 2px; padding: 12px; border-radius: 12px; background: linear-gradient(135deg, #df1d2d, #b10f1f); color: white; box-shadow: 0 12px 24px rgba(177, 15, 31, 0.2); }
 .pinHero small { font-weight: 900; opacity: 0.85; }
 .pinHero strong { font-size: 34px; line-height: 1; letter-spacing: 0; }
 .pinHospital { display: grid; gap: 4px; }
@@ -137,9 +139,9 @@
 }
 .request {
   display: grid;
-  gap: 12px;
-  padding: 14px;
-  margin-bottom: 12px;
+  gap: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
 }
 .cardButton {
   display: block;
@@ -163,14 +165,15 @@
   background: linear-gradient(135deg, #effcf5, #fff);
 }
 .requestTop { gap: 12px; }
-.blood { font-size: 38px; }
+.blood { font-size: 34px; }
 .criticalText { color: #d01424; }
 .warningText { color: #d98a05; }
 .stableText { color: #178a4f; }
 .accept,
 .cancel {
-  border-radius: 12px;
-  padding: 12px 18px;
+  border-radius: 10px;
+  padding: 10px 15px;
+  font-size: 12px;
   font-weight: 950;
 }
 .accept {
@@ -182,13 +185,13 @@
 .iconButton {
   display: grid;
   place-items: center;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 38px;
+  min-height: 38px;
   border: 1px solid #e7eaf0;
   border-radius: 999px;
   background: white;
   color: #111820;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 900;
 }
 .modalShade {

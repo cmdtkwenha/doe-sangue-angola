@@ -1,7 +1,7 @@
 .advancedGrid,
 .balancedGrid {
   display: grid;
-  gap: 16px;
+  gap: 14px;
 }
 
 .advancedGrid {
@@ -15,37 +15,37 @@
 .pinCard {
   background: linear-gradient(135deg, #fff7f8, #ffffff);
   border: 1px solid #f0c9ce;
-  border-radius: 12px;
-  box-shadow: 0 12px 35px rgba(25, 35, 45, 0.04);
-  padding: 18px;
+  border-radius: 8px;
+  box-shadow: 0 10px 26px rgba(25, 35, 45, 0.045);
+  padding: 14px;
 }
 
 .pinGrid,
 .metricStrip,
 .actionGrid {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .pinGrid {
   grid-template-columns: repeat(4, 1fr);
-  margin: 16px 0;
+  margin: 12px 0;
 }
 
 .digit {
   display: grid;
   place-items: center;
-  min-height: 52px;
-  border-radius: 10px;
+  min-height: 46px;
+  border-radius: 8px;
   background: #111820;
   color: white;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 900;
 }
 
 .metricStrip {
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin: 12px 0 16px;
+  margin: 10px 0 12px;
 }
 
 .metricBox,
@@ -56,14 +56,15 @@
 .unitRow,
 .messageRow {
   border: 1px solid #edf0f4;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #fbfcfe;
-  padding: 12px;
+  padding: 10px;
+  font-size: 12px;
 }
 
 .metricBox h3 {
   margin: 6px 0 2px;
-  font-size: 24px;
+  font-size: 22px;
 }
 
 .chart {
@@ -76,7 +77,7 @@
 }
 
 .action {
-  min-height: 86px;
+  min-height: 74px;
 }
 
 .arrivalCard,
@@ -86,7 +87,7 @@
 .messageRow {
   display: grid;
   gap: 6px;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .rowTop {
@@ -99,8 +100,8 @@
 .pinInput {
   width: 100%;
   border: 1px solid #d9dee7;
-  border-radius: 10px;
-  padding: 12px;
+  border-radius: 8px;
+  padding: 10px;
   font-weight: 900;
   letter-spacing: 8px;
   text-align: center;
