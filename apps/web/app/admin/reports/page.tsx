@@ -1,10 +1,10 @@
 import { AdminManagementPage } from "../../components/admin/management/AdminManagementPage";
-import { OperationalReports } from "../../components/reports/OperationalReports";
+import { NationalReportsDashboard } from "../../components/reports/NationalReportsDashboard";
 
 export default function AdminReportsPage() {
   return (
-    <AdminManagementPage kicker="Gestão" title="Relatórios">
-      <OperationalReports role="admin" />
+    <AdminManagementPage kicker="Relatórios Nacionais" title="Relatórios e Analítica Nacional">
+      <NationalReportsDashboard />
     </AdminManagementPage>
   );
 }
