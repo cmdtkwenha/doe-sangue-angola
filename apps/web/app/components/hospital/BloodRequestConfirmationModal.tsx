@@ -62,7 +62,7 @@ export function BloodRequestConfirmationModal({ loading, onCancel, onConfirm, re
             Cancelar
           </button>
           <button className={`${styles.button} ${styles.primary}`} disabled={loading} onClick={onConfirm} type="button">
-            {loading ? "A processar..." : "Confirmar Pedido"}
+            {loading ? "A processar..." : "Confirmar pedido"}
           </button>
         </div>
       </div>

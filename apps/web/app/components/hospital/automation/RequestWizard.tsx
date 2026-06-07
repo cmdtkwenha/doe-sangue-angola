@@ -44,7 +44,10 @@ export function RequestWizard() {
   }, []);
 
   async function confirmRequest() {
-    if (!confirming || !hospital?.id) return;
+    if (!confirming || !hospital?.id) {
+      setMessage("Hospital ligado não encontrado.");
+      return;
+    }
     setSaving(true);
     const result = await createRequestAction({
       bloodType: confirming.bloodType,
@@ -55,7 +58,9 @@ export function RequestWizard() {
       units: confirming.units,
       urgency: confirming.urgency
     });
-    const text = result.ok ? "Pedido criado e dadores notificados." : result.message ?? "Falha ao criar pedido.";
+    const text = result.ok
+      ? "Pedido de sangue criado com sucesso."
+      : `Não foi possível criar o pedido. ${result.message ?? "Tente novamente."}`;
     setMessage(text);
     showToast(text, result.ok ? "success" : "error");
     if (result.ok) setConfirming(null);
@@ -76,7 +81,11 @@ export function RequestWizard() {
       <form className={styles.form} onSubmit={async (event) => {
         event.preventDefault();
         const hospitalId = hospital?.id ?? "";
-        if (hospital?.verificationStatus !== "verified" || !hospital.verified) {
+        if (!hospitalId) {
+          setMessage("Hospital obrigatório. Ligue a conta a um hospital verificado.");
+          return;
+        }
+        if (!isHospitalVerified(hospital)) {
           setMessage("Apenas hospitais verificados podem criar pedidos reais.");
           return;
         }
@@ -109,7 +118,9 @@ export function RequestWizard() {
           {["Desastre", "Critica", "Alta", "Media", "Normal"].map((item) => <option key={item}>{item}</option>)}
         </select>
         <input className={styles.input} onChange={(event) => setNotes(event.target.value)} placeholder="Notas clínicas" value={notes} />
-        <button className={styles.button} disabled={hospital?.verificationStatus !== "verified"} type="submit">Criar e notificar dadores</button>
+        <button className={styles.button} disabled={!hospitalId || saving} type="submit">
+          Criar e notificar dadores
+        </button>
       </form>
       <p className="muted">{message}</p>
       <BloodRequestConfirmationModal
@@ -121,4 +132,8 @@ export function RequestWizard() {
       <ActionToast message={toast.message} tone={toast.tone} />
     </section>
   );
+}
+
+function isHospitalVerified(hospital: ReturnType<typeof useCurrentHospital>["data"]) {
+  return Boolean(hospital?.verified && ["Verificado", "verified"].includes(String(hospital.verificationStatus)));
 }
