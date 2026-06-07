@@ -11,19 +11,27 @@ export function HospitalHeader() {
   return (
     <header className={styles.topbar}>
       <div className={styles.identity}>
-        <span className={styles.avatar} />
+        <span className={styles.avatar}>⌾</span>
         <div>
-          <strong style={{ fontSize: 20 }}>
+          <h1 className={styles.title}>
             {hospital?.name ?? (loading ? "A carregar hospital" : "Hospital não ligado")}
-          </strong>
-          {hospital?.verified ? <span className="pill" style={{ marginLeft: 10 }}>Verificado</span> : null}
-          <div className="muted">{hospital ? `${hospital.municipality}, ${hospital.province}` : "Escolha hospital no onboarding"}</div>
+            {hospital?.verified ? <span className={styles.verified}>Verificado</span> : null}
+          </h1>
+          <div className={styles.location}>
+            {hospital ? `${hospital.municipality}, ${hospital.province}` : "Escolha hospital no onboarding"}
+          </div>
         </div>
       </div>
       <div className={styles.headerActions}>
-        <PilotFeedbackButton compact />
         <NotificationBell />
-        <strong>Dr. João Mendes</strong>
+        <PilotFeedbackButton compact />
+        <div className={styles.doctor}>
+          <span className={styles.doctorAvatar}>JM</span>
+          <span>
+            <strong>Dr. João Mendes</strong>
+            <small>Administrador</small>
+          </span>
+        </div>
       </div>
     </header>
   );

@@ -29,19 +29,28 @@ export function HospitalSummaryCards() {
 
   return (
     <>
-      <SummaryCard note={loadingRequests ? "A carregar" : "Aberto"} title="Pedidos Ativos" value={String(active.length)} />
-      <SummaryCard note="A caminho" title="Dadores a Caminho" value={String(incoming.length)} />
-      <SummaryCard note={`${completed.length} concluídos`} title="Taxa de Resposta" value={`${responseRate}%`} />
+      <SummaryCard icon="▣" note={loadingRequests ? "A carregar" : "Em curso"} title="Pedidos Ativos" value={String(active.length)} />
+      <SummaryCard icon="●" note="Ver lista" title="Dadores a Caminho" value={String(incoming.length)} />
+      <SummaryCard icon="✓" note="Finalizados" title="Pedidos Concluídos" value={String(completed.length)} />
+      <SummaryCard icon="↗" note="Com base nos pedidos" title="Taxa de Resposta" value={`${responseRate}%`} />
     </>
   );
 }
 
-function SummaryCard({ title, value, note }: { title: string; value: string; note: string }) {
+function SummaryCard({ icon, title, value, note }: {
+  icon: string;
+  title: string;
+  value: string;
+  note: string;
+}) {
   return (
-    <article className={styles.card}>
-      <div className="muted">{title}</div>
+    <article className={styles.kpiCard}>
+      <div className={styles.kpiHead}>
+        <span>{title}</span>
+        <span className={styles.kpiIcon}>{icon}</span>
+      </div>
       <h2 className={styles.kpiValue}>{value}</h2>
-      <span className="pill gold">{note}</span>
+      <span className={styles.kpiNote}>{note}</span>
     </article>
   );
 }

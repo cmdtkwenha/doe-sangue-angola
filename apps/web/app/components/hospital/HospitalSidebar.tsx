@@ -20,6 +20,11 @@ export function HospitalSidebar() {
         items={hospitalNavigation}
         rootHref="/hospital"
       />
+      <div className={styles.support}>
+        <strong>Precisa de ajuda?</strong>
+        <p>Contacte o suporte 24/7 para operações hospitalares.</p>
+        <a href="/help/hospital-guide">Contactar Suporte</a>
+      </div>
     </aside>
   );
 }
