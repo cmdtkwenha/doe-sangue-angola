@@ -16,7 +16,7 @@ export const requestColumns = [
   "created_at",
   "request_source",
   "family_request_id",
-  "hospitals(name,municipality,province)"
+  "hospitals!blood_requests_hospital_id_fkey(name,municipality,province)"
 ].join(",");
 
 export const donorColumns = [
