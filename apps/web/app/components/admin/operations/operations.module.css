@@ -1,0 +1,170 @@
+.filters,
+.grid,
+.health,
+.mapGrid,
+.tables {
+  display: grid;
+  gap: 12px;
+}
+
+.grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.card,
+.panel {
+  background: #fff;
+  border: 1px solid #e3e7ee;
+  border-radius: 14px;
+  box-shadow: 0 14px 36px rgba(25, 35, 45, 0.06);
+}
+
+.card {
+  padding: 16px;
+}
+
+.card span,
+.muted {
+  color: #667085;
+  font-size: 13px;
+}
+
+.card strong {
+  color: #b10f1f;
+  display: block;
+  font-size: 28px;
+  margin-top: 8px;
+}
+
+.filters {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.filters select,
+.export button {
+  border: 1px solid #dfe5ee;
+  border-radius: 10px;
+  min-height: 42px;
+  padding: 0 12px;
+}
+
+.panel {
+  padding: 16px;
+}
+
+.head {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.mapGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.mapItem {
+  border: 1px solid #edf0f4;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.mapItem strong {
+  display: block;
+}
+
+.tag {
+  background: #fff0f1;
+  border-radius: 999px;
+  color: #b10f1f;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  margin-top: 8px;
+  padding: 5px 9px;
+}
+
+.health {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.healthItem {
+  background: #eefdf5;
+  border: 1px solid #c8f2dc;
+  border-radius: 12px;
+  color: #087443;
+  font-weight: 900;
+  padding: 12px;
+}
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.table th,
+.table td {
+  border-top: 1px solid #edf0f4;
+  padding: 11px 10px;
+  text-align: left;
+}
+
+.table th {
+  color: #667085;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.tables {
+  grid-template-columns: 1fr 1fr;
+}
+
+.event {
+  border-top: 1px solid #edf0f4;
+  padding: 10px 0;
+}
+
+.export {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.export button {
+  background: #101317;
+  color: #fff;
+  font-weight: 900;
+}
+
+@media (max-width: 1180px) {
+  .filters,
+  .grid,
+  .health,
+  .mapGrid,
+  .tables {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .filters,
+  .grid,
+  .health,
+  .mapGrid,
+  .tables {
+    grid-template-columns: 1fr;
+  }
+
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+  }
+
+  .table thead {
+    display: none;
+  }
+}
