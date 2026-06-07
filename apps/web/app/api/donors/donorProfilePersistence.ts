@@ -1,5 +1,5 @@
 import { mapDonor, type DonorRow } from "@doe-sangue-angola/shared-services";
-import type { BloodType, Donor } from "@doe-sangue-angola/shared-types";
+import { DONOR_ELIGIBILITY_STATUS, type BloodType, type Donor } from "@doe-sangue-angola/shared-types";
 import { ApiError } from "../_utils/apiResponse";
 import type { createRouteSupabase } from "../_utils/security";
 
@@ -84,7 +84,7 @@ function buildPayload(input: SaveDonorInput, publicUserId: string) {
     consent_version: input.consentVersion,
     emergency_contact_name: input.emergencyContactName,
     emergency_contact_phone: input.emergencyContactPhone,
-    eligibility_status: "Pendente",
+    eligibility_status: DONOR_ELIGIBILITY_STATUS.PENDENTE,
     gender: input.gender,
     medical_disclaimer_version: input.consentVersion,
     municipality: input.municipality,

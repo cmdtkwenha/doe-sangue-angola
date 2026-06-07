@@ -58,7 +58,7 @@ function DonorDetails({ donor }: { donor: Donor }) {
       <Read label="Município" value={donor.municipality} />
       <Read label="Contacto emergência" value={donor.emergencyContactName} />
       <Read label="Telefone emergência" value={donor.emergencyContactPhone} />
-      <Read label="Elegibilidade" value={donor.eligibilityStatus ?? "eligible"} />
+      <Read label="Elegibilidade" value={donor.eligibilityStatus ?? "Pendente"} />
     </section>
   );
 }

@@ -60,7 +60,7 @@ export function VerificationWorkbench() {
   );
   const pendingHospitals = queue.hospitals.filter((item) => !resolved.hospitals.includes(item.id));
   const pendingDonors = queue.donors
-    .filter((item) => ["Pendente", "Verificação Pendente", "Revisão Necessária", "needs_review", "pending_verification"].includes(String(item.eligibilityStatus)))
+    .filter((item) => ["Pendente", "Revisão Necessária"].includes(String(item.eligibilityStatus)))
     .filter((item) => !resolved.donors.includes(item.id));
   const cases: Array<{ id: string; label: string; status: string; type: string }> = [];
 
@@ -228,11 +228,8 @@ function hospitalLabel(hospital: Hospital) {
 
 function donorLabel(donor: Donor) {
   const labels: Record<string, string> = {
-    needs_review: "Revisão necessária",
     Pendente: "Pendente",
-    pending_verification: "Verificação pendente",
-    "Revisão Necessária": "Revisão necessária",
-    "Verificação Pendente": "Verificação pendente"
+    "Revisão Necessária": "Revisão necessária"
   };
   return labels[String(donor.eligibilityStatus)] ?? String(donor.eligibilityStatus ?? "Elegível");
 }

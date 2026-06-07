@@ -1,5 +1,6 @@
 import { auditApiAction } from "../../_utils/audit";
 import { ApiError, apiResponse, readJson } from "../../_utils/apiResponse";
+import { DONOR_ELIGIBILITY_STATUS } from "@doe-sangue-angola/shared-types";
 import { createRouteSupabase, requireApiSession, requireSameOrigin } from "../../_utils/security";
 import { assertString } from "../../_utils/validation";
 
@@ -103,11 +104,11 @@ async function applyAction(
     const profileId = body.profileId ?? await profileIdByEmail(db, body.email);
     return updateProfile(db, profileId, { linked_entity_id: null });
   }
-  if (action === "verify_donor") return updateDonor(db, body.donorId, "Verificado", adminUserId, body.reason, { available: true, eligibility_status: "Verificado" });
-  if (action === "review_donor") return updateDonor(db, body.donorId, "Revisão Necessária", adminUserId, body.reason, { available: false, eligibility_status: "Revisão Necessária" });
-  if (action === "reject_donor") return updateDonor(db, body.donorId, "Revisão Necessária", adminUserId, body.reason, { available: false, eligibility_status: "Revisão Necessária" });
-  if (action === "suspend_donor") return updateDonor(db, body.donorId, "Suspenso", adminUserId, body.reason, { available: false, eligibility_status: "Suspenso" });
-  if (action === "reactivate_donor") return updateDonor(db, body.donorId, "Verificado", adminUserId, body.reason, { available: true, eligibility_status: "Verificado" });
+  if (action === "verify_donor") return updateDonor(db, body.donorId, DONOR_ELIGIBILITY_STATUS.ELEGIVEL, adminUserId, body.reason, { available: true, eligibility_status: DONOR_ELIGIBILITY_STATUS.ELEGIVEL });
+  if (action === "review_donor") return updateDonor(db, body.donorId, DONOR_ELIGIBILITY_STATUS.REVISAO_NECESSARIA, adminUserId, body.reason, { available: false, eligibility_status: DONOR_ELIGIBILITY_STATUS.REVISAO_NECESSARIA });
+  if (action === "reject_donor") return updateDonor(db, body.donorId, DONOR_ELIGIBILITY_STATUS.INELEGIVEL, adminUserId, body.reason, { available: false, eligibility_status: DONOR_ELIGIBILITY_STATUS.INELEGIVEL });
+  if (action === "suspend_donor") return updateDonor(db, body.donorId, DONOR_ELIGIBILITY_STATUS.INELEGIVEL, adminUserId, body.reason, { available: false, eligibility_status: DONOR_ELIGIBILITY_STATUS.INELEGIVEL });
+  if (action === "reactivate_donor") return updateDonor(db, body.donorId, DONOR_ELIGIBILITY_STATUS.ELEGIVEL, adminUserId, body.reason, { available: true, eligibility_status: DONOR_ELIGIBILITY_STATUS.ELEGIVEL });
 }
 
 async function updateHospital(

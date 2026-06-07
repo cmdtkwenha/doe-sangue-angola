@@ -1,4 +1,5 @@
 import { apiResponse } from "../../_utils/apiResponse";
+import { DONOR_ELIGIBILITY_STATUS } from "@doe-sangue-angola/shared-types";
 import { createRouteSupabase, requireApiSession } from "../../_utils/security";
 
 type Hospital = { facility_type?: string | null; hospital_type?: string | null; id: string; municipality?: string | null; name: string; province?: string | null; status?: string | null; verification_status?: string | null; verified?: boolean | null };
@@ -10,7 +11,10 @@ type Audit = { action: string; created_at: string; id: string };
 type Fraud = { id: string; status?: string | null };
 
 const activeStatuses = ["Aberto", "Em Correspondência", "Dador a Caminho", "PIN Validado"];
-const pendingStatuses = ["Pendente", "Revisão Necessária", "Verificação Pendente"];
+const pendingStatuses: string[] = [
+  DONOR_ELIGIBILITY_STATUS.PENDENTE,
+  DONOR_ELIGIBILITY_STATUS.REVISAO_NECESSARIA
+];
 const criticalUrgencies = ["Crítica", "Critica", "Desastre"];
 
 export async function GET() {
@@ -52,7 +56,7 @@ function build(input: {
   const completed = input.responses.filter((item) => item.status === "Doação concluída");
   const verifiedHospitals = input.hospitals.filter(isVerified);
   const pendingHospitals = input.hospitals.filter((item) => pendingStatuses.includes(statusOf(item)));
-  const verifiedDonors = input.donors.filter((item) => item.eligibility_status === "Verificado");
+  const verifiedDonors = input.donors.filter((item) => item.eligibility_status === DONOR_ELIGIBILITY_STATUS.ELEGIVEL);
   const pendingDonors = input.donors.filter((item) => pendingStatuses.includes(item.eligibility_status ?? ""));
   return {
     filters: {

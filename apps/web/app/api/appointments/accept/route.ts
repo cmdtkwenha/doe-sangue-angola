@@ -1,5 +1,5 @@
 import { canDonorDonateToRequest } from "@doe-sangue-angola/agents";
-import type { BloodType } from "@doe-sangue-angola/shared-types";
+import { DONOR_ELIGIBILITY_STATUS, type BloodType } from "@doe-sangue-angola/shared-types";
 import { ApiError, apiResponse, readJson } from "../../_utils/apiResponse";
 import { auditApiAction } from "../../_utils/audit";
 import { createRouteSupabase, requireApiSession, requireSameOrigin } from "../../_utils/security";
@@ -95,11 +95,10 @@ function eligibilityBlockMessage(donor: {
   next_eligible_donation_date?: string | null;
 }) {
   const labels: Record<string, string> = {
-    Pendente: "A sua conta está pendente de verificação.",
-    "Revisão Necessária": "A sua conta está em revisão pela Administração Nacional.",
-    Suspenso: "A sua conta está suspensa.",
-    needs_review: "A sua conta está em revisão pela Administração Nacional.",
-    pending_verification: "A sua conta está pendente de verificação."
+    [DONOR_ELIGIBILITY_STATUS.PENDENTE]: "A sua conta está pendente de verificação.",
+    [DONOR_ELIGIBILITY_STATUS.INELEGIVEL]: "A sua conta está inelegível para doação.",
+    [DONOR_ELIGIBILITY_STATUS.REVISAO_NECESSARIA]: "A sua conta está em revisão pela Administração Nacional.",
+    [DONOR_ELIGIBILITY_STATUS.TEMPORARIAMENTE_INELEGIVEL]: "Ainda está em período de recuperação antes da próxima doação."
   };
   const status = donor.eligibility_status ?? "";
   const next = donor.next_eligible_donation_date

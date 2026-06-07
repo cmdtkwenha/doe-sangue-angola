@@ -1,4 +1,5 @@
 import type { RequestStatus } from "./requestStatusConstants";
+import type { DonorEligibilityStatus } from "./donorEligibilityConstants";
 
 export type Locale = "pt" | "en" | "fr";
 
@@ -18,6 +19,12 @@ export type Urgency = "Desastre" | "Critica" | "Alta" | "Media" | "Normal";
 
 export type { RequestStatus } from "./requestStatusConstants";
 export { isRequestStatus, REQUEST_STATUS, REQUEST_STATUSES } from "./requestStatusConstants";
+export type { DonorEligibilityStatus } from "./donorEligibilityConstants";
+export {
+  DONOR_ELIGIBILITY_STATUS,
+  DONOR_ELIGIBILITY_STATUSES,
+  isDonorEligibilityStatus
+} from "./donorEligibilityConstants";
 
 export type DonorResponseStatus =
   | "Dador a Caminho"
@@ -26,21 +33,6 @@ export type DonorResponseStatus =
   | "Doação concluída"
   | "Cancelado"
   | "Não Compareceu";
-
-export type DonorEligibilityStatus =
-  | "Elegível"
-  | "Pendente"
-  | "Verificado"
-  | "Suspenso"
-  | "Verificação Pendente"
-  | "Diferido Temporário"
-  | "Diferido Permanente"
-  | "Revisão Necessária"
-  | "eligible"
-  | "pending_verification"
-  | "temporarily_deferred"
-  | "permanently_deferred"
-  | "needs_review";
 
 export type HospitalVerificationStatus =
   | "Revisão Necessária"

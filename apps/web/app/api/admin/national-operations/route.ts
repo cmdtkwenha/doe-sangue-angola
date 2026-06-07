@@ -1,6 +1,7 @@
 import { bloodTypes, minimumStockByType } from "@doe-sangue-angola/shared-services";
 import type { BloodType } from "@doe-sangue-angola/shared-types";
 import { apiResponse } from "../../_utils/apiResponse";
+import { DONOR_ELIGIBILITY_STATUS } from "@doe-sangue-angola/shared-types";
 import { createRouteSupabase, requireApiSession } from "../../_utils/security";
 
 const closed = new Set(["Cancelado", "Concluído"]);
@@ -83,7 +84,7 @@ function buildNationalOperations(input: {
   const today = new Date().toISOString().slice(0, 10);
   const month = today.slice(0, 7);
   const verifiedHospitals = input.hospitals.filter(isVerifiedHospital);
-  const activeDonors = input.donors.filter((item) => item.available && item.eligibility_status === "Verificado");
+  const activeDonors = input.donors.filter((item) => item.available && item.eligibility_status === DONOR_ELIGIBILITY_STATUS.ELEGIVEL);
   return {
     alerts: buildAlerts(input.inventory, criticalRequests),
     auditTrail: buildAudit(input.audits),

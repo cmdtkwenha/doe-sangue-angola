@@ -1,5 +1,6 @@
 import { auditApiAction } from "../../_utils/audit";
 import { ApiError, apiResponse, readJson } from "../../_utils/apiResponse";
+import { DONOR_ELIGIBILITY_STATUS } from "@doe-sangue-angola/shared-types";
 import { createRouteSupabase, requireApiSession, requireSameOrigin } from "../../_utils/security";
 import { assertRole, assertString } from "../../_utils/validation";
 
@@ -84,9 +85,9 @@ async function applyAction(db: Awaited<ReturnType<typeof createRouteSupabase>>, 
   if (action === "link_hospital") await updateProfile(db, profile, { linked_entity_id: assertString(body.hospitalId, "Hospital"), role: "hospital" });
   if (action === "approve_hospital") await updateHospital(db, body.hospitalId ?? profile.linked_entity_id, { verification_status: "Verificado", verified: true });
   if (action === "suspend_hospital") await updateHospital(db, body.hospitalId ?? profile.linked_entity_id, { verification_status: "Suspenso", verified: false });
-  if (action === "verify_donor") await updateDonor(db, body.donorId ?? profile.linked_entity_id, { available: true, eligibility_status: "Verificado" });
-  if (action === "review_donor") await updateDonor(db, body.donorId ?? profile.linked_entity_id, { available: false, eligibility_status: "Revisão Necessária" });
-  if (action === "suspend_donor") await updateDonor(db, body.donorId ?? profile.linked_entity_id, { available: false, eligibility_status: "Suspenso" });
+  if (action === "verify_donor") await updateDonor(db, body.donorId ?? profile.linked_entity_id, { available: true, eligibility_status: DONOR_ELIGIBILITY_STATUS.ELEGIVEL });
+  if (action === "review_donor") await updateDonor(db, body.donorId ?? profile.linked_entity_id, { available: false, eligibility_status: DONOR_ELIGIBILITY_STATUS.REVISAO_NECESSARIA });
+  if (action === "suspend_donor") await updateDonor(db, body.donorId ?? profile.linked_entity_id, { available: false, eligibility_status: DONOR_ELIGIBILITY_STATUS.INELEGIVEL });
 }
 
 async function updateProfile(db: Awaited<ReturnType<typeof createRouteSupabase>>, profile: Record<string, string | null>, patch: Record<string, string | null>) {

@@ -79,7 +79,7 @@ function isPendingHospital(row: AnyRow) {
 
 function isPendingDonor(row: AnyRow) {
   const status = String(row.status ?? row.eligibility_status ?? "");
-  return ["Pendente", "Verificação Pendente", "Revisão Necessária", "pending_verification", "needs_review"].includes(status);
+  return ["Pendente", "Revisão Necessária"].includes(status);
 }
 
 function debug(label: string, value: unknown) {

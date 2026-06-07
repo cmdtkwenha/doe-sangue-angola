@@ -142,16 +142,13 @@ function formatDateTime(value?: string) {
 
 function eligibleLabel(status = "Pendente", nextEligibleDate?: string) {
   const labels: Record<string, string> = {
-    eligible: "Elegível",
-    needs_review: "Requer revisão",
+    Elegível: "Elegível",
+    Inelegível: "Inelegível",
     Pendente: "Pendente",
-    permanently_deferred: "Diferido permanente",
-    Suspenso: "Suspenso",
-    temporarily_deferred: "Diferido temporário",
-    Verificado: "Verificado",
-    "Revisão Necessária": "Requer revisão"
+    "Revisão Necessária": "Requer revisão",
+    "Temporariamente Inelegível": "Temporariamente inelegível"
   };
-  if (status !== "Verificado" && status !== "eligible") return labels[status] ?? "Requer revisão";
+  if (status !== "Elegível") return labels[status] ?? "Requer revisão";
   if (!nextEligibleDate) return "Elegível";
   return new Date(nextEligibleDate).getTime() > Date.now() ? "Em pausa temporária" : "Elegível";
 }

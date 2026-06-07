@@ -14,7 +14,7 @@ export function AdminVerificationCounters() {
   const { data: users } = useApiData<UsersPayload>("/api/admin/users", { users: [] }, 0);
   const hospitalPending = hospitals.filter((item) => ["pending", "needs_review", "Pendente", "Revisão Necessária"].includes(status(item))).length;
   const donorPending = donors.filter((item) =>
-    ["Pendente", "Verificação Pendente", "Revisão Necessária", "needs_review", "pending_verification"].includes(String(item.eligibilityStatus))
+    ["Pendente", "Revisão Necessária"].includes(String(item.eligibilityStatus))
   ).length;
   const suspended = users.users.filter((item) => item.account_status === "Suspenso" || item.account_status === "suspended").length;
   const cards = [

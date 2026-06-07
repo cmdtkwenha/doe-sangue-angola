@@ -35,28 +35,31 @@ export function eligibilityState(donor: Donor | null) {
     };
   }
   const status = donor.eligibilityStatus ?? "Pendente";
-  if (status === "Pendente" || status === "Verificação Pendente" || status === "pending_verification") {
+  if (status === "Pendente") {
     return { canAccept: false, label: "Pendente", reason: "A sua conta está pendente de verificação.", tone: "red" };
   }
-  if (status === "Revisão Necessária" || status === "needs_review") {
+  if (status === "Revisão Necessária") {
     return { canAccept: false, label: "Revisão necessária", reason: "A Administração Nacional precisa rever o seu perfil antes da doação.", tone: "red" };
   }
-  if (status === "Suspenso") {
-    return { canAccept: false, label: "Suspenso", reason: "A sua conta está suspensa.", tone: "red" };
+  if (status === "Inelegível") {
+    return { canAccept: false, label: "Inelegível", reason: "A sua conta está inelegível para doação.", tone: "red" };
+  }
+  if (status === "Temporariamente Inelegível") {
+    return { canAccept: false, label: "Temporariamente inelegível", reason: "Ainda está em período de recuperação.", tone: "red" };
   }
   const next = donor.nextEligibleDonationDate ? new Date(donor.nextEligibleDonationDate) : null;
   if ((next && next.getTime() > Date.now())) {
     return {
       canAccept: false,
-      label: "Diferido temporário",
+      label: "Temporariamente inelegível",
       reason: next ? `Pode doar novamente em ${formatDate(next.toISOString())}.` : "Aguarde a próxima autorização clínica.",
       tone: "red"
     };
   }
-  if (status !== "Verificado") {
+  if (status !== "Elegível") {
     return { canAccept: false, label: "Pendente", reason: "A sua conta está pendente de verificação.", tone: "red" };
   }
-  return { canAccept: true, label: "Verificado", reason: "Pode aceitar pedidos compatíveis.", tone: "green" };
+  return { canAccept: true, label: "Elegível", reason: "Pode aceitar pedidos compatíveis.", tone: "green" };
 }
 
 function formatDate(value: string) {

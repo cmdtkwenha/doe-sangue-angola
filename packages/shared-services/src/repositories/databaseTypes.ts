@@ -1,60 +1,46 @@
-import type { Appointment, BloodRequest, BloodType, Donor, Hospital, RequestStatus, Urgency } from "@doe-sangue-angola/shared-types";
+import { DONOR_ELIGIBILITY_STATUS, isDonorEligibilityStatus, type Appointment, type BloodRequest, type BloodType, type Donor, type Hospital, type RequestStatus, type Urgency } from "@doe-sangue-angola/shared-types";
 import type { MockNotification } from "../notificationService";
 
 export type UserRow = {
-  id: string;
-  auth_user_id: string | null;
+  id: string; auth_user_id: string | null;
   role: "admin" | "hospital" | "donor";
   linked_entity_id?: string | null;
-  name: string;
-  email: string;
+  name: string; email: string;
   phone: string | null;
   created_at: string;
 };
 export type DonorRow = {
-  id: string;
-  blood_type: BloodType;
-  province: string;
-  municipality: string;
+  id: string; blood_type: BloodType;
+  province: string; municipality: string;
   phone?: string | null;
   available: boolean;
   birth_date?: string | null;
   consent_accepted_at?: string | null;
   consent_version?: string | null;
-  emergency_contact_name?: string | null;
-  emergency_contact_phone?: string | null;
-  eligibility_status?: string | null;
-  gender?: string | null;
+  emergency_contact_name?: string | null; emergency_contact_phone?: string | null;
+  eligibility_status?: string | null; gender?: string | null;
   last_donation: string | null;
-  last_donation_date?: string | null;
-  latitude?: number | null;
-  location_permission_status?: string | null;
-  longitude?: number | null;
+  last_donation_date?: string | null; latitude?: number | null;
+  location_permission_status?: string | null; longitude?: number | null;
   next_eligible_donation_date?: string | null;
   points: number;
   preferred_hospital_id: string | null;
-  reliability_score?: number | null;
-  response_speed_minutes?: number | null;
+  reliability_score?: number | null; response_speed_minutes?: number | null;
   user_id?: string | null;
 };
 export type HospitalRow = {
-  id: string;
-  address?: string | null;
+  id: string; address?: string | null;
   email?: string | null; facility_type?: string | null;
   hospital_type?: string | null; institutional_email?: string | null;
-  license_number?: string | null;
-  name: string;
+  license_number?: string | null; name: string;
   phone?: string | null;
   province: string; municipality: string;
-  responsible_person?: string | null;
-  type?: string | null;
+  responsible_person?: string | null; type?: string | null;
   verified: boolean;
   verification_status?: string | null; status?: string | null;
   rejection_reason?: string | null;
-  capacity: number;
-  contact: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
+  capacity: number; contact: string | null;
+  latitude?: number | null; longitude?: number | null;
 };
 export type RequestRow = {
   id: string;
@@ -142,9 +128,20 @@ export function mapDonor(row: DonorRow): Donor {
 }
 
 function normalizeEligibility(value?: string | null) {
-  const valid = ["Elegível", "Pendente", "Verificado", "Suspenso", "Revisão Necessária", "Verificação Pendente", "Diferido Permanente", "Diferido Temporário", "eligible", "needs_review", "pending_verification", "permanently_deferred", "temporarily_deferred"];
-  if (valid.includes(value ?? "")) return value as Donor["eligibilityStatus"];
-  return ["Pendente", "Revisão", "Em revisão"].includes(value ?? "") ? "Revisão Necessária" : "Elegível";
+  if (isDonorEligibilityStatus(value)) return value;
+  const mapped: Record<string, Donor["eligibilityStatus"]> = {
+    "Diferido Permanente": DONOR_ELIGIBILITY_STATUS.INELEGIVEL,
+    "Diferido Temporário": DONOR_ELIGIBILITY_STATUS.TEMPORARIAMENTE_INELEGIVEL,
+    eligible: DONOR_ELIGIBILITY_STATUS.ELEGIVEL,
+    needs_review: DONOR_ELIGIBILITY_STATUS.REVISAO_NECESSARIA,
+    pending_verification: DONOR_ELIGIBILITY_STATUS.PENDENTE,
+    permanently_deferred: DONOR_ELIGIBILITY_STATUS.INELEGIVEL,
+    Suspenso: DONOR_ELIGIBILITY_STATUS.INELEGIVEL,
+    temporarily_deferred: DONOR_ELIGIBILITY_STATUS.TEMPORARIAMENTE_INELEGIVEL,
+    Verificado: DONOR_ELIGIBILITY_STATUS.ELEGIVEL,
+    "Verificação Pendente": DONOR_ELIGIBILITY_STATUS.PENDENTE
+  };
+  return mapped[value ?? ""] ?? DONOR_ELIGIBILITY_STATUS.PENDENTE;
 }
 
 export function mapHospital(row: HospitalRow): Hospital {

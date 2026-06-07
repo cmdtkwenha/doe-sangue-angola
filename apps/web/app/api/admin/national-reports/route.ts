@@ -1,4 +1,5 @@
 import { apiResponse } from "../../_utils/apiResponse";
+import { DONOR_ELIGIBILITY_STATUS } from "@doe-sangue-angola/shared-types";
 import { createRouteSupabase, requireApiSession } from "../../_utils/security";
 
 type Donor = { available?: boolean | null; blood_type?: string | null; eligibility_status?: string | null; id: string; municipality?: string | null; province?: string | null; reliability_score?: number | null; user_id?: string | null };
@@ -92,10 +93,10 @@ function build(data: ReturnType<typeof scope>, users: User[]) {
       }),
       section("Relatórios de Dadores", [
         metric("Dadores registados", data.donors.length),
-        metric("Dadores verificados", data.donors.filter((item) => item.eligibility_status === "Verificado").length),
+        metric("Dadores verificados", data.donors.filter((item) => item.eligibility_status === DONOR_ELIGIBILITY_STATUS.ELEGIVEL).length),
         metric("Dadores ativos", data.donors.filter((item) => item.available).length),
-        metric("Dadores suspensos", data.donors.filter((item) => item.eligibility_status === "Suspenso").length),
-        metric("Dadores temporariamente inelegíveis", data.donors.filter((item) => item.eligibility_status === "Diferido Temporário").length)
+        metric("Dadores suspensos", data.donors.filter((item) => item.eligibility_status === DONOR_ELIGIBILITY_STATUS.INELEGIVEL).length),
+        metric("Dadores temporariamente inelegíveis", data.donors.filter((item) => item.eligibility_status === DONOR_ELIGIBILITY_STATUS.TEMPORARIAMENTE_INELEGIVEL).length)
       ], { "Dadores por província": group(data.donors, "province"), "Dadores por município": group(data.donors, "municipality") }),
       section("Relatórios de Hospitais", [
         metric("Hospitais registados", data.hospitals.length),

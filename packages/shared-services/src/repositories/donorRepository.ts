@@ -1,4 +1,4 @@
-import type { BloodType } from "@doe-sangue-angola/shared-types";
+import { DONOR_ELIGIBILITY_STATUS, type BloodType } from "@doe-sangue-angola/shared-types";
 import { getDatabaseClient } from "../databaseService";
 import { mapDonor, type DonorRow } from "./databaseTypes";
 import { rewardRepository } from "./rewardRepository";
@@ -74,7 +74,7 @@ export const donorRepository = {
         birth_date: input.birthDate || null,
         gender: input.gender || null,
         available: false,
-        eligibility_status: "Pendente"
+        eligibility_status: DONOR_ELIGIBILITY_STATUS.PENDENTE
       }, { onConflict: "user_id" })
       .select(donorColumns)
       .single();

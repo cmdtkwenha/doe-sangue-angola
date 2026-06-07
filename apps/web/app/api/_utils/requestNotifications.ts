@@ -1,6 +1,6 @@
 import { matchingAgent } from "@doe-sangue-angola/agents";
 import { mapDonor, type DonorRow } from "@doe-sangue-angola/shared-services";
-import type { BloodRequest } from "@doe-sangue-angola/shared-types";
+import { DONOR_ELIGIBILITY_STATUS, type BloodRequest } from "@doe-sangue-angola/shared-types";
 import type { createRouteSupabase } from "./security";
 import { notifyAdmins, notifyUser } from "./notifications";
 
@@ -17,7 +17,7 @@ export async function notifyMatchedDonors(
     ? await query
     : await query.eq("province", requestRecord.province);
   const donors = (data as unknown as DonorRow[] | null ?? [])
-    .filter((row) => row.available !== false && row.eligibility_status === "Verificado")
+    .filter((row) => row.available !== false && row.eligibility_status === DONOR_ELIGIBILITY_STATUS.ELEGIVEL)
     .map(mapDonor);
   const matches = matchingAgent(requestRecord, donors).filter((item) => item.score >= (disaster ? 45 : 55));
   await Promise.all(matches.map((match) =>

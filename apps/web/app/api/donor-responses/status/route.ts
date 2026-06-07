@@ -1,4 +1,5 @@
 import { ApiError, apiResponse, readJson } from "../../_utils/apiResponse";
+import { DONOR_ELIGIBILITY_STATUS } from "@doe-sangue-angola/shared-types";
 import { auditApiAction } from "../../_utils/audit";
 import { createRouteSupabase, requireApiSession, requireEntityAccess, requireSameOrigin } from "../../_utils/security";
 import { notifyAdmins, notifyUser } from "../../_utils/notifications";
@@ -156,7 +157,7 @@ async function updateCooldown(db: Awaited<ReturnType<typeof createRouteSupabase>
   next.setDate(next.getDate() + days);
   await db.from("donors").update({
     available: false,
-    eligibility_status: "Suspenso",
+    eligibility_status: DONOR_ELIGIBILITY_STATUS.TEMPORARIAMENTE_INELEGIVEL,
     last_donation_date: new Date().toISOString().slice(0, 10),
     next_eligible_donation_date: next.toISOString()
   }).eq("id", donorId);
