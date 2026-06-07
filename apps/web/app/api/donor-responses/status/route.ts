@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const responseId = assertString(body.responseId, "Resposta do dador");
     const { data: existing, error } = await db
       .from("donor_responses")
-      .select("id,blood_request_id,donor_id,hospital_id,confirmation_pin,failed_pin_attempts,pin_expires_at,pin_locked_until,status,blood_requests(family_request_id)")
+      .select("id,blood_request_id,donor_id,hospital_id,confirmation_pin,failed_pin_attempts,pin_expires_at,pin_locked_until,status,blood_requests(blood_type,family_request_id)")
       .eq("id", responseId)
       .single();
     if (error) throw supabaseError("Não foi possível carregar a resposta do dador", error);
@@ -51,19 +51,19 @@ export async function POST(request: Request) {
 
     const payload = statusPayload(status);
     const { data, error: updateError } = await db
-    .from("donor_responses")
-    .update(payload)
+      .from("donor_responses")
+      .update(payload)
       .eq("id", responseId)
       .select("id,status")
       .single();
     if (updateError) throw supabaseError("Não foi possível atualizar o estado do dador", updateError);
     if (status === "PIN Validado") await clearPinFailures(db, responseId);
     await syncAcceptance(db, existing, status);
-    await applyOperationalEffects(db, responseId, existing.donor_id, status);
+    await applyOperationalEffects(db, responseId, existing, principal.authUserId, status);
     await syncRequest(db, existing.blood_request_id, status);
     await syncFamilyRequest(db, familyId(existing), status);
     await notifyDonor(db, existing.donor_id, status);
-  if (status === "Doação concluída" || status === "Cancelado" || status === "Não Compareceu") {
+    if (status === "Doação concluída" || status === "Cancelado" || status === "Não Compareceu") {
       await notifyAdmins(db, workflowTitle(status), workflowMessage(status), status);
     }
     await auditApiAction(principal, auditMessage(status, responseId));
@@ -92,14 +92,46 @@ function familyId(row: { blood_requests?: unknown }) {
 async function applyOperationalEffects(
   db: Awaited<ReturnType<typeof createRouteSupabase>>,
   responseId: string,
-  donorId: string,
+  existing: {
+    blood_requests?: unknown;
+    donor_id: string;
+    hospital_id: string;
+  },
+  createdBy: string,
   status: ResponseStatus
 ) {
-  if (status === "Chegou") await rewardOnce(db, responseId, donorId, 40, "Chegada confirmada", "reward_arrived_at");
+  if (status === "Chegou") await rewardOnce(db, responseId, existing.donor_id, 40, "Chegada confirmada", "reward_arrived_at");
   if (status === "Doação concluída") {
-    await rewardOnce(db, responseId, donorId, 120, "Doação concluída", "reward_completed_at");
-    await updateCooldown(db, donorId);
+    await rewardOnce(db, responseId, existing.donor_id, 120, "Doação concluída", "reward_completed_at");
+    await updateCooldown(db, existing.donor_id);
+    await receiveInventory(db, existing, createdBy);
   }
+}
+
+async function receiveInventory(
+  db: Awaited<ReturnType<typeof createRouteSupabase>>,
+  existing: { blood_requests?: unknown; hospital_id: string },
+  createdBy: string
+) {
+  const bloodType = requestBloodType(existing);
+  if (!bloodType) return;
+  const current = await currentInventory(db, existing.hospital_id, bloodType);
+  const { error: inventoryError } = await db.from("hospital_inventory").upsert({
+    blood_type: bloodType,
+    hospital_id: existing.hospital_id,
+    units_available: (current?.units_available ?? 0) + 1,
+    updated_at: new Date().toISOString()
+  }, { onConflict: "hospital_id,blood_type" });
+  if (inventoryError) throw supabaseError("Não foi possível atualizar o inventário", inventoryError);
+  const { error: movementError } = await db.from("inventory_movements").insert({
+    blood_type: bloodType,
+    created_by: createdBy,
+    hospital_id: existing.hospital_id,
+    movement_type: "donation_received",
+    note: "Doação concluída no fluxo piloto.",
+    units: 1
+  });
+  if (movementError) throw supabaseError("Não foi possível registar movimento de inventário", movementError);
 }
 
 async function rewardOnce(
@@ -128,6 +160,26 @@ async function updateCooldown(db: Awaited<ReturnType<typeof createRouteSupabase>
     last_donation_date: new Date().toISOString().slice(0, 10),
     next_eligible_donation_date: next.toISOString()
   }).eq("id", donorId);
+}
+
+async function currentInventory(
+  db: Awaited<ReturnType<typeof createRouteSupabase>>,
+  hospitalId: string,
+  bloodType: string
+) {
+  const { data, error } = await db
+    .from("hospital_inventory")
+    .select("units_available")
+    .eq("hospital_id", hospitalId)
+    .eq("blood_type", bloodType)
+    .maybeSingle();
+  if (error) throw supabaseError("Não foi possível carregar o inventário", error);
+  return data as { units_available?: number | null } | null;
+}
+
+function requestBloodType(row: { blood_requests?: unknown }) {
+  const request = Array.isArray(row.blood_requests) ? row.blood_requests[0] : row.blood_requests;
+  return (request as { blood_type?: string | null } | undefined)?.blood_type ?? undefined;
 }
 
 function tierFor(points: number) {
