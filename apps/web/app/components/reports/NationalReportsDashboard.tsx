@@ -12,14 +12,14 @@ type ReportSection = {
   title: string;
 };
 type Payload = {
-  filters: { hospitals: Array<{ id: string; name: string }>; municipalities: string[]; provinces: string[] };
+  filters: { bloodTypes: string[]; hospitals: Array<{ id: string; name: string }>; municipalities: string[]; provinces: string[]; statuses: string[] };
   reports: ReportSection[];
 };
 
-const empty: Payload = { filters: { hospitals: [], municipalities: [], provinces: [] }, reports: [] };
+const empty: Payload = { filters: { bloodTypes: [], hospitals: [], municipalities: [], provinces: [], statuses: [] }, reports: [] };
 
 export function NationalReportsDashboard() {
-  const [filters, setFilters] = useState({ hospital: "", municipality: "", province: "" });
+  const [filters, setFilters] = useState({ bloodType: "", dateFrom: "", dateTo: "", hospital: "", municipality: "", province: "", status: "" });
   const [schedule, setSchedule] = useState("Sem agendamento");
   const version = useSupabaseRealtimeVersion(["blood_requests", "donor_responses", "donors", "hospital_inventory", "hospitals"]);
   const query = useMemo(() => new URLSearchParams(filters).toString(), [filters]);
@@ -31,6 +31,8 @@ export function NationalReportsDashboard() {
   return (
     <section className={styles.printable}>
       <div className={styles.filters}>
+        <DateField label="Data inicial" value={filters.dateFrom} onChange={(dateFrom) => setFilters((current) => ({ ...current, dateFrom }))} />
+        <DateField label="Data final" value={filters.dateTo} onChange={(dateTo) => setFilters((current) => ({ ...current, dateTo }))} />
         <Select label="Província" value={filters.province} values={data.filters.provinces} onChange={(province) => setFilters((current) => ({ ...current, province }))} />
         <Select label="Município" value={filters.municipality} values={data.filters.municipalities} onChange={(municipality) => setFilters((current) => ({ ...current, municipality }))} />
         <label className={styles.field}>
@@ -40,6 +42,8 @@ export function NationalReportsDashboard() {
             {data.filters.hospitals.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
           </select>
         </label>
+        <Select label="Tipo sanguíneo" value={filters.bloodType} values={data.filters.bloodTypes} onChange={(bloodType) => setFilters((current) => ({ ...current, bloodType }))} />
+        <Select label="Estado" value={filters.status} values={data.filters.statuses} onChange={(status) => setFilters((current) => ({ ...current, status }))} />
         <label className={styles.field}>
           <span className="eyebrow">Relatório agendado</span>
           <select value={schedule} onChange={(event) => setSchedule(event.target.value)}>
@@ -57,6 +61,9 @@ export function NationalReportsDashboard() {
 
       {loading ? <p className="muted">A carregar relatórios nacionais...</p> : null}
       {error ? <p className="muted">Falha nos relatórios: {error}</p> : null}
+      {!loading && !error && data.reports.length === 0 ? (
+        <p className="muted">Sem dados suficientes para este relatório.</p>
+      ) : null}
       {data.reports.map((section) => <ReportSectionView key={section.title} section={section} />)}
     </section>
   );
@@ -70,6 +77,15 @@ function Select({ label, onChange, value, values }: { label: string; onChange: (
         <option value="">Todos</option>
         {values.map((item) => <option key={item}>{item}</option>)}
       </select>
+    </label>
+  );
+}
+
+function DateField({ label, onChange, value }: { label: string; onChange: (value: string) => void; value: string }) {
+  return (
+    <label className={styles.field}>
+      <span className="eyebrow">{label}</span>
+      <input type="date" value={value} onChange={(event) => onChange(event.target.value)} />
     </label>
   );
 }
@@ -101,9 +117,9 @@ function ChartCard({ rows, title }: { rows: ChartRows; title: string }) {
     <section className={styles.chartCard}>
       <div className={styles.headerLine}>
         <strong>{title}</strong>
-        <button className={styles.pdfPreview} onClick={() => exportCsv(`${slug(title)}.csv`, rows)} type="button">CSV</button>
+        <button className={styles.pdfPreview} onClick={() => exportCsv(`${slug(title)}.csv`, rows)} type="button">Exportar CSV</button>
       </div>
-      {!rows.length ? <p className="muted">Sem dados reais para este gráfico.</p> : null}
+      {!rows.length ? <p className="muted">Sem dados suficientes para este relatório.</p> : null}
       {rows.slice(0, 8).map((row) => {
         const [label, raw] = Object.values(row);
         const value = Number(raw ?? 0);
