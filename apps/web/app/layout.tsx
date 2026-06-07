@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { KeyboardNavigationHelper } from "./components/accessibility";
 import { AuthProvider } from "./components/auth/AuthProvider";
 import { ErrorBoundary } from "./components/ui/ErrorBoundary";
@@ -21,6 +21,13 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "Doe Sangue"
   },
+  icons: {
+    apple: "/icons/icon-192.png",
+    icon: [
+      { sizes: "192x192", url: "/icons/icon-192.png" },
+      { sizes: "512x512", url: "/icons/icon-512.png" }
+    ]
+  },
   keywords: [
     "doação de sangue Angola",
     "Sangue Angola",
@@ -40,6 +47,14 @@ export const metadata: Metadata = {
     index: true,
     follow: true
   }
+};
+
+export const viewport: Viewport = {
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#b10f1f",
+  viewportFit: "cover",
+  width: "device-width"
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    background_color: "#ffffff",
+    background_color: "#f7f8fb",
     categories: ["health", "medical", "productivity"],
     description: "Doe Sangue Angola liga dadores, hospitais e operações nacionais.",
     display: "standalone",
@@ -26,13 +26,13 @@ export default function manifest(): MetadataRoute.Manifest {
         type: "image/png"
       }
     ],
-    id: "/",
+    id: "/mobile",
     lang: "pt-AO",
     name: "Doe Sangue Angola",
     orientation: "portrait",
     scope: "/",
     short_name: "Doe Sangue",
-    start_url: "/auth?source=pwa",
+    start_url: "/mobile",
     theme_color: "#b10f1f"
   };
 }

@@ -7,38 +7,48 @@
     <style>
       body {
         align-items: center;
-        background: #f6f4f1;
+        background: linear-gradient(180deg, #fff, #f5f7fa);
         color: #252525;
         display: grid;
         font-family: Inter, system-ui, sans-serif;
         margin: 0;
-        min-height: 100vh;
-        padding: 24px;
+        min-height: 100dvh;
+        padding: calc(env(safe-area-inset-top) + 20px) 20px calc(env(safe-area-inset-bottom) + 20px);
       }
       main {
         background: #fff;
-        border: 1px solid #ece6dc;
-        border-radius: 20px;
-        box-shadow: 0 24px 70px rgba(20, 20, 20, 0.12);
+        border: 1px solid #e7eaf0;
+        border-radius: 18px;
+        box-shadow: 0 22px 64px rgba(17, 24, 32, 0.14);
         margin: auto;
-        max-width: 440px;
-        padding: 28px;
+        max-width: 390px;
+        padding: 24px;
       }
-      h1 { color: #b10f1f; margin: 0 0 10px; }
-      p { color: #6f737b; line-height: 1.55; }
+      .drop {
+        background: linear-gradient(160deg, #ff5362, #b10f1f);
+        border-radius: 18px 18px 22px 22px;
+        height: 38px;
+        margin-bottom: 18px;
+        transform: rotate(45deg);
+        width: 30px;
+      }
+      h1 { color: #b10f1f; font-size: 22px; margin: 0 0 10px; }
+      p { color: #6f737b; font-size: 14px; line-height: 1.55; }
       button {
         background: #b10f1f;
         border: 0;
-        border-radius: 12px;
+        border-radius: 10px;
         color: #fff;
         font-weight: 800;
         min-height: 44px;
         padding: 0 16px;
+        width: 100%;
       }
     </style>
   </head>
   <body>
     <main>
+      <div class="drop" aria-hidden="true"></div>
       <h1>Está sem ligação</h1>
       <p>Não foi possível abrir esta área agora. Verifique a internet e tente novamente. Os dados serão sincronizados quando a ligação voltar.</p>
       <button onclick="window.location.reload()">Tentar novamente</button>

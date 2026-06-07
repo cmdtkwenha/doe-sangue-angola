@@ -23,6 +23,8 @@ export function InstallPrompt() {
     };
     window.addEventListener("beforeinstallprompt", handler);
     setManual(/iphone|ipad|ipod/i.test(navigator.userAgent));
+    const nav = navigator as Navigator & { standalone?: boolean };
+    setHidden(window.matchMedia("(display-mode: standalone)").matches || nav.standalone === true);
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
