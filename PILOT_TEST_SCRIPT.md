@@ -1,120 +1,167 @@
-# Roteiro de Teste do Piloto — Doe Sangue Angola
+# Roteiro de Teste Piloto
 
-Objetivo: validar o fluxo real com 1 hospital e até 20 dadores antes do lançamento público.
+Objetivo: validar o ciclo real de doação com Admin, Hospital e Dador usando apenas Supabase real.
 
-## Preparação
+## Antes de Começar
 
-1. Confirmar variáveis em produção:
-   - `NEXT_PUBLIC_AUTH_MODE=supabase`
-   - `NEXT_PUBLIC_DATA_MODE=supabase`
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-2. Confirmar Supabase:
-   - migrations aplicadas.
-   - hospitais importados.
-   - RLS ativo.
-3. Criar contas reais:
-   - 1 admin.
-   - 1 hospital ligado a hospital aprovado.
-   - 20 dadores com tipo sanguíneo e província.
+1. Confirmar `NEXT_PUBLIC_DATA_MODE=supabase`.
+2. Confirmar `NEXT_PUBLIC_AUTH_MODE=supabase`.
+3. Confirmar migrations aplicadas.
+4. Abrir Admin > Prontidão Piloto.
+5. Exportar dados atuais, se necessário.
+6. Limpar apenas dados operacionais de teste:
+   - pedidos de sangue;
+   - aceites;
+   - PINs;
+   - notificações.
 
-## Teste 1 — Admin
+## 1. Admin Login
+
+1. Abrir `/auth`.
+2. Entrar com a conta admin.
+3. Confirmar redirecionamento para `/admin`.
+4. Abrir Admin > Prontidão Piloto.
+5. Confirmar estado `Operacional` ou analisar avisos.
+
+Resultado esperado: admin entra e vê dados reais sem erro de permissão.
+
+## 2. Registo do Hospital
+
+1. Criar ou usar conta hospital.
+2. Entrar como hospital.
+3. Registar novo hospital ou selecionar hospital aprovado.
+4. Se registar novo hospital, confirmar mensagem de pendência.
+
+Resultado esperado: hospital novo aparece em Admin > Verificação > Hospitais Pendentes.
+
+## 3. Admin Aprova Hospital
 
 1. Entrar como admin.
-2. Abrir `/admin`.
-3. Confirmar KPIs carregados.
-4. Abrir `/admin/hospitals`.
-5. Confirmar lista de hospitais reais.
-6. Abrir `/admin/requests`.
-7. Confirmar que não há erro de Supabase.
-8. Abrir `/admin/audit`.
-9. Confirmar logs recentes.
+2. Abrir Admin > Verificação.
+3. Abrir Hospitais Pendentes.
+4. Ver detalhes do hospital.
+5. Aprovar hospital.
+6. Confirmar que saiu da lista pendente.
 
-Resultado esperado: admin vê dados nacionais e não encontra páginas vazias sem explicação.
+Resultado esperado: hospital fica `Verificado` e pode aceder ao painel hospitalar.
 
-## Teste 2 — Hospital
+## 4. Registo do Dador
+
+1. Criar ou usar conta de dador.
+2. Entrar como dador.
+3. Completar perfil:
+   - tipo sanguíneo;
+   - província;
+   - município;
+   - telefone;
+   - género;
+   - data de nascimento;
+   - contacto de emergência;
+   - consentimento.
+4. Guardar perfil.
+
+Resultado esperado: dador aparece em Admin > Verificação > Dadores Pendentes.
+
+## 5. Admin Verifica Dador
+
+1. Entrar como admin.
+2. Abrir Admin > Verificação.
+3. Abrir Dadores Pendentes.
+4. Ver detalhes do dador.
+5. Clicar Verificar dador.
+
+Resultado esperado: dador fica `Verificado` e pode ver pedidos compatíveis.
+
+## 6. Hospital Cria Pedido
+
+1. Entrar como hospital verificado.
+2. Abrir `/hospital/new-request`.
+3. Criar pedido com tipo sanguíneo compatível com o dador de teste.
+4. Confirmar modal de criação.
+5. Confirmar mensagem de sucesso.
+
+Resultado esperado: pedido aparece em Hospital > Pedidos de Sangue e Admin > Pedidos de Sangue.
+
+## 7. Dador Aceita Pedido
+
+1. Entrar como dador verificado.
+2. Abrir `/mobile`.
+3. Abrir aba Pedidos.
+4. Confirmar que só aparecem pedidos compatíveis.
+5. Abrir detalhe do pedido.
+6. Aceitar pedido.
+
+Resultado esperado: aceite é criado, vaga reduz e pedido fica associado ao dador.
+
+## 8. Dador Vê PIN
+
+1. Abrir aba PIN.
+2. Confirmar que aparece:
+   - hospital;
+   - tipo sanguíneo;
+   - ETA;
+   - estado;
+   - PIN de 4 dígitos.
+
+Resultado esperado: não aparece a mensagem “Aceite um pedido para gerar o seu PIN” se houver aceite ativo.
+
+## 9. Hospital Valida PIN
 
 1. Entrar como hospital.
-2. Se aparecer onboarding, selecionar hospital aprovado.
-3. Abrir `/hospital`.
-4. Criar pedido urgente O- em `/hospital/new-request`.
-5. Confirmar mensagem de sucesso.
-6. Abrir `/hospital/requests`.
-7. Confirmar pedido com estado correto.
-8. Confirmar que `/admin/requests` mostra o mesmo pedido.
+2. Abrir Dadores Recebidos ou Painel Principal.
+3. Confirmar que o dador aparece em Dadores a Caminho.
+4. Clicar Chegou.
+5. Introduzir o PIN mostrado pelo dador.
+6. Clicar PIN validado.
 
-Resultado esperado: pedido fica gravado em Supabase e aparece para admin/hospital.
+Resultado esperado: estado muda para `PIN Validado`.
 
-## Teste 3 — Dador
+## 10. Hospital Completa Doação
 
-1. Entrar como dador.
-2. Se aparecer onboarding, preencher perfil mínimo:
-   - tipo sanguíneo.
-   - província.
-   - município.
-3. Abrir `/mobile`.
-4. Ver pedidos compatíveis.
-5. Abrir detalhes do pedido.
-6. Confirmar hospital, localização, tipo sanguíneo e urgência.
-7. Clicar aceitar e confirmar.
-8. Confirmar cartão “Pedido aceite com sucesso”.
-9. Confirmar PIN visível.
+1. No mesmo dador, clicar Doação concluída.
+2. Confirmar a ação.
+3. Verificar que o dador sai da lista ativa.
+4. Abrir Histórico.
 
-Resultado esperado: `donor_responses` recebe linha com PIN único e estado `accepted`.
+Resultado esperado: estado final `Doação concluída`.
 
-## Teste 4 — Hospital Recebe Dador
+## 11. Admin Verifica Relatórios e Auditoria
 
-1. Voltar ao hospital.
-2. Abrir painel de dadores recebidos/lista ETA.
-3. Confirmar dador aceite.
-4. Marcar “Chegou”.
-5. Inserir PIN mostrado no telemóvel do dador.
-6. Validar PIN.
-7. Marcar “Doação concluída”.
-
-Resultado esperado: estado progride para `arrived`, `pin_validated`, `completed`.
-
-## Teste 5 — Cancelamento
-
-1. Criar segundo pedido.
-2. Aceitar com dador.
-3. No hospital, cancelar antes de completar.
-4. Confirmar que o dador sai da lista ativa.
-5. Confirmar que aparece no histórico.
-
-Resultado esperado: estado `cancelled`, sem permitir conclusão posterior.
-
-## Teste 6 — Notificações e Auditoria
-
-1. No dador, abrir notificações.
-2. Confirmar notificações do pedido/estado.
-3. Marcar notificações como lidas.
-4. No admin, abrir auditoria.
-5. Confirmar eventos:
-   - login.
-   - pedido criado.
-   - dador aceitou.
-   - PIN validado.
+1. Abrir Admin > Auditoria & Logs.
+2. Confirmar eventos:
+   - hospital aprovado;
+   - dador verificado;
+   - pedido criado;
+   - dador aceitou;
+   - PIN validado;
    - doação concluída.
-   - cancelamento, se testado.
+3. Abrir Admin > Relatórios.
+4. Confirmar que pedidos/doações aparecem nos relatórios.
 
-Resultado esperado: notificações e logs refletem as ações reais.
-
-## Teste 7 — Responsividade
-
-1. Testar admin em desktop.
-2. Testar hospital em desktop/tablet.
-3. Testar dador em telemóvel Android.
-4. Confirmar que botões não ficam escondidos.
-5. Confirmar que PIN não fica atrás da navegação inferior.
+Resultado esperado: auditoria e relatórios refletem o teste real.
 
 ## Critério de Aprovação
 
-O piloto pode avançar se:
+O piloto passa se:
 
-- Login funciona para os três papéis.
-- Pedido hospitalar aparece para admin e dador.
-- Dador aceita e recebe PIN.
-- Hospital valida PIN e conclui.
-- Audit logs e notificações são criados.
-- Nenhum crash acontece durante o fluxo.
+- os três papéis entram corretamente;
+- hospital verificado cria pedido;
+- dador verificado aceita pedido compatível;
+- PIN aparece no telemóvel do dador;
+- hospital valida PIN;
+- hospital conclui doação;
+- admin vê auditoria e relatórios;
+- nenhum utilizador vê dados de outro papel.
+
+## Critério de Falha
+
+Registar bug crítico se:
+
+- login falha para qualquer papel;
+- pedido não é gravado;
+- dador não vê pedido compatível;
+- aceite não cria PIN;
+- hospital não vê dador aceite;
+- PIN correto é rejeitado;
+- doação não conclui;
+- permissões permitem acesso indevido.
