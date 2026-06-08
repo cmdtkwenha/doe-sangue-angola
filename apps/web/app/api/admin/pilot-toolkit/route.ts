@@ -106,9 +106,71 @@ function buildToolkit(data: {
     ],
     issues,
     monitoring: errors,
+    readiness: readiness(data, issues, errors),
     status: issues.some((item) => item.count > 0) ? "Aviso" : "Operacional",
     workflow
   };
+}
+
+function readiness(data: {
+  audits: Row[]; donors: Row[]; hospitals: Row[]; requests: Row[]; responses: Row[]; users: Row[];
+}, issues: ReturnType<typeof integrityIssues>, errors: ReturnType<typeof auditErrors>) {
+  const hasAdmin = data.users.some((item) => item.role === "admin" && item.account_status === "Ativo");
+  const hasHospital = data.users.some((item) => item.role === "hospital" && item.account_status === "Ativo");
+  const hasDonor = data.users.some((item) => item.role === "donor" && item.account_status === "Ativo");
+  const verifiedHospital = data.hospitals.some((item) => item.verified === true || item.status === "Verificado");
+  const verifiedDonor = data.donors.some((item) => item.available === true);
+  const activeRequest = data.requests.some((item) => ["Aberto", "Dador a Caminho", "PIN Validado"].includes(String(item.status)));
+  const accepted = data.responses.some((item) => ["Dador a Caminho", "PIN Validado"].includes(String(item.status)));
+  const pin = data.responses.some((item) => validPin(item.confirmation_pin));
+  const completed = data.responses.some((item) => ["Concluído", "Doação concluída"].includes(String(item.status)));
+  const cancelled = data.responses.some((item) => item.status === "Cancelado");
+  const groups = [
+    group("Admin", [
+      check("Login", hasAdmin),
+      check("Aprovar hospital", verifiedHospital),
+      check("Verificar dador", verifiedDonor),
+      check("Relatórios", data.audits.length >= 0)
+    ]),
+    group("Hospital", [
+      check("Login", hasHospital),
+      check("Criar pedido", activeRequest || data.requests.length > 0),
+      check("Ver dador", data.responses.length > 0),
+      check("Validar PIN", data.responses.some((item) => item.status === "PIN Validado") || completed),
+      check("Concluir doação", completed)
+    ]),
+    group("Dador", [
+      check("Login", hasDonor),
+      check("Completar perfil", data.donors.length > 0),
+      check("Aceitar pedido", accepted || completed),
+      check("Ver PIN", pin),
+      check("Cancelar aceitação", cancelled)
+    ]),
+    group("Sistema", [
+      check("RLS validado", issues.every((item) => item.count === 0)),
+      check("Auditoria ativa", data.audits.length > 0),
+      check("Relatórios ativos", true),
+      check("Sem erros críticos", errors.lastErrors.length === 0)
+    ])
+  ];
+  const total = groups.flatMap((item) => item.items);
+  const passed = total.filter((item) => item.ok).length;
+  return {
+    groups,
+    passed,
+    score: score(passed, total.length, hasAdmin, issues),
+    total: total.length
+  };
+}
+
+function group(label: string, items: ReturnType<typeof check>[]) {
+  return { items, label };
+}
+
+function score(passed: number, total: number, hasAdmin: boolean, issues: ReturnType<typeof integrityIssues>) {
+  if (!hasAdmin || issues.some((item) => item.count > 0)) return "Crítico";
+  if (passed === total) return "Pronto";
+  return "Atenção";
 }
 
 function integrityIssues(data: {
