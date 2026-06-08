@@ -1,4 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { auditApiAction } from "../../_utils/audit";
 import { ApiError, apiResponse, readJson } from "../../_utils/apiResponse";
@@ -27,12 +26,11 @@ export async function POST(request: Request) {
   return apiResponse(async () => {
     const principal = await requireApiSession(["hospital", "admin"]);
     const db = await createRouteSupabase();
-    const writeDb = createPrivilegedSupabase() ?? db;
-    await ensureHospitalAccessProfile(writeDb, principal);
+    await ensureHospitalAccessProfile(db, principal);
     const hospitalId = body.mode === "register"
-      ? await registerHospital(writeDb, body)
-      : await selectApprovedHospital(writeDb, body.hospitalId);
-    await linkHospitalUser(writeDb, principal, hospitalId);
+      ? await registerHospital(db, body)
+      : await selectApprovedHospital(db, body.hospitalId);
+    await linkHospitalUser(db, principal, hospitalId);
     await db.from("legal_consents").insert({
       consent_type: "hospital_responsibility",
       page: "/onboarding/hospital",
@@ -152,13 +150,6 @@ function assertHospitalType(value: unknown) {
 
 function isVerified(status?: string | null) {
   return status === "Verificado" || status === "verified";
-}
-
-function createPrivilegedSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return null;
-  return createClient(url, key, { auth: { persistSession: false } });
 }
 
 type Db = Awaited<ReturnType<typeof createRouteSupabase>> | SupabaseClient;

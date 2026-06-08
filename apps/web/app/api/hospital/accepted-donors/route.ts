@@ -1,4 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
 import { ApiError, apiResponse } from "../../_utils/apiResponse";
 import { createRouteSupabase, requireApiSession } from "../../_utils/security";
 import { activeDonorStatuses, ageFromBirthDate, cleanName, isActiveDonorStatus, normalizeStatus, unique } from "../acceptedDonorHelpers";
@@ -130,20 +129,12 @@ async function getDonationMetrics(db: Awaited<ReturnType<typeof createRouteSupab
 async function getUsers(db: Awaited<ReturnType<typeof createRouteSupabase>>, ids: string[]) {
   type UserRow = { email: string | null; id: string; name: string | null; phone: string | null };
   if (!ids.length) return [] as UserRow[];
-  const userDb = createPrivilegedSupabase() ?? db;
-  const { data, error } = await userDb
+  const { data, error } = await db
     .from("users")
     .select("id,name,email,phone")
     .in("id", ids);
   if (error) throw supabaseError("Não foi possível carregar contactos dos dadores", error);
   return data ?? [];
-}
-
-function createPrivilegedSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return null;
-  return createClient(url, key, { auth: { persistSession: false } });
 }
 
 type ResponseLike = {
