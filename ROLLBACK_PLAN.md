@@ -1,39 +1,79 @@
-# Plano de Rollback — Doe Sangue Angola
+# Plano de Rollback
 
-## Quando Fazer Rollback
+Este plano explica como voltar para uma versão estável após falha de deploy ou migração.
 
-- Login real falha para todos.
-- Supabase fica indisponível durante o piloto.
-- PIN diverge entre dador e hospital.
-- RLS expõe dados indevidos.
-- Build novo quebra fluxo crítico.
+## Quando fazer rollback
 
-## Rollback de Deploy
+Usar rollback se acontecer:
 
-1. Abrir Vercel.
-2. Escolher último deploy estável.
-3. Clicar “Promote to Production”.
-4. Confirmar `/status`.
-5. Repetir teste de pedido, aceite e PIN.
+- login bloqueado para Admin, Hospital ou Dador;
+- pedidos de sangue não podem ser criados;
+- dador aceita pedido mas PIN não aparece;
+- validação de PIN falha para todos;
+- nova migração quebra tabelas críticas;
+- RLS expõe ou bloqueia dados indevidamente;
+- build novo quebra páginas críticas.
 
-## Desativar Realtime com Segurança
+## Rollback após deploy falhado
 
-1. Definir `NEXT_PUBLIC_FEATURE_REALTIME=false`.
+1. Pausar testes do piloto.
+2. Abrir Vercel.
+3. Ir a **Deployments**.
+4. Escolher o último deploy validado.
+5. Clicar em **Promote to Production**.
+6. Confirmar que variáveis de ambiente continuam corretas.
+7. Abrir:
+   - `/status`;
+   - `/auth`;
+   - `/admin`;
+   - `/hospital`;
+   - `/mobile`.
+8. Repetir teste rápido:
+   - login;
+   - criar pedido;
+   - aceitar pedido;
+   - ver PIN.
+
+## Rollback após migração falhada
+
+1. Não executar reset da base de dados.
+2. Copiar o erro completo da migração.
+3. Parar novas alterações de esquema.
+4. Verificar se a migração já aplicou alguma parte.
+5. Se não aplicou nada, corrigir a migration e executar novamente.
+6. Se aplicou parcialmente:
+   - criar migration corretiva;
+   - usar `alter table if exists`;
+   - usar `add column if not exists`;
+   - nunca apagar dados reais sem aprovação.
+7. Se a base ficou inutilizável, restaurar backup Supabase.
+
+## Rollback de dados
+
+Usar apenas quando há corrupção de dados.
+
+1. Exportar estado atual para investigação.
+2. Identificar último backup íntegro.
+3. Restaurar em staging primeiro, se possível.
+4. Validar contagens de utilizadores, hospitais, dadores e pedidos.
+5. Restaurar produção.
+6. Executar `npm run schema:verify`.
+
+## Modo de manutenção
+
+Se o sistema estiver instável:
+
+1. Ativar `NEXT_PUBLIC_MAINTENANCE_MODE=true`.
 2. Fazer redeploy.
-3. Confirmar que páginas ainda carregam por refresh/API.
-4. Avisar equipa que updates podem exigir recarregamento.
+3. Informar equipa piloto.
+4. Impedir novos pedidos até a recuperação terminar.
 
-## Ativar Manutenção
+## Checklist pós-rollback
 
-1. Definir `NEXT_PUBLIC_MAINTENANCE_MODE=true`.
-2. Fazer redeploy.
-3. Publicar aviso no grupo operacional.
-4. Não criar novos pedidos até resolver.
-
-## Rollback de Dados
-
-1. Exportar estado atual.
-2. Restaurar backup Supabase.
-3. Validar tabelas críticas.
-4. Confirmar audit logs.
-5. Reabrir o sistema apenas após teste completo.
+- Admin consegue entrar.
+- Hospital verificado consegue entrar.
+- Dador verificado consegue entrar.
+- Pedidos ativos carregam.
+- PIN ativo carrega.
+- Auditoria regista novas ações.
+- Saúde do sistema mostra estado operacional.
