@@ -57,9 +57,11 @@
 
 .modalCard {
   width: min(100%, 640px);
-  max-height: 85vh;
+  max-height: min(85dvh, 900px);
+  min-width: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   border: 1px solid rgba(226, 232, 240, 0.92);
   border-radius: 20px;
   background: #fff;
@@ -68,6 +70,10 @@
 
 .detailModal {
   width: min(100%, 900px);
+}
+
+.modalCard > * {
+  min-width: 0;
 }
 
 @media (max-width: 640px) {
@@ -79,7 +85,7 @@
   .modalCard,
   .detailModal {
     width: 100%;
-    max-height: calc(100dvh - env(safe-area-inset-top) - 10px);
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 10px);
     border-right: 0;
     border-bottom: 0;
     border-left: 0;
