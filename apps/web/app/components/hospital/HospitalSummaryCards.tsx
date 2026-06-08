@@ -13,7 +13,7 @@ export function HospitalSummaryCards() {
   const { data: hospital } = useCurrentHospital();
   const hospitalId = hospital?.id ?? "";
   const { data: requests, loading: loadingRequests } = useApiData<BloodRequest[]>(
-    hospitalId ? `/api/blood-requests?hospitalId=${hospitalId}` : "/api/blood-requests?hospitalId=missing",
+    hospitalId ? `/api/blood-requests?hospitalId=${hospitalId}&scope=all` : "/api/blood-requests?hospitalId=missing",
     [],
     version + liveVersion
   );

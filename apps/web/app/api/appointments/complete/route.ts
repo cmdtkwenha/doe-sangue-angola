@@ -32,6 +32,23 @@ export async function POST(request: Request) {
       .eq("donor_id", donorId)
       .eq("blood_request_id", requestId);
     if (appointmentError) throw appointmentError;
+    const completedAt = new Date().toISOString();
+    const { error: responseError } = await db
+      .from("donor_responses")
+      .update({
+        completed_at: completedAt,
+        donation_completed_at: completedAt,
+        status: "Doação concluída"
+      })
+      .eq("donor_id", donorId)
+      .eq("blood_request_id", requestId);
+    if (responseError) throw responseError;
+    const { error: acceptanceError } = await db
+      .from("request_acceptances")
+      .update({ completed_at: completedAt, status: "Doação concluída", updated_at: completedAt })
+      .eq("donor_id", donorId)
+      .eq("request_id", requestId);
+    if (acceptanceError) throw acceptanceError;
     const { data, error } = await db
       .from("blood_requests")
       .update({ status: "Concluído" })

@@ -38,6 +38,7 @@ export async function GET(request: Request) {
     const params = new URL(request.url).searchParams;
     const donorId = params.get("donorId");
     const hospitalId = params.get("hospitalId");
+    const scope = params.get("scope") ?? "active";
     const db = await createRouteSupabase();
 
     if (donorId === "missing" || hospitalId === "missing") return [];
@@ -88,7 +89,9 @@ export async function GET(request: Request) {
         .eq("hospital_id", hospitalId)
         .order("created_at", { ascending: false });
       if (error) throw new Error(formatSupabaseError(error));
-      return (data as unknown as RequestRow[]).map(mapRequest);
+      return (data as unknown as RequestRow[])
+        .map(mapRequest)
+        .filter((item) => scope === "all" || !["Concluído", "Cancelado"].includes(item.status));
     }
 
     if (principal.role !== "admin") throw new ApiError(403, "Acesso restrito ao admin.");

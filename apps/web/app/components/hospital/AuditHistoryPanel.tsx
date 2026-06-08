@@ -10,7 +10,7 @@ import { useCurrentHospital } from "./useCurrentHospital";
 export function AuditHistoryPanel() {
   const version = useRealtimeVersion();
   const { data: hospital } = useCurrentHospital();
-  const path = hospital?.id ? `/api/blood-requests?hospitalId=${hospital.id}` : "/api/blood-requests?hospitalId=missing";
+  const path = hospital?.id ? `/api/blood-requests?hospitalId=${hospital.id}&scope=all` : "/api/blood-requests?hospitalId=missing";
   const { data: requests, error, loading } = useApiData<BloodRequest[]>(path, [], version);
   const logs = requests.slice(0, 4).map((request) => ({
     action: `Pedido ${request.bloodType} está ${request.status}`,

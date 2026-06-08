@@ -1,7 +1,7 @@
-import type { DonorResponseStatus } from "@doe-sangue-angola/shared-types";
 import { createClient } from "@supabase/supabase-js";
 import { ApiError, apiResponse } from "../../_utils/apiResponse";
 import { createRouteSupabase, requireApiSession } from "../../_utils/security";
+import { activeDonorStatuses, ageFromBirthDate, cleanName, isActiveDonorStatus, normalizeStatus, unique } from "../acceptedDonorHelpers";
 
 export type AcceptedDonorRow = {
   acceptedAt?: string;
@@ -33,8 +33,9 @@ export type AcceptedDonorRow = {
   verificationStatus?: string;
 };
 
-export async function GET() {
+export async function GET(request: Request) {
   return apiResponse(async () => {
+    const scope = new URL(request.url).searchParams.get("scope") ?? "active";
     const principal = await requireApiSession(["hospital", "admin"]);
     const hospitalId = principal.hospitalId;
     if (!hospitalId && principal.role !== "admin") {
@@ -49,8 +50,8 @@ export async function GET() {
     if (error) throw supabaseError("Não foi possível carregar dadores aceites", error);
     const responses = mergeResponses(
       responseRows ?? [],
-      await acceptanceFallback(db, hospitalId ?? "", responseRows ?? [])
-    );
+      await acceptanceFallback(db, hospitalId ?? "", responseRows ?? [], scope)
+    ).filter((item) => scope === "all" || isActiveDonorStatus(item.status));
     if (!responses?.length) return [];
 
     const donorIds = unique(responses.map((item) => item.donor_id));
@@ -118,17 +119,6 @@ async function getDonationMetrics(db: Awaited<ReturnType<typeof createRouteSupab
   return metrics;
 }
 
-function ageFromBirthDate(value?: string | null) {
-  if (!value) return undefined;
-  const birth = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(birth.getTime())) return undefined;
-  const today = new Date();
-  let age = today.getFullYear() - birth.getFullYear();
-  const month = today.getMonth() - birth.getMonth();
-  if (month < 0 || (month === 0 && today.getDate() < birth.getDate())) age -= 1;
-  return age >= 0 ? age : undefined;
-}
-
 async function getUsers(db: Awaited<ReturnType<typeof createRouteSupabase>>, ids: string[]) {
   type UserRow = { email: string | null; id: string; name: string | null; phone: string | null };
   if (!ids.length) return [] as UserRow[];
@@ -148,28 +138,6 @@ function createPrivilegedSupabase() {
   return createClient(url, key, { auth: { persistSession: false } });
 }
 
-function normalizeStatus(status?: string | null): DonorResponseStatus {
-  const oldValues: Record<string, DonorResponseStatus> = {
-    accepted: "Dador a Caminho",
-    Aceite: "Dador a Caminho",
-    arrived: "Chegou",
-    cancelled: "Cancelado",
-    Cancelado: "Cancelado",
-    Chegou: "Chegou",
-    completed: "Doação concluída",
-    Concluido: "Doação concluída",
-    "Concluído": "Doação concluída",
-    "Doação concluída": "Doação concluída",
-    no_show: "Não Compareceu",
-    NO_SHOW: "Não Compareceu",
-    "Não Compareceu": "Não Compareceu",
-    pin_validated: "PIN Validado",
-    "PIN Validado": "PIN Validado",
-    "Dador a Caminho": "Dador a Caminho"
-  };
-  return oldValues[status ?? ""] ?? "Dador a Caminho";
-}
-
 type ResponseLike = {
   accepted_at?: string | null;
   blood_request_id: string;
@@ -186,7 +154,8 @@ type ResponseLike = {
 async function acceptanceFallback(
   db: Awaited<ReturnType<typeof createRouteSupabase>>,
   hospitalId: string,
-  existing: ResponseLike[]
+  existing: ResponseLike[],
+  scope: string
 ): Promise<ResponseLike[]> {
   if (!hospitalId) return [];
   const known = new Set(existing.map((item) => `${item.donor_id}:${item.blood_request_id}`));
@@ -198,6 +167,7 @@ async function acceptanceFallback(
   if (error) throw supabaseError("Não foi possível carregar aceitações do pedido", error);
   return (data ?? [])
     .filter((item) => !known.has(`${item.donor_id}:${item.request_id}`))
+    .filter((item) => scope === "all" || activeDonorStatuses.includes(item.status))
     .map((item) => ({
       accepted_at: item.accepted_at ?? item.created_at,
       blood_request_id: item.request_id,
@@ -219,11 +189,6 @@ function mergeResponses(primary: ResponseLike[], fallback: ResponseLike[]) {
   );
 }
 
-function cleanName(name?: string | null, email?: string | null) {
-  const value = name?.trim();
-  return value || email?.trim() || "Nome não disponível";
-}
-
 async function getHospital(db: Awaited<ReturnType<typeof createRouteSupabase>>, id: string) {
   const { data, error } = await db
     .from("hospitals")
@@ -234,10 +199,6 @@ async function getHospital(db: Awaited<ReturnType<typeof createRouteSupabase>>, 
   return {
     name: data?.name ?? "Hospital"
   };
-}
-
-function unique(values: Array<string | null | undefined>) {
-  return [...new Set(values.filter((value): value is string => Boolean(value)))];
 }
 
 function supabaseError(label: string, error: {

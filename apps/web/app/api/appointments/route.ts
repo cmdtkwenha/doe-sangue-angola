@@ -8,6 +8,7 @@ export async function GET(request: Request) {
     const params = new URL(request.url).searchParams;
     const donorId = params.get("donorId");
     const hospitalId = params.get("hospitalId");
+    const scope = params.get("scope") ?? "active";
     const db = await createRouteSupabase();
 
     if (donorId) {
@@ -18,7 +19,7 @@ export async function GET(request: Request) {
         .eq("donor_id", donorId)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data as unknown as AppointmentRow[]).map(mapAppointment);
+      return (data as unknown as AppointmentRow[]).map(mapAppointment).filter((item) => activeAppointment(item.status, scope));
     }
 
     if (hospitalId) {
@@ -29,7 +30,7 @@ export async function GET(request: Request) {
         .eq("hospital_id", hospitalId)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data as unknown as AppointmentRow[]).map(mapAppointment);
+      return (data as unknown as AppointmentRow[]).map(mapAppointment).filter((item) => activeAppointment(item.status, scope));
     }
 
     if (principal.role !== "admin") throw new ApiError(403, "Lista restrita ao admin.");
@@ -38,8 +39,12 @@ export async function GET(request: Request) {
       .select(appointmentColumns)
       .order("created_at", { ascending: false });
     if (error) throw error;
-    return (data as unknown as AppointmentRow[]).map(mapAppointment);
+    return (data as unknown as AppointmentRow[]).map(mapAppointment).filter((item) => activeAppointment(item.status, scope));
   });
+}
+
+function activeAppointment(status: string, scope: string) {
+  return scope === "all" || !["Concluído", "Cancelado"].includes(status);
 }
 
 const appointmentColumns = [
