@@ -24,10 +24,15 @@ export function HospitalPerformancePanel() {
     [],
     version + liveVersion
   );
+  const activeRequests = requests.filter((request) =>
+    ["Aberto", "Dador a Caminho", "PIN Validado"].includes(request.status)
+  );
   const completed = requests.filter((request) => request.status === "Concluído");
-  const activeResponses = responses.filter((item) => item.status !== "Cancelado");
+  const activeResponses = responses.filter((item) =>
+    !["Cancelado", "Concluído", "Doação concluída", "Não Compareceu"].includes(item.status)
+  );
   const metrics = [
-    ["Pedidos ativos", String(requests.length), "Registos reais"],
+    ["Pedidos ativos", String(activeRequests.length), "Registos reais"],
     ["Agendamentos", String(activeResponses.length), "Respostas reais"],
     ["Concluídos", String(completed.length), "Este ciclo"]
   ];

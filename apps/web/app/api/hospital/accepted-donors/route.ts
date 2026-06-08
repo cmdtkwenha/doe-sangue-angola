@@ -3,6 +3,8 @@ import { ApiError, apiResponse } from "../../_utils/apiResponse";
 import { createRouteSupabase, requireApiSession } from "../../_utils/security";
 import { activeDonorStatuses, ageFromBirthDate, cleanName, isActiveDonorStatus, normalizeStatus, unique } from "../acceptedDonorHelpers";
 
+const activeRequestStatuses = ["Aberto", "Dador a Caminho", "PIN Validado"];
+
 export type AcceptedDonorRow = {
   acceptedAt?: string;
   age?: number;
@@ -66,8 +68,14 @@ export async function GET(request: Request) {
     if (requestError) throw supabaseError("Não foi possível carregar pedidos de sangue", requestError);
     const users = await getUsers(db, unique((donors ?? []).map((item) => item.user_id)));
     const metrics = await getDonationMetrics(db, donorIds);
+    const visibleResponses = scope === "all"
+      ? responses
+      : responses.filter((item) => {
+        const linkedRequest = requests?.find((row) => row.id === item.blood_request_id);
+        return activeRequestStatuses.includes(linkedRequest?.status ?? "");
+      });
 
-    return responses.map((item) => {
+    return visibleResponses.map((item) => {
       const donor = donors?.find((row) => row.id === item.donor_id);
       const user = users.find((row) => row.id === donor?.user_id);
       const request = requests?.find((row) => row.id === item.blood_request_id);
