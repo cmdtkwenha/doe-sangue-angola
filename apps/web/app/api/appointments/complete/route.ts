@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     if (responseError) throw responseError;
     const { error: acceptanceError } = await db
       .from("request_acceptances")
-      .update({ completed_at: completedAt, status: "Doação concluída", updated_at: completedAt })
+      .update({ completed_at: completedAt, status: "Concluído", updated_at: completedAt })
       .eq("donor_id", donorId)
       .eq("request_id", requestId);
     if (acceptanceError) throw acceptanceError;

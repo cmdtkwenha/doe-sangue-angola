@@ -93,7 +93,7 @@ export function acceptanceStatus(status: ResponseStatus) {
   const values: Record<ResponseStatus, string> = {
     Chegou: "Chegou",
     Cancelado: "Cancelado",
-    "Doação concluída": "Doação concluída",
+    "Doação concluída": "Concluído",
     "Não Compareceu": "Não Compareceu",
     "PIN Validado": "PIN Validado"
   };

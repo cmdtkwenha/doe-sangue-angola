@@ -91,7 +91,7 @@ export async function GET(request: Request) {
       if (error) throw new Error(formatSupabaseError(error));
       return (data as unknown as RequestRow[])
         .map(mapRequest)
-        .filter((item) => scope === "all" || !["Concluído", "Cancelado"].includes(item.status));
+        .filter((item) => scope === "all" || activeHospitalRequestStatuses.includes(item.status));
     }
 
     if (principal.role !== "admin") throw new ApiError(403, "Acesso restrito ao admin.");
@@ -207,6 +207,8 @@ function nearDonor(request: BloodRequest, donor: ReturnType<typeof mapDonor>) {
   return request.province === donor.province
     && (!request.municipality || request.municipality === donor.municipality || request.urgency === "Critica");
 }
+
+const activeHospitalRequestStatuses = ["Aberto", "Dador a Caminho", "PIN Validado"];
 
 function formatSupabaseError(error: {
   code?: string;
