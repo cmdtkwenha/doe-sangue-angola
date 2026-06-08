@@ -23,7 +23,7 @@ export function useApiData<T>(path: string, fallback: T, version = 0) {
     setLoading(true);
     setError("");
 
-    fetch(path)
+    fetch(path, { cache: "no-store" })
       .then((response) => response.json() as Promise<Envelope<T>>)
       .then((payload) => {
         if (!active) return;

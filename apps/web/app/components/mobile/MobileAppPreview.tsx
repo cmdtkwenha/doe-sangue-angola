@@ -39,6 +39,11 @@ export function MobileAppPreview() {
     ...responses.filter((item) => isActiveResponse(item.status)).map((item) => item.bloodRequestId),
     ...optimisticAccepted
   ])];
+  const visibleRequests = requests.filter((request) =>
+    request.status === "Aberto" &&
+    !acceptedIds.includes(request.id) &&
+    (request.remainingSlots ?? 1) > 0
+  );
 
   const askAccept = (request: BloodRequest) => {
     const state = eligibilityState(donor);
@@ -100,7 +105,7 @@ export function MobileAppPreview() {
     <main className={pwa.stage}>
       <DonorEntityGate>
         <MobilePwaShell active={active} onTabChange={setActive}>
-          {active === "home" ? <HomeScreen donor={donor} loading={donorLoading} requests={requests} /> : null}
+          {active === "home" ? <HomeScreen donor={donor} loading={donorLoading} requests={visibleRequests} /> : null}
           {active === "requests" ? (
             <RequestsScreen
               acceptedIds={acceptedIds}
@@ -109,7 +114,7 @@ export function MobileAppPreview() {
               loading={requestsLoading}
               onAccept={askAccept}
               onOpen={setSelected}
-              requests={requests}
+              requests={visibleRequests}
             />
           ) : null}
           {active === "pin" ? <DonorPinCard /> : null}

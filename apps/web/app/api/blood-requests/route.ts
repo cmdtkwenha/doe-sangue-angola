@@ -30,6 +30,7 @@ import {
 } from "../_utils/validation";
 import { donorColumns, requestColumns } from "./columns";
 import { donorBlocked } from "../_utils/donorEligibility";
+import { acceptedRequestIds } from "./acceptedRequestIds";
 
 export async function GET(request: Request) {
   return apiResponse(async () => {
@@ -57,6 +58,7 @@ export async function GET(request: Request) {
         throw new ApiError(403, "Acesso negado ao perfil do dador.");
       }
       if (donorBlocked(donorRow)) return [];
+      const acceptedIds = await acceptedRequestIds(db, donorId);
       const { data, error } = await db
         .from("blood_requests")
         .select(requestColumns)
@@ -65,7 +67,8 @@ export async function GET(request: Request) {
       const donorRecord = mapDonor(donorRow);
       return (data as unknown as RequestRow[])
         .map((item) => enrichRequest(item, donorRecord))
-        .filter((item) => !closedStatuses.includes(item.status))
+        .filter((item) => item.status === "Aberto")
+        .filter((item) => !acceptedIds.has(item.id))
         .filter((item) => item.remainingSlots == null || item.remainingSlots > 0)
         .filter((item) => nearDonor(item, donorRecord))
         .filter((item) => canDonorDonateToRequest(donorRecord.bloodType, item.bloodType))
@@ -201,11 +204,6 @@ function nearDonor(request: BloodRequest, donor: ReturnType<typeof mapDonor>) {
   return request.province === donor.province
     && (!request.municipality || request.municipality === donor.municipality || request.urgency === "Critica");
 }
-
-const closedStatuses = [
-  "Cancelado",
-  "Concluído"
-];
 
 function formatSupabaseError(error: {
   code?: string;

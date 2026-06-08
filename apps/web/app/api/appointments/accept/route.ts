@@ -70,6 +70,7 @@ export async function POST(request: Request) {
     }
     const response = await acceptWithQuota(db, donorId, requestRow.id);
     const appointment = await createAppointment(db, donorId, requestRow.id, response.hospital_id, response.confirmation_pin, supabaseError);
+    const hospital = await loadHospital(db, response.hospital_id);
     await notifyHospitalUsers(
       db,
       response.hospital_id,
@@ -86,8 +87,37 @@ export async function POST(request: Request) {
     });
     await addReward(db, response.id, donorId, 25, "Pedido aceite");
     await auditApiAction(principal, `Aceitou pedido de sangue ${body.requestId}.`);
-    return appointment;
+    return {
+      acceptance_id: response.id,
+      appointment,
+      blood_type: requestRow.blood_type,
+      confirmation_pin: response.confirmation_pin,
+      donor_id: donorId,
+      hospital: {
+        id: response.hospital_id,
+        municipality: hospital?.municipality ?? null,
+        name: hospital?.name ?? "Hospital",
+        province: hospital?.province ?? null
+      },
+      hospital_id: response.hospital_id,
+      pin: response.confirmation_pin,
+      request_id: requestRow.id,
+      status: "Dador a Caminho"
+    };
   });
+}
+
+async function loadHospital(
+  db: Awaited<ReturnType<typeof createRouteSupabase>>,
+  hospitalId: string
+) {
+  const { data, error } = await db
+    .from("hospitals")
+    .select("id,name,municipality,province")
+    .eq("id", hospitalId)
+    .maybeSingle();
+  if (error) throw supabaseError("Não foi possível carregar o hospital", error);
+  return data;
 }
 
 function eligibilityBlockMessage(donor: {
@@ -118,11 +148,12 @@ async function acceptWithQuota(
   });
   if (error) throw supabaseError("Não foi possível aceitar o pedido", error);
   const row = Array.isArray(data) ? data[0] : data;
-  if (!row?.response_id || !row.confirmation_pin || !row.hospital_id) {
+  const pin = row?.confirmation_pin ?? row?.pin;
+  if (!row?.response_id || !pin || !row.hospital_id) {
     throw new ApiError(500, "Aceitação não devolveu dados completos.");
   }
   return {
-    confirmation_pin: row.confirmation_pin as string,
+    confirmation_pin: pin as string,
     hospital_id: row.hospital_id as string,
     id: row.response_id as string
   };

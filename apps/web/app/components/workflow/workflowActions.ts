@@ -18,6 +18,23 @@ type CreateRequestResult = {
   matches: MatchResult[];
   request: BloodRequest;
 };
+export type AcceptRequestResult = {
+  acceptance_id: string;
+  appointment: Appointment;
+  blood_type: string;
+  confirmation_pin: string;
+  donor_id: string;
+  hospital: {
+    id: string;
+    municipality?: string | null;
+    name: string;
+    province?: string | null;
+  };
+  hospital_id: string;
+  pin: string;
+  request_id: string;
+  status: "Dador a Caminho";
+};
 
 async function post<T>(path: string, body: unknown) {
   return withRetry(async () => {
@@ -56,10 +73,10 @@ export async function createRequestAction(input?: RequestDraft) {
 }
 
 export async function acceptRequestAction(donorId: string, requestId: string) {
-  const result = await post<Appointment>("/api/appointments/accept", { donorId, requestId });
+  const result = await post<AcceptRequestResult>("/api/appointments/accept", { donorId, requestId });
   if (result.ok) {
     publishRealtimeEvent("DONOR_ACCEPTED", { donorId, requestId });
-    publishRealtimeEvent("APPOINTMENT_CREATED", { appointment: result.data });
+    publishRealtimeEvent("APPOINTMENT_CREATED", { appointment: result.data.appointment });
     analyticsEvents.requestAccepted(requestId);
   }
   return result;
