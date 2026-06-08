@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { AccessibleModal } from "../accessibility";
 import styles from "./pilotFeedback.module.css";
 
 const issueTypes = [
@@ -54,7 +55,7 @@ export function PilotFeedbackButton({ compact = false }: { compact?: boolean }) 
         Reportar Problema
       </button>
       {open ? (
-        <div className={styles.backdrop} role="presentation">
+        <AccessibleModal onClose={() => setOpen(false)} title="Reportar problema">
           <form className={styles.modal} onSubmit={submit}>
             <header>
               <span>
@@ -89,7 +90,7 @@ export function PilotFeedbackButton({ compact = false }: { compact?: boolean }) 
             </footer>
             {message ? <p className="muted" role="status">{message}</p> : null}
           </form>
-        </div>
+        </AccessibleModal>
       ) : null}
     </>
   );

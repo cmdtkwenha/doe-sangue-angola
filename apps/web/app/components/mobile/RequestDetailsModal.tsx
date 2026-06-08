@@ -67,23 +67,19 @@ export function RequestDetailsModal({
             <span>{reason}</span>
           </div>
         ))}
-        <button
-          className={styles.accept}
-          disabled={accepting || !canAccept || filled}
-          onClick={onAccept}
-          style={{ width: "100%", marginTop: 18 }}
-          type="button"
-        >
-          {filled ? "PEDIDO PREENCHIDO" : accepting ? "A PROCESSAR..." : canAccept ? "ACEITAR PEDIDO" : "ELEGIBILIDADE BLOQUEADA"}
-        </button>
-        <button
-          className={styles.cancel}
-          onClick={onReject}
-          style={{ width: "100%", marginTop: 10 }}
-          type="button"
-        >
-          RECUSAR
-        </button>
+        <div className={styles.modalActions}>
+          <button
+            className={styles.accept}
+            disabled={accepting || !canAccept || filled}
+            onClick={onAccept}
+            type="button"
+          >
+            {filled ? "PEDIDO PREENCHIDO" : accepting ? "A PROCESSAR..." : canAccept ? "ACEITAR PEDIDO" : "ELEGIBILIDADE BLOQUEADA"}
+          </button>
+          <button className={styles.cancel} onClick={onReject} type="button">
+            RECUSAR
+          </button>
+        </div>
       </div>
     </AccessibleModal>
   );

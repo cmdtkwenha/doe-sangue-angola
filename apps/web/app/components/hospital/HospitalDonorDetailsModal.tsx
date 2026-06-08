@@ -7,6 +7,7 @@ import {
   donorResponseLabels,
   normalizeDonorResponseStatus
 } from "../ui/DonorResponseStatusBadge";
+import { AccessibleModal } from "../accessibility";
 import type { AcceptedDonor, WorkflowStatus } from "./incomingDonorTypes";
 import styles from "./HospitalDonorDetailsModal.module.css";
 
@@ -28,8 +29,8 @@ export function HospitalDonorDetailsModal({ donor, onAction, onClose, saving }: 
   ].filter(Boolean).join(" • ");
 
   return (
-    <div className={styles.backdrop} role="presentation">
-      <section aria-modal="true" className={styles.modal} role="dialog">
+    <AccessibleModal onClose={onClose} size="detail" title={`Detalhes do dador ${donorName}`}>
+      <section className={styles.modal}>
         <header className={styles.header}>
           <div className={styles.identity}>
             <div aria-hidden className={styles.photo}>{initials(donorName)}</div>
@@ -82,7 +83,7 @@ export function HospitalDonorDetailsModal({ donor, onAction, onClose, saving }: 
         </div>
         <p className={styles.privacy}>Dados sensíveis, autenticação, BI completo, consentimentos legais e dados administrativos não são apresentados neste painel.</p>
       </section>
-    </div>
+    </AccessibleModal>
   );
 }
 

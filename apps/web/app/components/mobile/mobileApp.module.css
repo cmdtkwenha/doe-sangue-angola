@@ -48,13 +48,7 @@
 .status { margin-bottom: 18px; font-size: 12px; font-weight: 900; }
 .header { gap: 12px; margin-bottom: 16px; }
 .brand, .reason { gap: 10px; }
-.drop {
-  width: 28px;
-  height: 34px;
-  border-radius: 18px 18px 22px 22px;
-  background: linear-gradient(160deg, #ff5362, #c8102e);
-  transform: rotate(45deg);
-}
+.drop { width: 28px; height: 34px; border-radius: 18px 18px 22px 22px; background: linear-gradient(160deg, #ff5362, #c8102e); transform: rotate(45deg); }
 .hero {
   padding: 15px;
   border-radius: 12px;
@@ -194,15 +188,19 @@
   font-size: 18px;
   font-weight: 900;
 }
-.modalShade {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  align-items: end;
-  padding: 16px;
-  background: rgba(10, 13, 18, 0.64);
-}
 .modal { padding: 20px; border-radius: 16px; }
+.modalActions {
+  position: sticky;
+  bottom: 0;
+  display: grid;
+  gap: 10px;
+  margin: 12px -20px -20px;
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid #e7eaf0;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+}
+.modalActions button { width: 100%; }
 .reason { margin-top: 12px; gap: 8px; }
 .check { width: 18px; height: 18px; background: #2da66a; }
 .nav {

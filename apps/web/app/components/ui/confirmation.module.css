@@ -3,7 +3,6 @@
   gap: 14px;
   border-radius: 18px;
   background: white;
-  box-shadow: 0 24px 80px rgba(12, 18, 28, 0.28);
   color: #111820;
   padding: 20px;
 }
@@ -58,9 +57,17 @@
 }
 
 .actions {
+  position: sticky;
+  bottom: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+  margin: 0 -20px -20px;
+  padding: 14px 20px calc(14px + env(safe-area-inset-bottom));
+  border-top: 1px solid #eef2f6;
+  border-radius: 0 0 18px 18px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
 }
 
 .button {
@@ -116,5 +123,15 @@
 
 @media (max-width: 640px) {
   .actions { grid-template-columns: 1fr; }
-  .body { padding: 18px; }
+  .body {
+    border-radius: 22px 22px 0 0;
+    padding: 18px;
+  }
+
+  .actions {
+    margin: 0 -18px -18px;
+    padding-right: 18px;
+    padding-left: 18px;
+    border-radius: 0;
+  }
 }

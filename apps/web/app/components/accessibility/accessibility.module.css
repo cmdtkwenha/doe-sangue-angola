@@ -44,15 +44,45 @@
 }
 
 .modalShade {
-  position: absolute;
+  position: fixed;
   inset: 0;
   display: grid;
-  align-items: end;
-  padding: 16px;
-  background: rgba(10, 13, 18, 0.68);
+  align-items: center;
+  justify-items: center;
+  z-index: 5000;
+  padding: max(18px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
+  background: rgba(10, 13, 18, 0.7);
+  backdrop-filter: blur(5px);
 }
 
 .modalCard {
-  max-height: 90%;
-  overflow: auto;
+  width: min(100%, 640px);
+  max-height: 85vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 28px 90px rgba(2, 8, 23, 0.34);
+}
+
+.detailModal {
+  width: min(100%, 900px);
+}
+
+@media (max-width: 640px) {
+  .modalShade {
+    align-items: end;
+    padding: env(safe-area-inset-top) 0 0;
+  }
+
+  .modalCard,
+  .detailModal {
+    width: 100%;
+    max-height: calc(100dvh - env(safe-area-inset-top) - 10px);
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 22px 22px 0 0;
+  }
 }

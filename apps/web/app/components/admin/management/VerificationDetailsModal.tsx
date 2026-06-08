@@ -26,7 +26,7 @@ export function VerificationDetailsModal({
 }) {
   const title = details.type === "donor" ? details.donor.name : details.hospital.name;
   return (
-    <AccessibleModal onClose={onClose} title="Detalhes de verificação">
+    <AccessibleModal onClose={onClose} size="detail" title="Detalhes de verificação">
       <section className={styles.detailCard}>
         <header className={styles.detailHead}>
           <span>
@@ -82,11 +82,11 @@ function Read({ label, value }: { label: string; value?: string }) {
 
 function statusLabel(status: string) {
   const labels: Record<string, string> = {
-    approved: "Verified",
-    needs_review: "Needs Review",
-    rejected: "Rejected",
-    suspended: "Suspended",
-    verified: "Verified"
+    approved: "Verificado",
+    needs_review: "Revisão Necessária",
+    rejected: "Rejeitado",
+    suspended: "Suspenso",
+    verified: "Verificado"
   };
   return labels[status] ?? status;
 }
