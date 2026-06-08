@@ -10,6 +10,7 @@ export const adminNavigation = [
   { label: "Fraude", href: "/admin/fraud" },
   { label: "Notificações", href: "/admin/notifications" },
   { label: "Auditoria & Logs", href: "/admin/audit" },
+  { label: "Saúde do Sistema", href: "/admin/health" },
   { label: "Relatórios", href: "/admin/reports" },
   { label: "Prontidão Piloto", href: "/admin/launch" },
   { label: "Definições", href: "/admin/settings" }
