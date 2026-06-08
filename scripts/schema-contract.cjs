@@ -38,8 +38,10 @@ const integrityContract = [
   "blood_requests_required_fields_check",
   "donor_responses_one_active_per_donor",
   "donor_responses_pin_format_check",
+  "flag_excessive_hospital_requests",
   "hospital_inventory_non_negative_check",
   "hospital_inventory_reasonable_units_check",
+  "pin_validity_window",
   "prevent_pin_reuse_after_final_status",
   "recompute_request_quota",
   "request_acceptances_one_active_per_donor"

@@ -44,6 +44,7 @@ export async function POST(request: Request) {
       assertPinRate(existing);
       if (pin !== existing.confirmation_pin) {
         await recordFailedPin(db, principal, responseId);
+        await notifyAdmins(db, "Falha na validação de PIN", `Tentativa inválida registada para a resposta ${responseId}.`, "fraud");
         throw new ApiError(400, "PIN inválido. Confirme os 4 dígitos com o dador.");
       }
       if (existing.pin_expires_at && new Date(existing.pin_expires_at).getTime() < Date.now()) {
