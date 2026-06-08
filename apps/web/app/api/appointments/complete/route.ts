@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     requireEntityAccess(principal, "hospital", requestRow.hospital_id);
     const { error: appointmentError } = await db
       .from("appointments")
-      .update({ status: "Concluído" })
+      .update({ status: "Concluido" })
       .eq("donor_id", donorId)
       .eq("blood_request_id", requestId);
     if (appointmentError) throw appointmentError;

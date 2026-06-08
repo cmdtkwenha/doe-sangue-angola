@@ -44,8 +44,10 @@ export async function GET(request: Request) {
 }
 
 function activeAppointment(status: string, scope: string) {
-  return scope === "all" || !["Concluído", "Cancelado"].includes(status);
+  return scope === "all" || !closedAppointmentStatuses.includes(status);
 }
+
+const closedAppointmentStatuses = ["Concluído", "Concluido", "Doação concluída", "Cancelado"];
 
 const appointmentColumns = [
   "id",

@@ -28,7 +28,7 @@ export function HospitalWorkflowHistory() {
       {error ? <p className={styles.rowMuted}>{error}</p> : null}
       {!history.length ? (
         <EmptyState
-          message="Doações concluídas e pedidos cancelados aparecerão aqui."
+          message="Doações concluídas aparecerão aqui."
           title="Sem histórico operacional"
         />
       ) : (
@@ -53,7 +53,7 @@ export function HospitalWorkflowHistory() {
 
 function isHistory(status: string) {
   const normalized = normalizeDonorResponseStatus(status);
-  return normalized === "Doação concluída" || normalized === "Cancelado" || normalized === "Não Compareceu";
+  return normalized === "Doação concluída";
 }
 
 function formatDate(value?: string) {

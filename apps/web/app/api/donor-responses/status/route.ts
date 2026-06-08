@@ -16,6 +16,7 @@ import {
   workflowMessage,
   workflowTitle
 } from "./statusHelpers";
+import { syncAppointment } from "./syncAppointment";
 
 type StatusBody = { confirmationPin?: string; responseId: string; status: string };
 const allowed: ResponseStatus[] = ["Chegou", "Cancelado", "Doação concluída", "Não Compareceu", "PIN Validado"];
@@ -60,6 +61,7 @@ export async function POST(request: Request) {
     if (updateError) throw supabaseError("Não foi possível atualizar o estado do dador", updateError);
     if (status === "PIN Validado") await clearPinFailures(db, responseId);
     await syncAcceptance(db, existing, status);
+    await syncAppointment(db, existing, status);
     await applyOperationalEffects(db, responseId, existing, principal.authUserId, status);
     await syncRequest(db, existing.blood_request_id, status);
     await syncFamilyRequest(db, familyId(existing), status);

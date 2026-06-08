@@ -47,8 +47,8 @@ export function useWorkflowSnapshot() {
       fetch("/api/donors").then((item) => item.json() as Promise<Envelope<Donor[]>>)
     ]).then(([requestPayload, appointmentPayload, donorPayload]) => {
       if (!active) return;
-      const request = requestPayload.data?.[0];
-      const appointment = appointmentPayload.data?.[0];
+      const request = requestPayload.data?.find((item) => isActiveRequest(item.status));
+      const appointment = appointmentPayload.data?.find((item) => isActiveAppointment(item.status));
       const donors = donorPayload.data ?? [];
       const matches = request ? matchingAgent(request, donors) : [];
       const donor = donors.find((item) => item.id === appointment?.donorId);
@@ -87,3 +87,11 @@ const emptySnapshot: Snapshot = {
   matches: [],
   responses: []
 };
+
+function isActiveRequest(status: string) {
+  return ["Aberto", "Dador a Caminho", "PIN Validado"].includes(status);
+}
+
+function isActiveAppointment(status: string) {
+  return !["Cancelado", "Concluido", "Concluído", "Doação concluída"].includes(status);
+}
