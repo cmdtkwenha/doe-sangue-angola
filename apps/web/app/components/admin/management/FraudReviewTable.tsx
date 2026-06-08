@@ -21,6 +21,7 @@ export function FraudReviewTable() {
     "donor_responses",
     "fraud_reviews",
     "hospitals",
+    "request_acceptances",
     "users"
   ]);
   const { data, error, loading } = useApiData<FraudRow[]>("/api/admin/fraud", [], version);

@@ -32,6 +32,7 @@ type HospitalRow = {
 type ResponseRow = {
   cancelled_at?: string | null;
   donor_id: string;
+  failed_pin_attempts?: number | null;
   status: string;
 };
 type UserRow = { email?: string | null; id: string; name?: string | null };
@@ -44,15 +45,16 @@ export async function GET() {
       read<DonorRow>(db, "donors", "id,user_id,bi_number,phone,emergency_contact_phone,birth_date,eligibility_status,reliability_score"),
       read<UserRow>(db, "users", "id,name,email"),
       read<HospitalRow>(db, "hospitals", "id,name,license_number,nif,institutional_email,phone,status,verification_status"),
-      read<ResponseRow>(db, "donor_responses", "donor_id,status,cancelled_at"),
+      read<ResponseRow>(db, "donor_responses", "donor_id,status,cancelled_at,failed_pin_attempts"),
       readSavedReviews(db)
     ]);
     const userById = new Map(users.map((user) => [user.id, user]));
     const rows = [
       ...duplicateDonors(donors, userById),
-      ...duplicateHospitals(hospitals),
-      ...suspiciousResponses(donors, responses, userById),
-      ...verificationFlags(donors, hospitals, userById),
+    ...duplicateHospitals(hospitals),
+    ...suspiciousResponses(donors, responses, userById),
+    ...pinAbuse(donors, responses, userById),
+    ...verificationFlags(donors, hospitals, userById),
       ...saved
     ];
     return dedupe(rows).sort((a, b) => b.score - a.score);
@@ -89,16 +91,13 @@ function duplicateDonors(donors: DonorRow[], users: Map<string, UserRow>) {
   return [
     ...duplicates("BI", donors, (row) => row.bi_number, (items) => donorCase("BI duplicado", items, users)),
     ...duplicates("Telefone", donors, (row) => row.phone, (items) => donorCase("telefone duplicado", items, users)),
-    ...duplicates("Email", donors, (row) => users.get(row.user_id ?? "")?.email, (items) => donorCase("email duplicado", items, users)),
-    ...duplicates("Contacto", donors, (row) => row.emergency_contact_phone, (items) => donorCase("contacto de emergência duplicado", items, users)),
-    ...duplicates("Nascimento", donors, (row) => row.birth_date, (items) => donorCase("data de nascimento duplicada", items, users))
+    ...duplicates("Email", donors, (row) => users.get(row.user_id ?? "")?.email, (items) => donorCase("email duplicado", items, users))
   ];
 }
 
 function duplicateHospitals(hospitals: HospitalRow[]) {
   return [
     ...duplicates("Licença", hospitals, (row) => row.license_number, (items) => hospitalCase("licença duplicada", items)),
-    ...duplicates("NIF", hospitals, (row) => row.nif, (items) => hospitalCase("NIF duplicado", items)),
     ...duplicates("Email", hospitals, (row) => row.institutional_email, (items) => hospitalCase("email duplicado", items)),
     ...duplicates("Telefone", hospitals, (row) => row.phone, (items) => hospitalCase("telefone duplicado", items))
   ];
@@ -108,16 +107,32 @@ function suspiciousResponses(donors: DonorRow[], responses: ResponseRow[], users
   return donors.flatMap((donor) => {
     const rows = responses.filter((item) => item.donor_id === donor.id);
     const cancelled = rows.filter((item) => item.status === "Cancelado").length;
+    const completed = rows.filter((item) => item.status === "Doação concluída").length;
     const noShows = rows.filter((item) => item.status === "Não Compareceu").length;
-    const active = rows.filter((item) => ["Dador a Caminho", "Chegou", "PIN Validado"].includes(item.status)).length;
-    if (cancelled < 3 && noShows < 2 && active < 2) return [];
-    const reliability = donorReliability(cancelled, noShows, active);
+    if (cancelled < 3 && noShows < 2) return [];
+    const reliability = donorReliability(completed, cancelled, noShows);
     return [caseRow({
       entity: donorName(donor, users),
-      flags: [`Confiabilidade do Dador: ${reliability}`, `${cancelled} cancelamentos`, `${noShows} faltas`, `${active} aceitações ativas`],
+      flags: [`Confiabilidade do Dador: ${reliability}`, `${completed} doações concluídas`, `${cancelled} cancelamentos`, `${noShows} faltas`],
       id: `COMPORTAMENTO-${donor.id}`,
       score: noShows >= 2 ? 88 : 68,
       status: reliability === "Suspenso" ? "Suspenso" : "Revisão Necessária"
+    })];
+  });
+}
+
+function pinAbuse(donors: DonorRow[], responses: ResponseRow[], users: Map<string, UserRow>) {
+  return donors.flatMap((donor) => {
+    const attempts = responses
+      .filter((item) => item.donor_id === donor.id)
+      .reduce((total, item) => total + (item.failed_pin_attempts ?? 0), 0);
+    if (attempts < 3) return [];
+    return [caseRow({
+      entity: donorName(donor, users),
+      flags: [`Abuso de PIN: ${attempts} tentativas inválidas`, "Validar identidade presencialmente"],
+      id: `PIN-${donor.id}`,
+      score: attempts >= 5 ? 90 : 70,
+      status: "Revisão Necessária"
     })];
   });
 }
@@ -179,11 +194,12 @@ function donorName(donor: DonorRow, users: Map<string, UserRow>) {
   return user?.name ?? user?.email ?? donor.id;
 }
 
-function donorReliability(cancelled: number, noShows: number, active: number) {
+function donorReliability(completed: number, cancelled: number, noShows: number) {
   if (noShows >= 3 || cancelled >= 6) return "Suspenso";
   if (noShows >= 2 || cancelled >= 4) return "Baixa";
-  if (cancelled >= 3 || active >= 2) return "Média";
-  return "Boa";
+  if (cancelled >= 3) return "Média";
+  if (completed >= 5) return "Excelente";
+  return completed >= 1 ? "Boa" : "Média";
 }
 
 function riskLabel(value: string | null) {
