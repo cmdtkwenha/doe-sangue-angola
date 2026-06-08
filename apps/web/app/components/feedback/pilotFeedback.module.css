@@ -79,3 +79,10 @@
   background: #b10f1f;
   color: #fff;
 }
+
+@media (max-width: 720px) {
+  .compact {
+    min-height: 36px;
+    padding: 0 10px;
+  }
+}

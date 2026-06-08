@@ -9,5 +9,5 @@ export function RouteGuard({
   allowed: UserRole[];
   children: ReactNode;
 }) {
-  return <SecureRouteWrapper allowed={allowed}>{children}</SecureRouteWrapper>;
+  return <SecureRouteWrapper allowed={allowed} showLogout={false}>{children}</SecureRouteWrapper>;
 }
