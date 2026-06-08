@@ -1,7 +1,7 @@
 import {
   approveVerification,
   createInAppNotification,
-  donors,
+  getRepositories,
   getMonitoringSummary,
   getNationalSummary,
   listHospitalVerificationQueue,
@@ -28,7 +28,9 @@ test("atalho de aprovação de hospital devolve verificado", () => {
 });
 
 test("broadcast de teste cria notificação in-app segura", () => {
-  const donor = donors[0];
+  const donor = getRepositories().donor.listDonors()[0];
+  assert.ok(donor);
+
   const before = listNotifications(donor.id).length;
 
   createInAppNotification(donor.id, "Mensagem da plataforma", "Teste seguro", "urgent");

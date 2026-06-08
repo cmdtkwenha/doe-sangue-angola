@@ -2,7 +2,7 @@ import {
   acceptWorkflowRequest,
   completeWorkflowDonation,
   createWorkflowRequest,
-  donors,
+  getRepositories,
   getWorkflowSnapshot,
   listAuditLogs,
   listNotifications,
@@ -17,7 +17,7 @@ test("fluxo completo liga hospital, admin, dador, PIN, recompensa, notificaçõe
   const donorId = "d1";
   const beforeNotifications = listNotifications(donorId).length;
   const beforeAudit = listAuditLogs().length;
-  const beforePoints = donors.find((donor) => donor.id === donorId)?.points ?? 0;
+  const beforePoints = getRepositories().donor.findDonor(donorId)?.points ?? 0;
 
   const created = createWorkflowRequest({
     bloodType: "O-",
@@ -28,17 +28,17 @@ test("fluxo completo liga hospital, admin, dador, PIN, recompensa, notificaçõe
   });
 
   assert.equal(created.ok, true);
-  assert.equal(created.request.status, "Em Correspondência");
+  assert.equal(created.request.status, "Aberto");
   assert.ok(created.matches.length > 0);
   assert.ok(listNotifications(donorId).length > beforeNotifications);
 
   const accepted = acceptWorkflowRequest(donorId, created.request.id);
   assert.equal(accepted.ok, true);
   assert.match(accepted.appointment.pin, /^\d{4}$/);
-  assert.equal(getWorkflowSnapshot(created.request.id).request.status, "Agendado");
+  assert.equal(getWorkflowSnapshot(created.request.id).request.status, "Dador a Caminho");
 
   const onWay = markDonorOnWay(created.request.id);
-  assert.equal(onWay.request?.status, "Doador a Caminho");
+  assert.equal(onWay.request?.status, "Dador a Caminho");
 
   const validated = validateWorkflowPin(accepted.appointment.pin, created.request.id);
   assert.equal(validated.ok, true);
